@@ -111,6 +111,11 @@ function Header({ active, navigate }: { active: string; navigate: (path: string)
             {item}
           </button>
         ))}
+        {active && (
+          <button className="home-nav-link" onClick={() => navigate("/")}>
+            HOME
+          </button>
+        )}
       </nav>
     </header>
   );
@@ -123,7 +128,7 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
   return (
     <main className="home-page">
       <section className="hero plan-b-hero flow-section">
-        <div className="section-kicker">01&nbsp;&nbsp; HOME / HERO</div>
+        <div className="section-kicker">HOME / HERO</div>
         <div className="hero-copy">
           <h1 className="plan-b-title" data-title="SHEN AO">SHEN AO</h1>
           <p className="identity">COMPOSER / PRODUCER / SOUND ARTIST</p>
@@ -134,13 +139,12 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
           <img className="hero-monster hero-monster-primary" src={assetUrl("/assets/plan-b/monster-pink.png")} alt="Hand-drawn Plan B character" />
           <img className="hero-pixel-play" src={assetUrl("/assets/plan-b/pixel-play.png")} alt="Plan B pixel play marker" />
           <img className="hero-doodle-ring" src={assetUrl("/assets/plan-b/doodle-blue-ring.png")} alt="" />
-          <span className="hero-bit hero-bit-a">03</span>
           <span className="hero-bit hero-bit-b">PLAY?</span>
         </div>
       </section>
 
       <section className="feature feature-music plan-b-music flow-section" data-testid="plan-b-featured-music">
-        <div className="section-kicker">02&nbsp;&nbsp; FEATURED WORK / MUSIC</div>
+        <div className="section-kicker">FEATURED WORK / MUSIC</div>
         <div className="featured-releases">
           {featuredReleases.map((release, index) => (
             <article className={`featured-release featured-release-${index + 1} plan-b-release plan-b-release-${release.slug}`} key={release.slug}>
@@ -162,7 +166,7 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
       </section>
 
       <section className="feature feature-film flow-section">
-        <div className="section-kicker">03&nbsp;&nbsp; FEATURED WORK / MOVING IMAGE</div>
+        <div className="section-kicker">FEATURED WORK / MOVING IMAGE</div>
         <div className="feature-text">
           <h2>ROLE MODEL</h2>
           <MetaLines lines={[roleModel.year, "FILM", "AUDIOVISUAL COMPOSITION / MIX"]} />
@@ -189,8 +193,9 @@ function WorkPage({ navigate }: { navigate: (path: string) => void }) {
 
   return (
     <main className="work-page">
+      <PageAccentMarks variant="work" />
       <section className="work-intro">
-        <div className="section-kicker">01&nbsp;&nbsp; WORK / SELECTED</div>
+        <div className="section-kicker">WORK / SELECTED</div>
         <h1>WORK</h1>
         <p>Selected Works</p>
       </section>
@@ -199,7 +204,6 @@ function WorkPage({ navigate }: { navigate: (path: string) => void }) {
           <article className={`selected-work selected-work-${index + 1} ${selectedLayout(project.slug)}`} data-testid={`selected-work-${project.slug}`} key={project.slug}>
             {showSelectedMedia(project.slug) && <MediaVisual project={project} />}
             <div>
-              <span className="index">{String(index + 1).padStart(2, "0")}</span>
               <h2>{project.title}</h2>
               <MetaLines lines={[project.year, project.category, project.subtype]} />
               {(project.slug === "cyberspace" || project.slug === "bug-party" || project.slug === "role-model") && (
@@ -221,7 +225,8 @@ function MusicPage({ navigate }: { navigate: (path: string) => void }) {
   const musicProjects = projects.filter((project) => project.category === "Music");
   return (
     <main className="route-page music-page">
-      <PageIntro kicker="01  MUSIC / RELEASES" title="MUSIC">
+      <PageAccentMarks variant="music" />
+      <PageIntro kicker="MUSIC / RELEASES" title="MUSIC">
         Electronic music, composition and production shaped through improvisation, unconventional harmony and the environments around him.
       </PageIntro>
       <section className="release-list">
@@ -246,7 +251,8 @@ function MusicPage({ navigate }: { navigate: (path: string) => void }) {
 function LivePage() {
   return (
     <main className="route-page live-page">
-      <PageIntro kicker="01  LIVE / PERFORMANCE" title="LIVE">
+      <PageAccentMarks variant="live" />
+      <PageIntro kicker="LIVE / PERFORMANCE" title="LIVE">
         A recording captures only one aspect of a performance. The live work is different every time.
       </PageIntro>
       <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "DJ SETS", "COLLABORATIVE PERFORMANCE"]} />
@@ -265,7 +271,8 @@ function PracticePage({ navigate }: { navigate: (path: string) => void }) {
   const openband = getProject("openband-openscore")!;
   return (
     <main className="route-page practice-page">
-      <PageIntro kicker="01  PRACTICE / EVENTS + RADIO" title="PRACTICE">
+      <PageAccentMarks variant="practice" />
+      <PageIntro kicker="PRACTICE / EVENTS + RADIO" title="PRACTICE">
         Music-making and event-making occupy different roles in Shen Ao's practice. One grows from accumulated learning; the other from lived experience, listening and making things together.
       </PageIntro>
       <section className="practice-feature-grid">
@@ -283,7 +290,8 @@ function PracticePage({ navigate }: { navigate: (path: string) => void }) {
 function AboutPage({ navigate }: { navigate: (path: string) => void }) {
   return (
     <main className="route-page about-page">
-      <PageIntro kicker="01  ABOUT / BIO" title="ABOUT">
+      <PageAccentMarks variant="about" />
+      <PageIntro kicker="ABOUT / BIO" title="ABOUT">
         Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making. His practice includes independent releases, film and theatre composition, live electronics, improvisation, DJ performance and collaborative projects.
       </PageIntro>
       <section className="about-layout">
@@ -319,18 +327,18 @@ function PressRadioPage() {
   return (
     <main className="route-page press-radio-page">
       <section className="press-radio-intro">
-        <div className="section-kicker">00&nbsp;&nbsp; EXTERNAL RECEPTION ARCHIVE</div>
+        <div className="section-kicker">EXTERNAL RECEPTION ARCHIVE</div>
         <h1><span>PRESS /</span><span>RADIO</span></h1>
         <p>Selected reviews, features, recommendations and radio appearances around Shen Ao's music and practice.</p>
       </section>
       <section className="press-feature-list" aria-label="Reviews and recommendations">
-        <div className="section-kicker">01&nbsp;&nbsp; FEATURES / REVIEWS</div>
+        <div className="section-kicker">FEATURES / REVIEWS</div>
         {featured.map((item, index) => <PressFeatureRow item={item} index={index} key={item.id} />)}
       </section>
       <section className="radio-log" aria-label="Radio airplay">
-        <div className="section-kicker">02&nbsp;&nbsp; RADIO / AIRPLAY</div>
+        <div className="section-kicker">RADIO / AIRPLAY</div>
         <div>
-          <div className="radio-row radio-head"><span>NO.</span><p>DATE</p><h2>STATION / PROGRAMME</h2><p>TRACK</p><span>LINK</span></div>
+          <div className="radio-row radio-head"><p>DATE</p><h2>STATION / PROGRAMME</h2><p>TRACK</p><span>LINK</span></div>
           {radio.map((item, index) => <RadioLogRow item={item} index={index} key={item.id} />)}
         </div>
       </section>
@@ -340,19 +348,18 @@ function PressRadioPage() {
 
 function EpkPage({ navigate }: { navigate: (path: string) => void }) {
   const selectedWork = [
-    ["01", "CYBERSPACE", "KIT RECORDS / RELEASE", "/work/cyberspace"],
-    ["02", "BUG PARTY", "KIT RECORDS / RELEASE", "/work/bug-party"],
-    ["03", "ROLE MODEL", "MOVING IMAGE / 2024", "/work/role-model"],
-    ["04", "FANCY A BITE?", "THEATRE / 2024", "/work/fancy-a-bite"],
-    ["05", "NO IDEA", "EVENTS / RADIO", "/work/no-idea"],
-    ["06", "OPENBAND / OPENSCORE", "INTERDISCIPLINARY IMPROVISATION", "/work/openband-openscore"]
+    ["CYBERSPACE", "KIT RECORDS / RELEASE", "/work/cyberspace"],
+    ["BUG PARTY", "KIT RECORDS / RELEASE", "/work/bug-party"],
+    ["ROLE MODEL", "MOVING IMAGE / 2024", "/work/role-model"],
+    ["FANCY A BITE?", "THEATRE / 2024", "/work/fancy-a-bite"],
+    ["NO IDEA", "EVENTS / RADIO", "/work/no-idea"],
+    ["OPENBAND / OPENSCORE", "INTERDISCIPLINARY IMPROVISATION", "/work/openband-openscore"]
   ];
 
   return (
     <main className="route-page epk-page">
       <section className="epk-hero">
         <div>
-          <span className="epk-section-number">00</span>
           <h1>SHEN AO</h1>
           <p>COMPOSER / PRODUCER / SOUND ARTIST</p>
           <p>LONDON</p>
@@ -390,9 +397,8 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
       <section className="epk-selected-work">
         <h2>SELECTED WORK</h2>
         <div>
-          {selectedWork.map(([index, title, meta, path]) => (
+          {selectedWork.map(([title, meta, path]) => (
             <button className="epk-work-row" key={title} onClick={() => navigate(path)}>
-              <span>{index}</span>
               <strong>{title}</strong>
               <em>{meta}</em>
             </button>
@@ -435,7 +441,7 @@ function MusicReleasePage({ slug, navigate }: { slug: "cyberspace" | "bug-party"
   const project = getProject(slug)!;
   const nextProject = slug === "cyberspace" ? { title: "BUG PARTY", path: "/work/bug-party" } : { title: "ROLE MODEL", path: "/work/role-model" };
   return (
-    <ProjectShell kicker="01  PROJECT / MUSIC" title={project.title.toUpperCase()} project={project}>
+    <ProjectShell kicker="PROJECT / MUSIC" title={project.title.toUpperCase()} project={project}>
       <div className="project-layout project-layout-loose">
         <img className="project-art album-cover" src={assetUrl(project.artwork!)} alt={`${project.title} album artwork`} />
         <div className="project-meta">
@@ -453,7 +459,7 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("role-model")!;
   const [heroImage, ...galleryImages] = project.images!;
   return (
-    <ProjectShell kicker="01  PROJECT / MOVING IMAGE" title="ROLE MODEL" project={project}>
+    <ProjectShell kicker="PROJECT / MOVING IMAGE" title="ROLE MODEL" project={project}>
       <div className="project-layout project-layout-loose film-layout">
         <figure className="project-figure role-model-hero-figure">
           <img className="role-model-still role-model-still-detail" src={assetUrl(heroImage.src)} alt={heroImage.alt} />
@@ -472,7 +478,6 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
         {galleryImages.map((image, index) => (
           <figure className={`project-figure role-model-gallery-item role-model-gallery-item-${index + 1}`} key={image.src}>
             <img className="role-model-still" src={assetUrl(image.src)} alt={image.alt} />
-            <figcaption>{`0${index + 1}`}</figcaption>
           </figure>
         ))}
       </section>
@@ -487,7 +492,8 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
 
 function ProjectShell({ kicker, title, project, children }: { kicker: string; title: ReactNode; project: Project; children: ReactNode }) {
   return (
-    <main className="project-page">
+    <main className={`project-page project-page-${project.slug}`}>
+      <PageAccentMarks variant="project" />
       <section className="project-hero">
         <div className="section-kicker">{kicker}</div>
         <h1>{title}</h1>
@@ -498,10 +504,20 @@ function ProjectShell({ kicker, title, project, children }: { kicker: string; ti
   );
 }
 
+function PageAccentMarks({ variant }: { variant: string }) {
+  return (
+    <div className={`page-accent-marks page-accent-${variant}`} aria-hidden="true">
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
+
 function ArchiveTable({ filter, setFilter, rows }: { filter: (typeof archiveFilters)[number]; setFilter: (filter: (typeof archiveFilters)[number]) => void; rows: Project[] }) {
   return (
     <section className="archive">
-      <div className="section-kicker">02&nbsp;&nbsp; WORK / ARCHIVE</div>
+      <div className="section-kicker">WORK / ARCHIVE</div>
       <div className="filters" aria-label="Archive filters">
         {archiveFilters.map((item) => (
           <button key={item} className={filter === item ? "selected" : ""} onClick={() => setFilter(item)}>{item}</button>
@@ -527,15 +543,15 @@ function AboutPractice({ navigate }: { navigate: (path: string) => void }) {
   return (
     <section className="about-practice">
       <div className="about-block">
-        <div className="section-kicker">04&nbsp;&nbsp; ABOUT / PREVIEW</div>
+        <div className="section-kicker">ABOUT / PREVIEW</div>
         <h2>SOUND AS PROCESS</h2>
         <p>Keyboard improvisation is central to Shen Ao's way of processing sound. Different musical languages and surrounding environments are absorbed, tested and reorganised through playing, production and collaboration.</p>
         <button className="text-arrow" onClick={() => navigate("/about")}>ABOUT</button>
       </div>
       <div className="practice-columns">
         {[
-          ["01 MUSIC WORK", "Composition", "Electronic music", "Production", "Improvisation", "Moving image"],
-          ["02 EVENT WORK", "Events", "Radio", "Workshops", "Collective improvisation", "Cross-disciplinary collaboration"]
+          ["MUSIC WORK", "Composition", "Electronic music", "Production", "Improvisation", "Moving image"],
+          ["EVENT WORK", "Events", "Radio", "Workshops", "Collective improvisation", "Cross-disciplinary collaboration"]
         ].map(([heading, ...items]) => (
           <div key={heading}>
             <h3>{heading}</h3>
@@ -551,7 +567,7 @@ function LivePreview({ navigate }: { navigate: (path: string) => void }) {
   return (
     <section className="live-preview flow-section">
       <div>
-        <div className="section-kicker">05&nbsp;&nbsp; LIVE / PREVIEW</div>
+        <div className="section-kicker">LIVE / PREVIEW</div>
         <h2>LIVE</h2>
         <p>A recording captures only one aspect of a performance. The live work is different every time.</p>
       </div>
@@ -566,9 +582,8 @@ function PracticeProjects({ navigate }: { navigate: (path: string) => void }) {
   const practice = projects.filter((project) => project.featured === "practice");
   return (
     <section className="practice-projects">
-      {practice.map((project, index) => (
+      {practice.map((project) => (
         <article key={project.slug}>
-          <span className="index">0{index + 1}</span>
           <MediaPlaceholder title={project.title.toUpperCase()} label={project.slug === "no-idea" ? "EVENT OR RADIO MATERIAL" : "WORKSHOP MATERIAL"} variant="landscape" />
           <h2>{project.title.toUpperCase()}</h2>
           <p>{project.description}</p>
@@ -585,7 +600,7 @@ function PracticeProjects({ navigate }: { navigate: (path: string) => void }) {
 function PressRadioPreview({ navigate }: { navigate: (path: string) => void }) {
   return (
     <section className="press-radio-preview">
-      <div className="section-kicker">06&nbsp;&nbsp; PRESS / RADIO</div>
+      <div className="section-kicker">PRESS / RADIO</div>
       <h2>PRESS / RADIO</h2>
       <div className="home-press-index">
         {homePressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
@@ -600,14 +615,14 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
   if (!project) {
     return (
       <main className="project-page">
-        <PageIntro kicker="01  PROJECT / NOT FOUND" title="PROJECT NOT FOUND">The requested project route is not available.</PageIntro>
+        <PageIntro kicker="PROJECT / NOT FOUND" title="PROJECT NOT FOUND">The requested project route is not available.</PageIntro>
       </main>
     );
   }
 
   const isPractice = project.slug === "no-idea" || project.slug === "openband-openscore";
   return (
-    <ProjectShell kicker={`01  PROJECT / ${project.category.toUpperCase()}`} title={project.title.toUpperCase()} project={project}>
+    <ProjectShell kicker={`PROJECT / ${project.category.toUpperCase()}`} title={project.title.toUpperCase()} project={project}>
       <div className={`project-layout project-layout-loose ${isPractice ? "practice-detail-layout" : ""}`}>
         {project.artwork ? <img className="project-art album-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} /> : <MediaPlaceholder title={project.title.toUpperCase()} label={project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER"} variant={project.category === "Music" ? "square" : "landscape"} />}
         <div className="project-meta">
@@ -719,7 +734,6 @@ function PressFeatureRow({ item, index }: { item: PressItem; index: number }) {
   const outlet = item.outlet ?? item.station ?? "";
   return (
     <article className={`press-feature-row press-feature-row-${index + 1}`}>
-      <span className="press-index">{String(index + 1).padStart(2, "0")}</span>
       <div>
         <p className="press-outlet">{outlet}</p>
         <h2>{item.title}</h2>
@@ -735,7 +749,6 @@ function PressFeatureRow({ item, index }: { item: PressItem; index: number }) {
 function RadioLogRow({ item, index }: { item: PressItem; index: number }) {
   return (
     <article className={`radio-row radio-row-${index + 1}`}>
-      <span>{String(index + 1).padStart(2, "0")}</span>
       <p>{item.date}</p>
       <h2><span>{item.station}</span><strong>{item.programme}</strong></h2>
       <p className="radio-track">{item.track}</p>
@@ -769,7 +782,7 @@ function displayRelatedProject(relatedProject?: string) {
 function SelectedContexts() {
   return (
     <section className="contexts">
-      <div className="section-kicker">07&nbsp;&nbsp; CONTEXTS</div>
+      <div className="section-kicker">CONTEXTS</div>
       <h2>SELECTED CONTEXTS</h2>
       <p>KIT RECORDS</p><p>GOLDSMITHS</p><p>CCTV-13</p><p>THE QUIETUS</p><p>LONDON</p>
     </section>
@@ -832,7 +845,7 @@ function LinkList({ heading, links }: { heading: string; links: { label: string;
 }
 
 function PlaceholderSequence({ labels }: { labels: string[] }) {
-  return <section className="placeholder-sequence">{labels.map((label, index) => <MediaPlaceholder key={label} title={`0${index + 1}`} label={label} variant={index === 0 ? "landscape" : "square"} />)}</section>;
+  return <section className="placeholder-sequence">{labels.map((label, index) => <MediaPlaceholder key={label} title="MEDIA" label={label} variant={index === 0 ? "landscape" : "square"} />)}</section>;
 }
 
 function NextProject({ title, onClick }: { title: string; onClick: () => void }) {

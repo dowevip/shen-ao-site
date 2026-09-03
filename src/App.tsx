@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { archiveFilters, getProject, projects, selectedWorks, type Project } from "./content/projects";
 import "./styles.css";
 
@@ -9,11 +9,12 @@ type AppProps = {
 };
 
 const basePath = import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL.replace(/\/$/, "");
-const fallbackBasePath = "/shen-ao-site";
+const fallbackBasePaths = ["/shen-ao-site-plan-b", "/shen-ao-site"];
 const toAppPath = (path: string) => {
+  const fallbackBasePath = fallbackBasePaths.find((candidate) => path.startsWith(candidate));
   const normalized = basePath && path.startsWith(basePath)
     ? path.slice(basePath.length) || "/"
-    : path.startsWith(fallbackBasePath)
+    : fallbackBasePath
       ? path.slice(fallbackBasePath.length) || "/"
       : path;
   return normalized.startsWith("/") ? normalized : `/${normalized}`;
@@ -54,19 +55,45 @@ export default function App({ initialPath }: AppProps) {
     <MusicReleasePage slug="bug-party" navigate={navigate} />
   ) : path.startsWith("/work/role-model") ? (
     <RoleModelPage navigate={navigate} />
+  ) : path.startsWith("/work/") ? (
+    <ProjectDetailPage slug={path.replace(/^\/work\//, "").split("/")[0]} navigate={navigate} />
   ) : path.startsWith("/work") ? (
     <WorkPage navigate={navigate} />
+  ) : path.startsWith("/music") ? (
+    <MusicPage navigate={navigate} />
+  ) : path.startsWith("/live") ? (
+    <LivePage />
+  ) : path.startsWith("/practice") ? (
+    <PracticePage navigate={navigate} />
+  ) : path.startsWith("/about") ? (
+    <AboutPage />
+  ) : path.startsWith("/epk") ? (
+    <EpkPage navigate={navigate} />
   ) : (
     <HomePage navigate={navigate} />
   );
 
   return (
     <div className="site-shell">
-      <Header active={path.startsWith("/work") ? "WORK" : ""} navigate={navigate} />
+      <Header active={activeNav(path)} navigate={navigate} />
       {page}
       <Footer />
     </div>
   );
+}
+
+const navPath: Record<string, string> = {
+  WORK: "/work",
+  MUSIC: "/music",
+  LIVE: "/live",
+  PRACTICE: "/practice",
+  ABOUT: "/about",
+  EPK: "/epk"
+};
+
+function activeNav(path: string) {
+  const match = navItems.find((item) => path.startsWith(navPath[item]));
+  return match ?? "";
 }
 
 function Header({ active, navigate }: { active: string; navigate: (path: string) => void }) {
@@ -75,7 +102,7 @@ function Header({ active, navigate }: { active: string; navigate: (path: string)
       <button className="brand-link" onClick={() => navigate("/")}>SHEN AO</button>
       <nav aria-label="Primary navigation">
         {navItems.map((item) => (
-          <button key={item} className={active === item ? "active" : ""} onClick={() => navigate(item === "WORK" ? "/work" : "/")}>
+          <button key={item} className={active === item ? "active" : ""} onClick={() => navigate(navPath[item])}>
             {item}
           </button>
         ))}
@@ -90,29 +117,38 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
 
   return (
     <main className="home-page">
-      <section className="hero flow-section">
+      <section className="hero plan-b-hero flow-section">
         <div className="section-kicker">01&nbsp;&nbsp; HOME / HERO</div>
         <div className="hero-copy">
-          <h1>SHEN AO</h1>
+          <h1 className="plan-b-title" data-title="SHEN AO">SHEN AO</h1>
           <p className="identity">COMPOSER / PRODUCER / SOUND ARTIST</p>
           <p className="short-copy">Electronic music, composition and sound practice across moving image, performance and collaboration.</p>
           <p className="mono-place">LONDON</p>
         </div>
-        <figure className="hero-signal">
-          <img src={assetUrl("/assets/hero-signal-final.png")} alt="Data horizon signal field" />
-        </figure>
+        <div className="plan-b-hero-marks">
+          <img className="hero-monster hero-monster-primary" src={assetUrl("/assets/plan-b/monster-pink.png")} alt="Hand-drawn Plan B character" />
+          <img className="hero-pixel-play" src={assetUrl("/assets/plan-b/pixel-play.png")} alt="Plan B pixel play marker" />
+          <img className="hero-doodle-ring" src={assetUrl("/assets/plan-b/doodle-blue-ring.png")} alt="" />
+          <span className="hero-bit hero-bit-a">03</span>
+          <span className="hero-bit hero-bit-b">PLAY?</span>
+        </div>
       </section>
 
-      <section className="feature feature-music flow-section">
+      <section className="feature feature-music plan-b-music flow-section" data-testid="plan-b-featured-music">
         <div className="section-kicker">02&nbsp;&nbsp; FEATURED WORK / MUSIC</div>
         <div className="featured-releases">
           {featuredReleases.map((release, index) => (
-            <article className={`featured-release featured-release-${index + 1}`} key={release.slug}>
-              <img src={assetUrl(release.artwork!)} alt={`${release.title} album artwork`} />
-              <div>
+            <article className={`featured-release featured-release-${index + 1} plan-b-release plan-b-release-${release.slug}`} key={release.slug}>
+              <div className="plan-b-release-art">
+                <img src={assetUrl(release.artwork!)} alt={`${release.title} album artwork`} />
+                {release.slug === "cyberspace" && <img className="release-pixel-progress" src={assetUrl("/assets/plan-b/pixel-progress.png")} alt="" />}
+                {release.slug === "bug-party" && <img className="release-blue-arrow" src={assetUrl("/assets/plan-b/tape-blue-arrow.png")} alt="" />}
+              </div>
+              <div className="plan-b-release-copy">
+                {release.slug === "bug-party" && <span className="release-badge">LEFT ON DESK</span>}
                 <h2>{release.title.toUpperCase()}</h2>
                 <MetaLines lines={[release.label, "ALBUM / RELEASE"]} />
-                <ExternalLink href="https://shenao.bandcamp.com/">LISTEN</ExternalLink>
+                <ExternalLink className="listen-link" href="https://shenao.bandcamp.com/">LISTEN</ExternalLink>
                 <button className="text-arrow" onClick={() => navigate(`/work/${release.slug}`)}>VIEW PROJECT</button>
               </div>
             </article>
@@ -128,12 +164,12 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
           <div className="mini-meta"><span>DIRECTOR</span><strong>HONGXUAN WANG</strong></div>
           <button className="text-arrow" onClick={() => navigate("/work/role-model")}>VIEW PROJECT</button>
         </div>
-        <div className="wide-media mist-media" aria-label="Film still placeholder" />
+        <MediaPlaceholder title="ROLE MODEL" label="PROJECT STILL" variant="cinematic" />
       </section>
 
-      <AboutPractice />
-      <LivePreview />
-      <PracticeProjects />
+      <AboutPractice navigate={navigate} />
+      <LivePreview navigate={navigate} />
+      <PracticeProjects navigate={navigate} />
       <SelectedContexts />
       <Collaboration />
     </main>
@@ -174,6 +210,130 @@ function WorkPage({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
+function MusicPage({ navigate }: { navigate: (path: string) => void }) {
+  const musicProjects = projects.filter((project) => project.category === "Music");
+  return (
+    <main className="route-page music-page">
+      <PageIntro kicker="01  MUSIC / RELEASES" title="MUSIC">
+        Electronic music, composition and production shaped through improvisation, unconventional harmony and the environments around him.
+      </PageIntro>
+      <section className="release-list">
+        {musicProjects.map((project) => (
+          <article className={`release-row release-row-${project.slug}`} key={project.slug}>
+            {project.artwork ? <img className="release-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} /> : <MediaPlaceholder title={project.title} label="ALBUM ARTWORK" variant="square" />}
+            <div>
+              <h2>{project.title}</h2>
+              <MetaLines lines={[project.year, project.label, project.subtype]} />
+              <div className="link-row">
+                {project.externalLinks?.[0] && <ExternalLink href={project.externalLinks[0].url}>LISTEN</ExternalLink>}
+                <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </section>
+    </main>
+  );
+}
+
+function LivePage() {
+  return (
+    <main className="route-page live-page">
+      <PageIntro kicker="01  LIVE / PERFORMANCE" title="LIVE">
+        A recording captures only one aspect of a performance. The live work is different every time.
+      </PageIntro>
+      <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "DJ SETS", "COLLABORATIVE PERFORMANCE"]} />
+      <section className="live-gallery">
+        <MediaPlaceholder title="LIVE" label="ADDITIONAL MEDIA" variant="landscape" />
+        <MediaPlaceholder title="LIVE" label="PROJECT IMAGE" variant="portrait" />
+        <MediaPlaceholder title="LIVE" label="ADDITIONAL MEDIA" variant="square" />
+        <MediaPlaceholder title="LIVE" label="MEDIA PLACEHOLDER" variant="cinematic" />
+      </section>
+    </main>
+  );
+}
+
+function PracticePage({ navigate }: { navigate: (path: string) => void }) {
+  const noIdea = getProject("no-idea")!;
+  const openband = getProject("openband-openscore")!;
+  return (
+    <main className="route-page practice-page">
+      <PageIntro kicker="01  PRACTICE / EVENTS + RADIO" title="PRACTICE">
+        Music-making and event-making occupy different roles in Shen Ao's practice. One grows from accumulated learning; the other from lived experience, listening and making things together.
+      </PageIntro>
+      <section className="practice-feature-grid">
+        <PracticeFeature project={noIdea} placeholder="NO IDEA / EVENT OR RADIO MATERIAL" onOpen={() => navigate("/work/no-idea")} />
+        <PracticeFeature project={openband} placeholder="OPENBAND / WORKSHOP MATERIAL" onOpen={() => navigate("/work/openband-openscore")} />
+      </section>
+      <section className="note-band low-key">
+        <h2>TUNNEL</h2>
+        <p>Techno label / club practice involving artist coordination, technical requirements, editorial copy and resident / guest DJ activity.</p>
+      </section>
+    </main>
+  );
+}
+
+function AboutPage() {
+  return (
+    <main className="route-page about-page">
+      <PageIntro kicker="01  ABOUT / BIO" title="ABOUT">
+        Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making. His practice includes independent releases, film and theatre composition, live electronics, improvisation, DJ performance and collaborative projects.
+      </PageIntro>
+      <section className="about-layout">
+        <div className="about-copy">
+          <p>His recent work includes releases with Kit Records and projects spanning moving image, theatre, broadcast and interdisciplinary performance. Alongside his music-making, he has developed independent event, radio and improvisation practices through projects including No Idea and Openband / Openscore.</p>
+          <h2>ARTIST STATEMENT</h2>
+          <p>Keyboard improvisation is central to Shen Ao's way of processing sound. It is a tool through which different musical languages and the environments around him are absorbed, tested and reorganised. Unconventional harmonic movement remains a recurring part of this process.</p>
+          <p>His music is shaped by the environments he moves through. Electronic and minimalist music sit alongside the sound of the city, becoming material that can be processed through improvisation and production rather than treated as separate influences.</p>
+          <p>For Shen, experimentation is a working method rather than a genre. A work often begins with an imagined structure or expectation. During the process, that structure is gradually allowed to loosen, opening the work toward accident, instability and a degree of loss of control.</p>
+          <p>This is also why live performance matters. A recording preserves only one aspect of an event; each performance remains contingent on the room, the performers and the moment.</p>
+          <p>His event practice operates differently from his music-making. Shen describes music production as the accumulation of learning, while organising events grows from lived experience and from the simple pleasure of completing something with other people.</p>
+        </div>
+        <MediaPlaceholder title="ABOUT" label="PROJECT IMAGE" variant="portrait" />
+      </section>
+      <section className="statement-notes">
+        {[
+          ["KEYBOARD IMPROVISATION", "A way of absorbing and processing different sounds."],
+          ["EXPERIMENT", "A working method, not a genre."],
+          ["STRUCTURE -> LOSS OF CONTROL", "Begin with an expectation; gradually allow the work to move away from it."],
+          ["LIVE", "A recording is only one perspective on an event."]
+        ].map(([title, copy]) => <article key={title}><h3>{title}</h3><p>{copy}</p></article>)}
+      </section>
+      <CvSections />
+      <PressSection />
+    </main>
+  );
+}
+
+function EpkPage({ navigate }: { navigate: (path: string) => void }) {
+  return (
+    <main className="route-page epk-page">
+      <section className="epk-hero">
+        <h1>SHEN AO</h1>
+        <p>COMPOSER / PRODUCER / SOUND ARTIST</p>
+        <p>LONDON</p>
+      </section>
+      <section className="epk-grid">
+        <EpkBlock title="SHORT BIO">Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making.</EpkBlock>
+        <EpkBlock title="ARTIST STATEMENT">Experimentation is a working method rather than a genre; live performance remains contingent on the room, the performers and the moment.</EpkBlock>
+        <EpkBlock title="SELECTED MUSIC">Cyberspace; Bug Party; two dreadful children / unipre; Clouds from Underground.</EpkBlock>
+        <EpkBlock title="MOVING IMAGE">Role Model, 2024, audiovisual composition / mix, director Hongxuan Wang.</EpkBlock>
+        <EpkBlock title="LIVE / PERFORMANCE">Live electronics, improvisation, performance and DJ sets.</EpkBlock>
+        <EpkBlock title="PRACTICE">No Idea; Openband / Openscore; events, radio, workshops and collective improvisation.</EpkBlock>
+        <EpkBlock title="SELECTED PRESS">THE QUIETUS - Spool's Out cassette reviews. MUITO PICKS.</EpkBlock>
+        <EpkBlock title="EDUCATION">2023-2025 Goldsmiths, University of London, MMus Creative Practice.</EpkBlock>
+        <EpkBlock title="CONTACT">lerezero@gmail.com</EpkBlock>
+      </section>
+      <div className="epk-links">
+        <button className="text-arrow" onClick={() => navigate("/music")}>MUSIC</button>
+        <ExternalLink href="https://shenao.bandcamp.com/">BANDCAMP</ExternalLink>
+        <ExternalLink href="https://soundcloud.com/shen-ao">SOUNDCLOUD</ExternalLink>
+        <ExternalLink href="https://www.mixcloud.com/teendrum/">MIXCLOUD</ExternalLink>
+      </div>
+    </main>
+  );
+}
+
 function MusicReleasePage({ slug, navigate }: { slug: "cyberspace" | "bug-party"; navigate: (path: string) => void }) {
   const project = getProject(slug)!;
   const nextProject = slug === "cyberspace" ? { title: "BUG PARTY", path: "/work/bug-party" } : { title: "ROLE MODEL", path: "/work/role-model" };
@@ -186,7 +346,7 @@ function MusicReleasePage({ slug, navigate }: { slug: "cyberspace" | "bug-party"
           <ExternalLink href="https://shenao.bandcamp.com/">LISTEN</ExternalLink>
         </div>
       </div>
-      <PlaceholderSequence labels={["MEDIA PLACEHOLDER", "LIVE / IMAGE PLACEHOLDER", "PROJECT IMAGE PLACEHOLDER"]} />
+      <PlaceholderSequence labels={["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]} />
       <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
     </ProjectShell>
   );
@@ -197,17 +357,17 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
   return (
     <ProjectShell kicker="01  PROJECT / MOVING IMAGE" title="ROLE MODEL" project={project}>
       <div className="project-layout project-layout-loose film-layout">
-        <div className="project-art mist-media" aria-label="Film still placeholder" />
+        <MediaPlaceholder title="ROLE MODEL" label="PROJECT STILL" variant="cinematic" />
         <div className="project-meta">
           <MetaLines lines={[project.year, "FILM", "DIRECTOR", "HONGXUAN WANG"]} />
-          <ExternalLink href={project.externalLinks![0].url}>WATCH</ExternalLink>
+          <ExternalLink href={project.externalLinks![0].url}>VIEW PROJECT</ExternalLink>
         </div>
       </div>
       <section className="detail-band">
         <h2>SHEN AO'S ROLE</h2>
         <ul>{project.role?.map((role) => <li key={role}>{role}</li>)}</ul>
       </section>
-      <PlaceholderSequence labels={["SELECTED SCENE PLACEHOLDER", "MOVING IMAGE PLACEHOLDER"]} />
+      <PlaceholderSequence labels={["PROJECT IMAGE", "ADDITIONAL MEDIA"]} />
       <section className="detail-band">
         <h2>CREDITS</h2>
         <p>DIRECTOR / HONGXUAN WANG</p>
@@ -217,7 +377,7 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
-function ProjectShell({ kicker, title, project, children }: { kicker: string; title: React.ReactNode; project: Project; children: React.ReactNode }) {
+function ProjectShell({ kicker, title, project, children }: { kicker: string; title: ReactNode; project: Project; children: ReactNode }) {
   return (
     <main className="project-page">
       <section className="project-hero">
@@ -255,21 +415,19 @@ function ArchiveTable({ filter, setFilter, rows }: { filter: (typeof archiveFilt
   );
 }
 
-function AboutPractice() {
+function AboutPractice({ navigate }: { navigate: (path: string) => void }) {
   return (
     <section className="about-practice">
       <div className="about-block">
         <div className="section-kicker">04&nbsp;&nbsp; ABOUT / PREVIEW</div>
-        <p>Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and collaborative sound practice.</p>
-        <p>His work moves between studio production, composition, improvisation and event-making, spanning independent releases, film and theatre, live electronics and cross-disciplinary projects.</p>
-        <span className="text-arrow">ABOUT</span>
+        <h2>SOUND AS PROCESS</h2>
+        <p>Keyboard improvisation is central to Shen Ao's way of processing sound. Different musical languages and surrounding environments are absorbed, tested and reorganised through playing, production and collaboration.</p>
+        <button className="text-arrow" onClick={() => navigate("/about")}>ABOUT</button>
       </div>
       <div className="practice-columns">
         {[
-          ["01 MUSIC", "Electronic music", "Composition", "Production", "Releases"],
-          ["02 MOVING IMAGE", "Film", "Documentary", "Theatre", "Commissions"],
-          ["03 LIVE", "Live electronics", "Improvisation", "Performance", "DJ sets"],
-          ["04 CURATION + COMMUNITY", "Events", "Workshops", "Collective practice", "Cross-disciplinary collaboration"]
+          ["01 MUSIC WORK", "Composition", "Electronic music", "Production", "Improvisation", "Moving image"],
+          ["02 EVENT WORK", "Events", "Radio", "Workshops", "Collective improvisation", "Cross-disciplinary collaboration"]
         ].map(([heading, ...items]) => (
           <div key={heading}>
             <h3>{heading}</h3>
@@ -281,36 +439,151 @@ function AboutPractice() {
   );
 }
 
-function LivePreview() {
+function LivePreview({ navigate }: { navigate: (path: string) => void }) {
   return (
     <section className="live-preview flow-section">
       <div>
         <div className="section-kicker">05&nbsp;&nbsp; LIVE / PREVIEW</div>
         <h2>LIVE</h2>
+        <p>A recording captures only one aspect of a performance. The live work is different every time.</p>
       </div>
-      <MetaLines lines={["PERFORMANCE", "IMPROVISATION", "ELECTRONICS"]} />
-      <div className="stage-media" aria-label="Performance media placeholder" />
-      <span className="text-arrow">EXPLORE LIVE</span>
+      <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "PERFORMANCE", "DJ SETS"]} />
+      <MediaPlaceholder title="LIVE" label="ADDITIONAL MEDIA" variant="cinematic" />
+      <button className="text-arrow" onClick={() => navigate("/live")}>EXPLORE LIVE</button>
     </section>
   );
 }
 
-function PracticeProjects() {
+function PracticeProjects({ navigate }: { navigate: (path: string) => void }) {
   const practice = projects.filter((project) => project.featured === "practice");
   return (
     <section className="practice-projects">
       {practice.map((project, index) => (
         <article key={project.slug}>
           <span className="index">0{index + 1}</span>
+          <MediaPlaceholder title={project.title.toUpperCase()} label={project.slug === "no-idea" ? "EVENT OR RADIO MATERIAL" : "WORKSHOP MATERIAL"} variant="landscape" />
           <h2>{project.title.toUpperCase()}</h2>
           <p>{project.description}</p>
           <div className="link-row">
             {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+            <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
           </div>
         </article>
       ))}
     </section>
   );
+}
+
+function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: string) => void }) {
+  const project = getProject(slug);
+  if (!project) {
+    return (
+      <main className="project-page">
+        <PageIntro kicker="01  PROJECT / NOT FOUND" title="PROJECT NOT FOUND">The requested project route is not available.</PageIntro>
+      </main>
+    );
+  }
+
+  const isPractice = project.slug === "no-idea" || project.slug === "openband-openscore";
+  return (
+    <ProjectShell kicker={`01  PROJECT / ${project.category.toUpperCase()}`} title={project.title.toUpperCase()} project={project}>
+      <div className={`project-layout project-layout-loose ${isPractice ? "practice-detail-layout" : ""}`}>
+        {project.artwork ? <img className="project-art album-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} /> : <MediaPlaceholder title={project.title.toUpperCase()} label={project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER"} variant={project.category === "Music" ? "square" : "landscape"} />}
+        <div className="project-meta">
+          {project.description && <p>{project.description}</p>}
+          <MetaLines lines={[project.year, project.label, project.subtype, project.location]} />
+          {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+        </div>
+      </div>
+      {isPractice && (
+        <section className="detail-band">
+          <h2>RELATED PRACTICE</h2>
+          <p>{project.slug === "no-idea" ? "Events, radio, programming, budgeting, technical production and coordination around immersive live experiences." : "Open, non-hierarchical approaches to sound-making with musicians, artists, visual practitioners and local collaborators."}</p>
+        </section>
+      )}
+      <PlaceholderSequence labels={project.category === "Music" ? ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"] : ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]} />
+      {project.press && <KnownPress press={project.press} />}
+      <NextProject title={nextProjectFor(project.slug).title} onClick={() => navigate(nextProjectFor(project.slug).path)} />
+    </ProjectShell>
+  );
+}
+
+function PageIntro({ kicker, title, children }: { kicker: string; title: string; children: ReactNode }) {
+  return (
+    <section className="page-intro">
+      <div className="section-kicker">{kicker}</div>
+      <h1>{title}</h1>
+      <p>{children}</p>
+    </section>
+  );
+}
+
+function MediaPlaceholder({ title, label, variant = "landscape" }: { title: string; label: string; variant?: "portrait" | "landscape" | "cinematic" | "square" }) {
+  return (
+    <div className={`media-placeholder plan-b-placeholder placeholder-${variant}`}>
+      <span>{title}</span>
+      <strong>{label}</strong>
+      <em>MEDIA SLOT</em>
+    </div>
+  );
+}
+
+function PracticeFeature({ project, placeholder, onOpen }: { project: Project; placeholder: string; onOpen: () => void }) {
+  return (
+    <article className="practice-feature">
+      <MediaPlaceholder title={project.title.toUpperCase()} label={placeholder} variant="landscape" />
+      <div>
+        <h2>{project.title}</h2>
+        <p>{project.description}</p>
+        <div className="link-row">
+          {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+          <button className="text-arrow" onClick={onOpen}>VIEW PROJECT</button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function CvSections() {
+  return (
+    <section className="cv-grid">
+      <div>
+        <h2>EDUCATION</h2>
+        <p><span>2023-2025</span>Goldsmiths, University of London<br />MMus Creative Practice</p>
+        <p><span>2018-2022</span>Jazz piano studies with Kong Hongwei</p>
+        <p><span>2014-2018</span>Tianjin Conservatory of Music</p>
+      </div>
+      <div>
+        <h2>PROFESSIONAL WORK</h2>
+        <p><span>2021.09-2023.04</span>China Television Media / 中视前卫影视传媒<br />Audio Editing / Music Production</p>
+        <p>Participated in audio and music production for more than 50 short-form promotional projects for CCTV-13.</p>
+      </div>
+    </section>
+  );
+}
+
+function PressSection() {
+  return (
+    <section className="press-section">
+      <h2>SELECTED PRESS</h2>
+      <p>THE QUIETUS</p>
+      <p>Spool's Out - cassette reviews</p>
+      <p>MUITO PICKS</p>
+    </section>
+  );
+}
+
+function KnownPress({ press }: { press: NonNullable<Project["press"]> }) {
+  return (
+    <section className="detail-band">
+      <h2>KNOWN PRESS</h2>
+      <ul>{press.map((item) => <li key={item.title}>{[item.context, item.title].filter(Boolean).join(" / ")}</li>)}</ul>
+    </section>
+  );
+}
+
+function EpkBlock({ title, children }: { title: string; children: ReactNode }) {
+  return <article><h2>{title}</h2><p>{children}</p></article>;
 }
 
 function SelectedContexts() {
@@ -328,8 +601,8 @@ function Collaboration() {
     <section className="collaboration">
       <h2>COMMISSIONS<br />& COLLABORATION</h2>
       <div>
-        <p>For moving image, film, performance, installation and interdisciplinary projects.</p>
-        <p>Composition, sound, production and collaborative development.</p>
+        <p>Available for moving image, film, theatre, performance and interdisciplinary projects.</p>
+        <p>Composition, sound production and collaborative development.</p>
         <a className="text-arrow" href="mailto:lerezero@gmail.com">START A CONVERSATION</a>
         <p className="email">lerezero@gmail.com</p>
       </div>
@@ -359,15 +632,15 @@ function MediaVisual({ project }: { project: Project }) {
     return <img className="work-media work-artwork" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />;
   }
 
-  return <div className="work-media" aria-hidden="true" />;
+  return <MediaPlaceholder title={project.title.toUpperCase()} label={project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER"} variant={project.category === "Music" ? "square" : "landscape"} />;
 }
 
 function MetaLines({ lines }: { lines: Array<string | undefined> }) {
   return <div className="meta-lines">{lines.filter(Boolean).map((line) => <span key={line}>{line!.toUpperCase()}</span>)}</div>;
 }
 
-function ExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return <a className="text-arrow" href={href} target="_blank" rel="noreferrer">{children}</a>;
+function ExternalLink({ href, children, className = "text-arrow" }: { href: string; children: React.ReactNode; className?: string }) {
+  return <a className={className} href={href} target="_blank" rel="noreferrer">{children}</a>;
 }
 
 function LinkList({ heading, links }: { heading: string; links: { label: string; url: string }[] }) {
@@ -375,7 +648,7 @@ function LinkList({ heading, links }: { heading: string; links: { label: string;
 }
 
 function PlaceholderSequence({ labels }: { labels: string[] }) {
-  return <section className="placeholder-sequence">{labels.map((label) => <div key={label} className="media-placeholder">{label}</div>)}</section>;
+  return <section className="placeholder-sequence">{labels.map((label, index) => <MediaPlaceholder key={label} title={`0${index + 1}`} label={label} variant={index === 0 ? "landscape" : "square"} />)}</section>;
 }
 
 function NextProject({ title, onClick }: { title: string; onClick: () => void }) {
@@ -408,4 +681,11 @@ function selectedLayout(slug: string) {
 
 function showSelectedMedia(slug: string) {
   return !["fancy-a-bite", "no-idea", "paradise-dream-2"].includes(slug);
+}
+
+function nextProjectFor(slug: string) {
+  const visibleProjects = selectedWorks.filter((project) => project.verificationStatus !== "needs-review");
+  const index = visibleProjects.findIndex((project) => project.slug === slug);
+  const next = visibleProjects[index >= 0 ? (index + 1) % visibleProjects.length : 0];
+  return { title: next.title.toUpperCase(), path: `/work/${next.slug}` };
 }

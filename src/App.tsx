@@ -163,9 +163,10 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
           <h2>ROLE MODEL</h2>
           <MetaLines lines={[roleModel.year, "FILM", "AUDIOVISUAL COMPOSITION / MIX"]} />
           <div className="mini-meta"><span>DIRECTOR</span><strong>HONGXUAN WANG</strong></div>
+          <p className="photo-credit">{roleModel.photographyCredit}</p>
           <button className="text-arrow" onClick={() => navigate("/work/role-model")}>VIEW PROJECT</button>
         </div>
-        <MediaPlaceholder title="ROLE MODEL" label="PROJECT STILL" variant="cinematic" />
+        <img className="role-model-still role-model-still-home" src={assetUrl(roleModel.images![0].src)} alt={roleModel.images![0].alt} />
       </section>
 
       <AboutPractice navigate={navigate} />
@@ -355,10 +356,14 @@ function MusicReleasePage({ slug, navigate }: { slug: "cyberspace" | "bug-party"
 
 function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("role-model")!;
+  const [heroImage, ...galleryImages] = project.images!;
   return (
     <ProjectShell kicker="01  PROJECT / MOVING IMAGE" title="ROLE MODEL" project={project}>
       <div className="project-layout project-layout-loose film-layout">
-        <MediaPlaceholder title="ROLE MODEL" label="PROJECT STILL" variant="cinematic" />
+        <figure className="project-figure role-model-hero-figure">
+          <img className="role-model-still role-model-still-detail" src={assetUrl(heroImage.src)} alt={heroImage.alt} />
+          <figcaption>{project.photographyCredit}</figcaption>
+        </figure>
         <div className="project-meta">
           <MetaLines lines={[project.year, "FILM", "DIRECTOR", "HONGXUAN WANG"]} />
           <ExternalLink href={project.externalLinks![0].url}>VIEW PROJECT</ExternalLink>
@@ -368,7 +373,13 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
         <h2>SHEN AO'S ROLE</h2>
         <ul>{project.role?.map((role) => <li key={role}>{role}</li>)}</ul>
       </section>
-      <PlaceholderSequence labels={["PROJECT IMAGE", "ADDITIONAL MEDIA"]} />
+      <section className="role-model-gallery" aria-label="Role Model image gallery">
+        {galleryImages.map((image, index) => (
+          <figure className={`project-figure role-model-gallery-item role-model-gallery-item-${index + 1}`} key={image.src}>
+            <img className="role-model-still" src={assetUrl(image.src)} alt={image.alt} />
+          </figure>
+        ))}
+      </section>
       <section className="detail-band">
         <h2>CREDITS</h2>
         <p>DIRECTOR / HONGXUAN WANG</p>
@@ -629,6 +640,10 @@ function SignalArtwork() {
 }
 
 function MediaVisual({ project }: { project: Project }) {
+  if (project.images?.[0]) {
+    return <img className="work-media work-project-image" src={assetUrl(project.images[0].src)} alt={project.images[0].alt} />;
+  }
+
   if (project.artwork) {
     return <img className="work-media work-artwork" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />;
   }

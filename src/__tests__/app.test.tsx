@@ -62,6 +62,11 @@ describe("SHEN AO Round 1 site", () => {
     render(<App initialPath="/work/role-model" />);
     expect(screen.getByRole("heading", { name: "ROLE MODEL" })).toBeInTheDocument();
     expect(screen.getByText("HONGXUAN WANG")).toBeInTheDocument();
+    expect(screen.getByText("Photography: Roger Sinek")).toBeInTheDocument();
+    expect(screen.getByAltText("Exhibition view showing a projected close-up from Role Model.")).toHaveAttribute("src", "/assets/role-model/DSC0944_1600px_sRGB.jpg");
+    expect(screen.getByAltText("Exhibition view showing a filming scene projected in Role Model.")).toHaveAttribute("src", "/assets/role-model/DSC0919_1600px_sRGB.jpg");
+    expect(screen.getByAltText("Exhibition view showing a black-and-white family portrait projected in Role Model.")).toHaveAttribute("src", "/assets/role-model/DSC0937_1600px_sRGB.jpg");
+    expect(screen.getByAltText("Exhibition view showing a landscape scene projected in Role Model.")).toHaveAttribute("src", "/assets/role-model/DSC0946_1600px_sRGB.jpg");
     expect(screen.getByRole("link", { name: "VIEW PROJECT" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "WATCH" })).not.toBeInTheDocument();
     expect(screen.queryByText(/festival/i)).not.toBeInTheDocument();

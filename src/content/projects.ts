@@ -15,6 +15,8 @@ export type Project = {
   press?: { title: string; context?: string; url?: string }[];
   relatedTitles?: string[];
   artwork?: string;
+  images?: { src: string; alt: string }[];
+  photographyCredit?: string;
   featured?: "home-primary" | "home-secondary" | "practice";
   selectedOrder?: number;
   verificationStatus: "confirmed" | "archive-only" | "later-verification" | "needs-review";
@@ -63,10 +65,29 @@ export const projects: Project[] = [
     externalLinks: [
       { label: "Project", url: "https://www.thebluecoat.org.uk/library/event/dahong-hongxuan-wang-role-model" }
     ],
+    images: [
+      {
+        src: "/assets/role-model/DSC0944_1600px_sRGB.jpg",
+        alt: "Exhibition view showing a projected close-up from Role Model."
+      },
+      {
+        src: "/assets/role-model/DSC0919_1600px_sRGB.jpg",
+        alt: "Exhibition view showing a filming scene projected in Role Model."
+      },
+      {
+        src: "/assets/role-model/DSC0937_1600px_sRGB.jpg",
+        alt: "Exhibition view showing a black-and-white family portrait projected in Role Model."
+      },
+      {
+        src: "/assets/role-model/DSC0946_1600px_sRGB.jpg",
+        alt: "Exhibition view showing a landscape scene projected in Role Model."
+      }
+    ],
+    photographyCredit: "Photography: Roger Sinek",
     featured: "home-secondary",
     selectedOrder: 3,
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "fancy-a-bite",

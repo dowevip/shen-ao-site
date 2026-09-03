@@ -808,6 +808,30 @@ button.text-arrow::after,
   font-weight: 400;
 }
 
+.photo-credit {
+  margin: -38px 0 46px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.4;
+  text-transform: none;
+}
+
+.role-model-still {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent;
+}
+
+.role-model-still-home {
+  grid-column: 2;
+  align-self: stretch;
+  min-height: 360px;
+  object-fit: cover;
+  object-position: 50% 42%;
+}
+
 .mist-media,
 .stage-media,
 .work-media:nth-child(n) {
@@ -1258,6 +1282,53 @@ button.text-arrow::after,
 
 .film-layout .project-art {
   min-height: 430px;
+}
+
+.project-figure {
+  margin: 0;
+}
+
+.project-figure figcaption {
+  margin-top: 14px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.role-model-hero-figure {
+  align-self: start;
+}
+
+.role-model-still-detail {
+  object-fit: contain;
+}
+
+.role-model-gallery {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 34px 28px;
+  margin-top: 68px;
+}
+
+.role-model-gallery-item-1 {
+  grid-column: 1 / 8;
+}
+
+.role-model-gallery-item-2 {
+  grid-column: 8 / -1;
+  margin-top: 86px;
+}
+
+.role-model-gallery-item-3 {
+  grid-column: 4 / 12;
+  margin-top: 18px;
+}
+
+.work-media.work-project-image {
+  border: 0;
+  background: transparent;
+  object-fit: cover;
 }
 
 .detail-band {
@@ -1892,6 +1963,7 @@ button.text-arrow::after,
   .feature-text,
   .feature .album-placeholder,
   .feature-film .wide-media,
+  .role-model-still-home,
   .vertical-mark {
     grid-column: auto;
   }
@@ -2007,6 +2079,22 @@ button.text-arrow::after,
   .wide-media,
   .film-layout .project-art {
     min-height: 240px;
+  }
+
+  .role-model-still-home {
+    min-height: 240px;
+  }
+
+  .role-model-gallery {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .role-model-gallery-item-1,
+  .role-model-gallery-item-2,
+  .role-model-gallery-item-3 {
+    grid-column: auto;
+    margin-top: 0;
   }
 
   .vertical-mark {

@@ -1034,8 +1034,11 @@ button.text-arrow::after,
 .home-live-event img {
   display: block;
   width: 100%;
+  aspect-ratio: 16 / 9;
   height: auto;
   background: #fff;
+  object-fit: cover;
+  object-position: 46% 40%;
 }
 
 .home-live-event h3 {
@@ -1875,8 +1878,11 @@ button.text-arrow::after,
 .live-event-reference img {
   display: block;
   width: 100%;
+  aspect-ratio: 16 / 9;
   height: auto;
   background: #fff;
+  object-fit: cover;
+  object-position: 46% 40%;
 }
 
 .live-event-reference h2 {
@@ -2440,6 +2446,26 @@ button.text-arrow::after,
   font-size: 13px;
   font-weight: 500;
   text-transform: uppercase;
+}
+
+.artist-portrait {
+  display: block;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  min-height: 0;
+  background: #fff;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.artist-portrait-about {
+  align-self: start;
+}
+
+.artist-portrait-epk {
+  align-self: end;
+  width: min(100%, 300px);
+  justify-self: end;
 }
 
 .statement-notes {

@@ -39,7 +39,7 @@ describe("structured project content", () => {
     expect(noIdeaEvents[0]).toMatchObject({
       slug: "2026-05-23",
       series: "No Idea",
-      edition: "No Idea #2",
+      edition: "Live With No Idea",
       displayDate: "23 MAY 2026",
       day: "SATURDAY",
       venue: "Shai Space",

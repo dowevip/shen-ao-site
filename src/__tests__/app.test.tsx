@@ -115,12 +115,16 @@ describe("SHEN AO Round 1 site", () => {
     render(<App initialPath="/about" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "ABOUT" })).toBeInTheDocument();
     expect(screen.getByText("ARTIST STATEMENT")).toBeInTheDocument();
+    expect(screen.getByAltText("Childhood portrait of Shen Ao.")).toHaveAttribute("src", "/assets/portrait/shen-ao-childhood.avif");
     expect(screen.getByText((content) => content.includes("Goldsmiths, University of London"))).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "MORE PRESS / RADIO" })).toBeInTheDocument();
+    expect(screen.queryByText("KEYBOARD IMPROVISATION")).not.toBeInTheDocument();
+    expect(screen.queryByText("STRUCTURE -> LOSS OF CONTROL")).not.toBeInTheDocument();
 
     cleanup();
     render(<App initialPath="/epk" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "SHEN AO" })).toBeInTheDocument();
+    expect(screen.getByAltText("Childhood portrait of Shen Ao.")).toHaveAttribute("src", "/assets/portrait/shen-ao-childhood.avif");
     expect(screen.getByText("SHORT BIO")).toBeInTheDocument();
     expect(screen.getByText("SELECTED PRESS / RADIO")).toBeInTheDocument();
     expect(screen.getByText("MUITO RADIO")).toBeInTheDocument();
@@ -137,10 +141,10 @@ describe("SHEN AO Round 1 site", () => {
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "NO IDEA" })).toBeInTheDocument();
     expect(screen.getByText(/An independent ambient \/ experimental event and online-radio practice/)).toBeInTheDocument();
     expect(screen.getByText("SELECTED EVENTS")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "NO IDEA #2" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "LIVE WITH NO IDEA" })).toBeInTheDocument();
     expect(screen.getByText("ORGANISER + PERFORMER")).toBeInTheDocument();
-    expect(screen.getByAltText("Shen Ao performing at No Idea #2 at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
-    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(screen.getByAltText("Shen Ao performing at Live With No Idea at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
+    expect(screen.getByAltText("Live With No Idea event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
     expect(screen.getByRole("button", { name: "VIEW EVENT" })).toBeInTheDocument();
 
     cleanup();
@@ -156,38 +160,39 @@ describe("SHEN AO Round 1 site", () => {
     render(<App initialPath="/practice/no-idea/2026-05-23" />);
 
     expect(screen.getByRole("navigation").querySelector(".active")).toHaveTextContent("PRACTICE");
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "NO IDEA #2" })).toBeInTheDocument();
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "LIVE WITH NO IDEA" })).toBeInTheDocument();
     expect(screen.getByText("NO IDEA / EVENT")).toBeInTheDocument();
     expect(screen.getByText("17 LATONA RD")).toBeInTheDocument();
     expect(screen.getByText("LONDON SE15 6RX")).toBeInTheDocument();
     expect(screen.getByText("AMBIENT / EXPERIMENTAL")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "VIEW ON RESIDENT ADVISOR" })).toHaveAttribute("href", "https://ra.co/events/2432167");
-    expect(screen.getByAltText("Shen Ao performing at No Idea #2 at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
-    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
-    expect(screen.getAllByAltText(/No Idea #2/)).toHaveLength(9);
+    expect(screen.getByAltText("Shen Ao performing at Live With No Idea at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
+    expect(screen.getByAltText("Live With No Idea event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(screen.getAllByAltText(/Live With No Idea/)).toHaveLength(9);
+    expect(screen.getByRole("button", { name: "BACK TO NO IDEA" })).toBeInTheDocument();
     expect(screen.queryByText(/photography/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/18:30|19:00|7PM/)).not.toBeInTheDocument();
   });
 
-  it("cross-references No Idea #2 from home, practice, and live without making it a top-level live project", () => {
+  it("cross-references No Idea from home, practice, and live without making it a top-level live project", () => {
     render(<App initialPath="/" />);
 
-    expect(screen.getByText("NO IDEA #2")).toBeInTheDocument();
+    expect(screen.getByText("NO IDEA — SHAI SPACE")).toBeInTheDocument();
     expect(screen.getByText("SHAI SPACE / LONDON")).toBeInTheDocument();
-    expect(screen.getByAltText("Shen Ao performing at No Idea #2 at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
-    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(screen.getByAltText("Shen Ao performing at Live With No Idea at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
+    expect(screen.getByAltText("Live With No Idea event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
 
     cleanup();
     render(<App initialPath="/practice" />);
     expect(screen.getByText("LATEST DOCUMENTED EVENT")).toBeInTheDocument();
-    expect(screen.getByText("NO IDEA #2 / 23 MAY 2026")).toBeInTheDocument();
-    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(screen.getByText("LIVE WITH NO IDEA / 23 MAY 2026")).toBeInTheDocument();
+    expect(screen.getByAltText("Live With No Idea event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
 
     cleanup();
     render(<App initialPath="/live" />);
-    expect(screen.getByText("NO IDEA #2")).toBeInTheDocument();
+    expect(screen.getByText("NO IDEA — SHAI SPACE")).toBeInTheDocument();
     expect(screen.getByText("ORGANISER + PERFORMER")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "VIEW EVENT" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { level: 1, name: "NO IDEA #2" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 1, name: "LIVE WITH NO IDEA" })).not.toBeInTheDocument();
   });
 });

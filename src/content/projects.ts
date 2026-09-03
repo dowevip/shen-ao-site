@@ -126,7 +126,7 @@ export const projects: Project[] = [
     images: [
       {
         src: "/assets/no-idea/2026-05-23/hero.webp",
-        alt: "Shen Ao performing at No Idea #2 at Shai Space, London."
+        alt: "Shen Ao performing at Live With No Idea at Shai Space, London."
       }
     ],
     featured: "practice",

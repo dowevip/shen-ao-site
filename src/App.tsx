@@ -264,9 +264,9 @@ function LivePage({ navigate }: { navigate: (path: string) => void }) {
       <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "DJ SETS", "COLLABORATIVE PERFORMANCE"]} />
       <section className="live-gallery">
         <article className="live-event-reference">
-          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
           <div>
-            <h2>{event.edition.toUpperCase()}</h2>
+            <h2>NO IDEA — SHAI SPACE</h2>
             <MetaLines lines={[event.displayDate, `${event.venue} / ${event.city}`, event.roles.join(" + ")]} />
             <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT</button>
           </div>
@@ -318,15 +318,7 @@ function AboutPage({ navigate }: { navigate: (path: string) => void }) {
           <p>This is also why live performance matters. A recording preserves only one aspect of an event; each performance remains contingent on the room, the performers and the moment.</p>
           <p>His event practice operates differently from his music-making. Shen describes music production as the accumulation of learning, while organising events grows from lived experience and from the simple pleasure of completing something with other people.</p>
         </div>
-        <MediaPlaceholder title="ABOUT" label="PROJECT IMAGE" variant="portrait" />
-      </section>
-      <section className="statement-notes">
-        {[
-          ["KEYBOARD IMPROVISATION", "A way of absorbing and processing different sounds."],
-          ["EXPERIMENT", "A working method, not a genre."],
-          ["STRUCTURE -> LOSS OF CONTROL", "Begin with an expectation; gradually allow the work to move away from it."],
-          ["LIVE", "A recording is only one perspective on an event."]
-        ].map(([title, copy]) => <article key={title}><h3>{title}</h3><p>{copy}</p></article>)}
+        <img className="artist-portrait artist-portrait-about" src={assetUrl("/assets/portrait/shen-ao-childhood.avif")} alt="Childhood portrait of Shen Ao." />
       </section>
       <CvSections />
       <PressSection navigate={navigate} />
@@ -380,7 +372,7 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
           <p>COMPOSER / PRODUCER / SOUND ARTIST</p>
           <p>LONDON</p>
         </div>
-        <MediaPlaceholder title="EPK" label="PORTRAIT / ARTIST IMAGE" variant="portrait" />
+        <img className="artist-portrait artist-portrait-epk" src={assetUrl("/assets/portrait/shen-ao-childhood.avif")} alt="Childhood portrait of Shen Ao." />
       </section>
 
       <section className="epk-dossier">
@@ -521,7 +513,7 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
           </div>
         </div>
         <figure className="no-idea-hero-figure">
-          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
         </figure>
       </section>
 
@@ -530,7 +522,7 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
         {noIdeaEvents.map((eventItem) => (
           <article className="no-idea-event-card" key={eventItem.slug}>
             <figure className="no-idea-event-photo">
-              <img src={assetUrl(eventItem.heroImage)} alt="No Idea #2 event archive photograph." />
+              <img src={assetUrl(eventItem.heroImage)} alt="Live With No Idea event archive photograph." />
             </figure>
             <div className="no-idea-event-copy">
               <h2>{eventItem.edition.toUpperCase()}</h2>
@@ -546,7 +538,7 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
               </div>
             </div>
             <figure className="no-idea-event-poster">
-              <img src={assetUrl(eventItem.posterImage)} alt="No Idea #2 event poster." />
+              <img src={assetUrl(eventItem.posterImage)} alt="Live With No Idea event poster." />
             </figure>
           </article>
         ))}
@@ -588,12 +580,12 @@ function NoIdeaEventPage({ slug, navigate }: { slug: string; navigate: (path: st
       </section>
 
       <figure className="event-main-photo">
-        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
       </figure>
 
       <section className="event-poster-section">
         <figure>
-          <img src={assetUrl(event.posterImage)} alt="No Idea #2 event poster." />
+          <img src={assetUrl(event.posterImage)} alt="Live With No Idea event poster." />
         </figure>
         <div>
           <div className="section-kicker">EVENT POSTER</div>
@@ -605,14 +597,14 @@ function NoIdeaEventPage({ slug, navigate }: { slug: string; navigate: (path: st
         </div>
       </section>
 
-      <section className="no-idea-event-gallery" aria-label="No Idea #2 image gallery">
+      <section className="no-idea-event-gallery" aria-label="Live With No Idea image gallery">
         {event.galleryImages.map((image, index) => (
           <figure className={`no-idea-gallery-item no-idea-gallery-item-${index + 1}`} key={image.src}>
             <img src={assetUrl(image.src)} alt={image.alt} />
           </figure>
         ))}
       </section>
-      <NextProject title="NO IDEA" onClick={() => navigate("/work/no-idea")} />
+      <NextProject title="BACK TO NO IDEA" onClick={() => navigate("/work/no-idea")} label={null} />
     </main>
   );
 }
@@ -704,9 +696,9 @@ function LivePreview({ navigate }: { navigate: (path: string) => void }) {
       </div>
       <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "PERFORMANCE", "DJ SETS"]} />
       <article className="home-live-event">
-        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
         <div>
-          <h3>{event.edition.toUpperCase()}</h3>
+          <h3>NO IDEA — SHAI SPACE</h3>
           <MetaLines lines={[event.displayDate, `${event.venue} / ${event.city}`, event.roles.join(" + ")]} />
           <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT</button>
         </div>
@@ -723,7 +715,7 @@ function PracticeProjects({ navigate }: { navigate: (path: string) => void }) {
       {practice.map((project) => (
         <article key={project.slug}>
           {project.slug === "no-idea" ? (
-            <img className="practice-poster-preview" src={assetUrl(latestNoIdeaEvent.posterImage)} alt="No Idea #2 event poster." />
+            <img className="practice-poster-preview" src={assetUrl(latestNoIdeaEvent.posterImage)} alt="Live With No Idea event poster." />
           ) : (
             <MediaPlaceholder title={project.title.toUpperCase()} label="WORKSHOP MATERIAL" variant="landscape" />
           )}
@@ -816,7 +808,7 @@ function PracticeFeature({ project, placeholder, event, onOpen }: { project: Pro
   return (
     <article className="practice-feature">
       {event ? (
-        <img className="practice-feature-poster" src={assetUrl(event.posterImage)} alt="No Idea #2 event poster." />
+        <img className="practice-feature-poster" src={assetUrl(event.posterImage)} alt="Live With No Idea event poster." />
       ) : (
         <MediaPlaceholder title={project.title.toUpperCase()} label={placeholder ?? "MEDIA PLACEHOLDER"} variant="landscape" />
       )}
@@ -996,8 +988,8 @@ function PlaceholderSequence({ labels }: { labels: string[] }) {
   return <section className="placeholder-sequence">{labels.map((label, index) => <MediaPlaceholder key={label} title="MEDIA" label={label} variant={index === 0 ? "landscape" : "square"} />)}</section>;
 }
 
-function NextProject({ title, onClick }: { title: string; onClick: () => void }) {
-  return <button className="next-project" onClick={onClick}><span>NEXT PROJECT</span><strong>{title}</strong></button>;
+function NextProject({ title, onClick, label = "NEXT PROJECT" }: { title: string; onClick: () => void; label?: string | null }) {
+  return <button className="next-project" onClick={onClick}>{label && <span>{label}</span>}<strong>{title}</strong></button>;
 }
 
 function toFilter(project: Project) {

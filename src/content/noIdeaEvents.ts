@@ -30,7 +30,7 @@ export const noIdeaEvents: NoIdeaEvent[] = [
   {
     slug: "2026-05-23",
     series: "No Idea",
-    edition: "No Idea #2",
+    edition: "Live With No Idea",
     date: "2026-05-23",
     displayDate: "23 MAY 2026",
     day: "SATURDAY",
@@ -46,13 +46,13 @@ export const noIdeaEvents: NoIdeaEvent[] = [
     heroImage: "/assets/no-idea/2026-05-23/hero.webp",
     posterImage: "/assets/no-idea/2026-05-23/poster.webp",
     galleryImages: [
-      { src: "/assets/no-idea/2026-05-23/gallery-01.webp", alt: "Performer at No Idea #2, Shai Space, London." },
-      { src: "/assets/no-idea/2026-05-23/gallery-02.webp", alt: "Live performance at No Idea #2." },
-      { src: "/assets/no-idea/2026-05-23/gallery-03.webp", alt: "Audience at No Idea #2, Shai Space, London." },
-      { src: "/assets/no-idea/2026-05-23/gallery-04.webp", alt: "Electronic performance at No Idea #2." },
-      { src: "/assets/no-idea/2026-05-23/gallery-05.webp", alt: "Live performance at No Idea #2." },
-      { src: "/assets/no-idea/2026-05-23/gallery-06.webp", alt: "Electronic performance at No Idea #2." },
-      { src: "/assets/no-idea/2026-05-23/gallery-07.webp", alt: "Audience at No Idea #2, Shai Space, London." }
+      { src: "/assets/no-idea/2026-05-23/gallery-01.webp", alt: "Performer at Live With No Idea, Shai Space, London." },
+      { src: "/assets/no-idea/2026-05-23/gallery-02.webp", alt: "Live performance at Live With No Idea." },
+      { src: "/assets/no-idea/2026-05-23/gallery-03.webp", alt: "Audience at Live With No Idea, Shai Space, London." },
+      { src: "/assets/no-idea/2026-05-23/gallery-04.webp", alt: "Electronic performance at Live With No Idea." },
+      { src: "/assets/no-idea/2026-05-23/gallery-05.webp", alt: "Live performance at Live With No Idea." },
+      { src: "/assets/no-idea/2026-05-23/gallery-06.webp", alt: "Electronic performance at Live With No Idea." },
+      { src: "/assets/no-idea/2026-05-23/gallery-07.webp", alt: "Audience at Live With No Idea, Shai Space, London." }
     ],
     externalLinks: {
       residentAdvisor: "https://ra.co/events/2432167",

@@ -23,6 +23,9 @@ describe("SHEN AO Round 1 site", () => {
     expect(featuredMusic.getByText("LEFT ON DESK")).toBeInTheDocument();
     expect(featuredMusic.getAllByRole("button", { name: "VIEW PROJECT" })).toHaveLength(2);
     expect(featuredMusic.getAllByRole("link", { name: "LISTEN" })).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "PRESS / RADIO" })).toBeInTheDocument();
+    expect(screen.getByText("NTS RADIO — TREVOR JACKSON")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "VIEW PRESS / RADIO" })).toBeInTheDocument();
     expect(screen.queryByAltText("Data horizon signal field")).not.toBeInTheDocument();
     expect(screen.queryByText("申奡")).not.toBeInTheDocument();
     expect(screen.queryByAltText(/portrait/i)).not.toBeInTheDocument();
@@ -97,15 +100,28 @@ describe("SHEN AO Round 1 site", () => {
     expect(screen.getByText(/Music-making and event-making occupy different roles/)).toBeInTheDocument();
 
     cleanup();
+    render(<App initialPath="/press-radio" />);
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "PRESS / RADIO" })).toBeInTheDocument();
+    expect(screen.getByText("Spool's Out: Cassette Reviews for July")).toBeInTheDocument();
+    expect(screen.getByText("DARYL WORTHINGTON")).toBeInTheDocument();
+    expect(screen.getByText(/astounding statements of intent/)).toBeInTheDocument();
+    expect(screen.getByText("NTS RADIO — TREVOR JACKSON")).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "LISTEN / VIEW TRACKLIST" })).toHaveLength(2);
+    expect(screen.queryByText(/Amazon/i)).not.toBeInTheDocument();
+
+    cleanup();
     render(<App initialPath="/about" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "ABOUT" })).toBeInTheDocument();
     expect(screen.getByText("ARTIST STATEMENT")).toBeInTheDocument();
     expect(screen.getByText((content) => content.includes("Goldsmiths, University of London"))).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "MORE PRESS / RADIO" })).toBeInTheDocument();
 
     cleanup();
     render(<App initialPath="/epk" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "SHEN AO" })).toBeInTheDocument();
     expect(screen.getByText("SHORT BIO")).toBeInTheDocument();
+    expect(screen.getByText("SELECTED PRESS / RADIO")).toBeInTheDocument();
+    expect(screen.getByText("MUITO RADIO")).toBeInTheDocument();
     expect(screen.queryByText(/download epk/i)).not.toBeInTheDocument();
   });
 

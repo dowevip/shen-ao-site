@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { archiveFilters, getProject, projects, selectedWorks, type Project } from "./content/projects";
+import { aboutPressItems, epkPressItems, homePressItems, verifiedPressItems, type PressItem } from "./content/press";
 import "./styles.css";
 
-const navItems = ["WORK", "MUSIC", "LIVE", "PRACTICE", "ABOUT", "EPK"];
+const navItems = ["WORK", "MUSIC", "LIVE", "PRACTICE", "PRESS", "ABOUT", "EPK"];
 
 type AppProps = {
   initialPath?: string;
@@ -66,8 +67,10 @@ export default function App({ initialPath }: AppProps) {
     <LivePage />
   ) : path.startsWith("/practice") ? (
     <PracticePage navigate={navigate} />
+  ) : path.startsWith("/press-radio") ? (
+    <PressRadioPage />
   ) : path.startsWith("/about") ? (
-    <AboutPage />
+    <AboutPage navigate={navigate} />
   ) : path.startsWith("/epk") ? (
     <EpkPage navigate={navigate} />
   ) : (
@@ -88,6 +91,7 @@ const navPath: Record<string, string> = {
   MUSIC: "/music",
   LIVE: "/live",
   PRACTICE: "/practice",
+  PRESS: "/press-radio",
   ABOUT: "/about",
   EPK: "/epk"
 };
@@ -172,6 +176,7 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
       <AboutPractice navigate={navigate} />
       <LivePreview navigate={navigate} />
       <PracticeProjects navigate={navigate} />
+      <PressRadioPreview navigate={navigate} />
       <SelectedContexts />
       <Collaboration />
     </main>
@@ -275,7 +280,7 @@ function PracticePage({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
-function AboutPage() {
+function AboutPage({ navigate }: { navigate: (path: string) => void }) {
   return (
     <main className="route-page about-page">
       <PageIntro kicker="01  ABOUT / BIO" title="ABOUT">
@@ -302,7 +307,29 @@ function AboutPage() {
         ].map(([title, copy]) => <article key={title}><h3>{title}</h3><p>{copy}</p></article>)}
       </section>
       <CvSections />
-      <PressSection />
+      <PressSection navigate={navigate} />
+    </main>
+  );
+}
+
+function PressRadioPage() {
+  const featured = verifiedPressItems.filter((item) => item.type !== "radio");
+  const radio = verifiedPressItems.filter((item) => item.type === "radio");
+
+  return (
+    <main className="route-page press-radio-page">
+      <PageIntro kicker="01  PRESS / RADIO" title="PRESS / RADIO">
+        Selected reviews, features, recommendations and radio appearances around Shen Ao's music and practice.
+      </PageIntro>
+      <section className="press-feature-list" aria-label="Reviews and recommendations">
+        {featured.map((item, index) => <PressFeatureRow item={item} index={index} key={item.id} />)}
+      </section>
+      <section className="radio-log" aria-label="Radio airplay">
+        <div className="section-kicker">02&nbsp;&nbsp; RADIO / AIRPLAY</div>
+        <div>
+          {radio.map((item, index) => <RadioLogRow item={item} index={index} key={item.id} />)}
+        </div>
+      </section>
     </main>
   );
 }
@@ -371,10 +398,8 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
 
       <section className="epk-lower-grid">
         <article className="epk-press">
-          <h2>SELECTED PRESS</h2>
-          <p>THE QUIETUS</p>
-          <p>Spool's Out — cassette reviews</p>
-          <p>MUITO PICKS</p>
+          <h2>SELECTED PRESS / RADIO</h2>
+          {epkPressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
         </article>
         <article>
           <h2>EDUCATION</h2>
@@ -553,6 +578,19 @@ function PracticeProjects({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
+function PressRadioPreview({ navigate }: { navigate: (path: string) => void }) {
+  return (
+    <section className="press-radio-preview">
+      <div className="section-kicker">06&nbsp;&nbsp; PRESS / RADIO</div>
+      <h2>PRESS / RADIO</h2>
+      <div className="home-press-index">
+        {homePressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
+      </div>
+      <button className="text-arrow" onClick={() => navigate("/press-radio")}>VIEW PRESS / RADIO</button>
+    </section>
+  );
+}
+
 function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: string) => void }) {
   const project = getProject(slug);
   if (!project) {
@@ -641,13 +679,12 @@ function CvSections() {
   );
 }
 
-function PressSection() {
+function PressSection({ navigate }: { navigate: (path: string) => void }) {
   return (
     <section className="press-section">
       <h2>SELECTED PRESS</h2>
-      <p>THE QUIETUS</p>
-      <p>Spool's Out - cassette reviews</p>
-      <p>MUITO PICKS</p>
+      {aboutPressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
+      <button className="text-arrow" onClick={() => navigate("/press-radio")}>MORE PRESS / RADIO</button>
     </section>
   );
 }
@@ -674,10 +711,57 @@ function InfoItem({ label, value }: { label: string; value: string }) {
   );
 }
 
+function PressFeatureRow({ item, index }: { item: PressItem; index: number }) {
+  const outlet = item.outlet ?? item.station ?? "";
+  return (
+    <article className={`press-feature-row press-feature-row-${index + 1}`}>
+      <span className="press-index">{String(index + 1).padStart(2, "0")}</span>
+      <div>
+        <p className="press-outlet">{outlet}</p>
+        <h2>{item.title}</h2>
+        <MetaLines lines={[pressTypeLabel(item), item.relatedProject, item.author, item.year]} />
+        <p>{item.context}</p>
+        {item.quote && <blockquote>“{item.quote}”</blockquote>}
+        <ExternalLink href={item.url}>{item.cta}</ExternalLink>
+      </div>
+    </article>
+  );
+}
+
+function RadioLogRow({ item, index }: { item: PressItem; index: number }) {
+  return (
+    <article className={`radio-row radio-row-${index + 1}`}>
+      <span>{String(index + 1).padStart(2, "0")}</span>
+      <p>{item.date}</p>
+      <h2>{[item.station, item.programme].filter(Boolean).join(" — ")}</h2>
+      <p>{item.track}</p>
+      <ExternalLink href={item.url}>{item.cta}</ExternalLink>
+    </article>
+  );
+}
+
+function PressMiniLine({ item }: { item: PressItem }) {
+  const source = item.type === "radio"
+    ? [item.station, item.programme].filter(Boolean).join(" — ")
+    : item.outlet;
+  const detail = item.type === "radio" ? item.track : item.title;
+
+  return (
+    <div className="press-mini-line">
+      <strong>{source}</strong>
+      <span>{detail}</span>
+    </div>
+  );
+}
+
+function pressTypeLabel(item: PressItem) {
+  return item.type === "radio" ? "RADIO AIRPLAY" : item.type;
+}
+
 function SelectedContexts() {
   return (
     <section className="contexts">
-      <div className="section-kicker">06&nbsp;&nbsp; CONTEXTS</div>
+      <div className="section-kicker">07&nbsp;&nbsp; CONTEXTS</div>
       <h2>SELECTED CONTEXTS</h2>
       <p>KIT RECORDS</p><p>GOLDSMITHS</p><p>CCTV-13</p><p>THE QUIETUS</p><p>LONDON</p>
     </section>

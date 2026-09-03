@@ -8,6 +8,7 @@ const routes = [
   "music",
   "live",
   "practice",
+  "press-radio",
   "about",
   "epk",
   "work/cyberspace",

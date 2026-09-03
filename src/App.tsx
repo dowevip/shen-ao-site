@@ -127,6 +127,7 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
 
   return (
     <main className="home-page">
+      <PageAccentMarks variant="home" />
       <section className="hero plan-b-hero flow-section">
         <div className="section-kicker">HOME / HERO</div>
         <div className="hero-copy">
@@ -181,7 +182,6 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
       <LivePreview navigate={navigate} />
       <PracticeProjects navigate={navigate} />
       <PressRadioPreview navigate={navigate} />
-      <SelectedContexts />
       <Collaboration />
     </main>
   );
@@ -326,6 +326,7 @@ function PressRadioPage() {
 
   return (
     <main className="route-page press-radio-page">
+      <PageAccentMarks variant="press" />
       <section className="press-radio-intro">
         <div className="section-kicker">EXTERNAL RECEPTION ARCHIVE</div>
         <h1><span>PRESS /</span><span>RADIO</span></h1>
@@ -358,6 +359,7 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
 
   return (
     <main className="route-page epk-page">
+      <PageAccentMarks variant="epk" />
       <section className="epk-hero">
         <div>
           <h1>SHEN AO</h1>
@@ -507,6 +509,9 @@ function ProjectShell({ kicker, title, project, children }: { kicker: string; ti
 function PageAccentMarks({ variant }: { variant: string }) {
   return (
     <div className={`page-accent-marks page-accent-${variant}`} aria-hidden="true">
+      <span />
+      <span />
+      <span />
       <span />
       <span />
       <span />
@@ -777,16 +782,6 @@ function pressTypeLabel(item: PressItem) {
 
 function displayRelatedProject(relatedProject?: string) {
   return relatedProject?.replace(" / ", " + ");
-}
-
-function SelectedContexts() {
-  return (
-    <section className="contexts">
-      <div className="section-kicker">CONTEXTS</div>
-      <h2>SELECTED CONTEXTS</h2>
-      <p>KIT RECORDS</p><p>GOLDSMITHS</p><p>CCTV-13</p><p>THE QUIETUS</p><p>LONDON</p>
-    </section>
-  );
 }
 
 function Collaboration() {

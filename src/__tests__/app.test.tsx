@@ -26,6 +26,8 @@ describe("SHEN AO Round 1 site", () => {
     expect(screen.getByRole("heading", { name: "PRESS / RADIO" })).toBeInTheDocument();
     expect(screen.getByText("NTS RADIO — TREVOR JACKSON")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "VIEW PRESS / RADIO" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "SELECTED CONTEXTS" })).not.toBeInTheDocument();
+    expect(screen.queryByText("CONTEXTS")).not.toBeInTheDocument();
     expect(screen.queryByAltText("Data horizon signal field")).not.toBeInTheDocument();
     expect(screen.queryByText("申奡")).not.toBeInTheDocument();
     expect(screen.queryByAltText(/portrait/i)).not.toBeInTheDocument();

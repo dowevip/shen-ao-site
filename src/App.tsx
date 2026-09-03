@@ -308,30 +308,96 @@ function AboutPage() {
 }
 
 function EpkPage({ navigate }: { navigate: (path: string) => void }) {
+  const selectedWork = [
+    ["01", "CYBERSPACE", "KIT RECORDS / RELEASE", "/work/cyberspace"],
+    ["02", "BUG PARTY", "KIT RECORDS / RELEASE", "/work/bug-party"],
+    ["03", "ROLE MODEL", "MOVING IMAGE / 2024", "/work/role-model"],
+    ["04", "FANCY A BITE?", "THEATRE / 2024", "/work/fancy-a-bite"],
+    ["05", "NO IDEA", "EVENTS / RADIO", "/work/no-idea"],
+    ["06", "OPENBAND / OPENSCORE", "INTERDISCIPLINARY IMPROVISATION", "/work/openband-openscore"]
+  ];
+
   return (
     <main className="route-page epk-page">
       <section className="epk-hero">
-        <h1>SHEN AO</h1>
-        <p>COMPOSER / PRODUCER / SOUND ARTIST</p>
-        <p>LONDON</p>
+        <div>
+          <span className="epk-section-number">00</span>
+          <h1>SHEN AO</h1>
+          <p>COMPOSER / PRODUCER / SOUND ARTIST</p>
+          <p>LONDON</p>
+        </div>
+        <MediaPlaceholder title="EPK" label="PORTRAIT / ARTIST IMAGE" variant="portrait" />
       </section>
-      <section className="epk-grid">
-        <EpkBlock title="SHORT BIO">Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making.</EpkBlock>
-        <EpkBlock title="ARTIST STATEMENT">Experimentation is a working method rather than a genre; live performance remains contingent on the room, the performers and the moment.</EpkBlock>
-        <EpkBlock title="SELECTED MUSIC">Cyberspace; Bug Party; two dreadful children / unipre; Clouds from Underground.</EpkBlock>
-        <EpkBlock title="MOVING IMAGE">Role Model, 2024, audiovisual composition / mix, director Hongxuan Wang.</EpkBlock>
-        <EpkBlock title="LIVE / PERFORMANCE">Live electronics, improvisation, performance and DJ sets.</EpkBlock>
-        <EpkBlock title="PRACTICE">No Idea; Openband / Openscore; events, radio, workshops and collective improvisation.</EpkBlock>
-        <EpkBlock title="SELECTED PRESS">THE QUIETUS - Spool's Out cassette reviews. MUITO PICKS.</EpkBlock>
-        <EpkBlock title="EDUCATION">2023-2025 Goldsmiths, University of London, MMus Creative Practice.</EpkBlock>
-        <EpkBlock title="CONTACT">lerezero@gmail.com</EpkBlock>
+
+      <section className="epk-dossier">
+        <article className="epk-main-copy">
+          <h2>SHORT BIO</h2>
+          <p>Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making. His practice includes independent releases, film and theatre composition, live electronics, improvisation, DJ performance and collaborative projects.</p>
+
+          <h2>ARTIST STATEMENT</h2>
+          <p>Keyboard improvisation is central to Shen Ao's way of processing sound. It is a tool through which different musical languages and the environments around him are absorbed, tested and reorganised. Unconventional harmonic movement remains a recurring part of this process.</p>
+          <p>His music is shaped by the environments he moves through. Electronic and minimalist music sit alongside the sound of the city, becoming material that can be processed through improvisation and production rather than treated as separate influences.</p>
+          <p>For Shen, experimentation is a working method rather than a genre. A work often begins with an imagined structure or expectation. During the process, that structure is gradually allowed to loosen, opening the work toward accident, instability and a degree of loss of control.</p>
+          <p>This is also why live performance matters. A recording preserves only one aspect of an event; each performance remains contingent on the room, the performers and the moment.</p>
+          <p>His event practice operates differently from his music-making. Shen describes music production as the accumulation of learning, while organising events grows from lived experience and from the simple pleasure of completing something with other people.</p>
+        </article>
+
+        <aside className="epk-facts" aria-label="Quick facts">
+          <InfoItem label="BASED IN" value="London" />
+          <InfoItem label="PRACTICE" value="Music / Moving Image / Live / Event-making" />
+          <InfoItem label="WORKING ACROSS" value="Composition / Production / Improvisation / Performance" />
+          <InfoItem label="CONTACT" value="lerezero@gmail.com" />
+          <div className="epk-listen">
+            <h2>LISTEN</h2>
+            <ExternalLink href="https://shenao.bandcamp.com/">BANDCAMP</ExternalLink>
+            <ExternalLink href="https://soundcloud.com/shen-ao">SOUNDCLOUD</ExternalLink>
+            <ExternalLink href="https://www.mixcloud.com/teendrum/">MIXCLOUD</ExternalLink>
+          </div>
+        </aside>
       </section>
-      <div className="epk-links">
-        <button className="text-arrow" onClick={() => navigate("/music")}>MUSIC</button>
-        <ExternalLink href="https://shenao.bandcamp.com/">BANDCAMP</ExternalLink>
-        <ExternalLink href="https://soundcloud.com/shen-ao">SOUNDCLOUD</ExternalLink>
-        <ExternalLink href="https://www.mixcloud.com/teendrum/">MIXCLOUD</ExternalLink>
-      </div>
+
+      <section className="epk-selected-work">
+        <h2>SELECTED WORK</h2>
+        <div>
+          {selectedWork.map(([index, title, meta, path]) => (
+            <button className="epk-work-row" key={title} onClick={() => navigate(path)}>
+              <span>{index}</span>
+              <strong>{title}</strong>
+              <em>{meta}</em>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="epk-lower-grid">
+        <article className="epk-press">
+          <h2>SELECTED PRESS</h2>
+          <p>THE QUIETUS</p>
+          <p>Spool's Out — cassette reviews</p>
+          <p>MUITO PICKS</p>
+        </article>
+        <article>
+          <h2>EDUCATION</h2>
+          <p><span>2023-2025</span>Goldsmiths, University of London<br />MMus Creative Practice</p>
+          <p><span>2018-2022</span>Jazz piano studies with Kong Hongwei</p>
+          <p><span>2014-2018</span>Tianjin Conservatory of Music</p>
+        </article>
+        <article>
+          <h2>PROFESSIONAL EXPERIENCE</h2>
+          <p><span>2021.09-2023.04</span>China Television Media / 中视前卫影视传媒<br />Audio Editing / Music Production</p>
+          <p>Participated in audio and music production for more than 50 short-form promotional projects for CCTV-13.</p>
+        </article>
+      </section>
+
+      <section className="epk-contact">
+        <h2>CONTACT / BOOKINGS / COLLABORATION</h2>
+        <p>lerezero@gmail.com</p>
+        <div>
+          <ExternalLink href="https://shenao.bandcamp.com/">BANDCAMP</ExternalLink>
+          <ExternalLink href="https://soundcloud.com/shen-ao">SOUNDCLOUD</ExternalLink>
+          <ExternalLink href="https://www.mixcloud.com/teendrum/">MIXCLOUD</ExternalLink>
+        </div>
+      </section>
     </main>
   );
 }
@@ -377,6 +443,7 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
         {galleryImages.map((image, index) => (
           <figure className={`project-figure role-model-gallery-item role-model-gallery-item-${index + 1}`} key={image.src}>
             <img className="role-model-still" src={assetUrl(image.src)} alt={image.alt} />
+            <figcaption>{`0${index + 1}`}</figcaption>
           </figure>
         ))}
       </section>
@@ -596,6 +663,15 @@ function KnownPress({ press }: { press: NonNullable<Project["press"]> }) {
 
 function EpkBlock({ title, children }: { title: string; children: ReactNode }) {
   return <article><h2>{title}</h2><p>{children}</p></article>;
+}
+
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="info-item">
+      <span>{label}</span>
+      <p>{value}</p>
+    </div>
+  );
 }
 
 function SelectedContexts() {

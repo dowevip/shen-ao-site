@@ -105,7 +105,7 @@ describe("SHEN AO Round 1 site", () => {
     expect(screen.getByText("Spool's Out: Cassette Reviews for July")).toBeInTheDocument();
     expect(screen.getByText("DARYL WORTHINGTON")).toBeInTheDocument();
     expect(screen.getByText(/astounding statements of intent/)).toBeInTheDocument();
-    expect(screen.getByText("NTS RADIO — TREVOR JACKSON")).toBeInTheDocument();
+    expect(screen.getByText("TREVOR JACKSON")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "LISTEN / VIEW TRACKLIST" })).toHaveLength(2);
     expect(screen.queryByText(/Amazon/i)).not.toBeInTheDocument();
 

@@ -318,15 +318,19 @@ function PressRadioPage() {
 
   return (
     <main className="route-page press-radio-page">
-      <PageIntro kicker="01  PRESS / RADIO" title="PRESS / RADIO">
-        Selected reviews, features, recommendations and radio appearances around Shen Ao's music and practice.
-      </PageIntro>
+      <section className="press-radio-intro">
+        <div className="section-kicker">00&nbsp;&nbsp; EXTERNAL RECEPTION ARCHIVE</div>
+        <h1><span>PRESS /</span><span>RADIO</span></h1>
+        <p>Selected reviews, features, recommendations and radio appearances around Shen Ao's music and practice.</p>
+      </section>
       <section className="press-feature-list" aria-label="Reviews and recommendations">
+        <div className="section-kicker">01&nbsp;&nbsp; FEATURES / REVIEWS</div>
         {featured.map((item, index) => <PressFeatureRow item={item} index={index} key={item.id} />)}
       </section>
       <section className="radio-log" aria-label="Radio airplay">
         <div className="section-kicker">02&nbsp;&nbsp; RADIO / AIRPLAY</div>
         <div>
+          <div className="radio-row radio-head"><span>NO.</span><p>DATE</p><h2>STATION / PROGRAMME</h2><p>TRACK</p><span>LINK</span></div>
           {radio.map((item, index) => <RadioLogRow item={item} index={index} key={item.id} />)}
         </div>
       </section>
@@ -719,7 +723,7 @@ function PressFeatureRow({ item, index }: { item: PressItem; index: number }) {
       <div>
         <p className="press-outlet">{outlet}</p>
         <h2>{item.title}</h2>
-        <MetaLines lines={[pressTypeLabel(item), item.relatedProject, item.author, item.year]} />
+        <MetaLines lines={[pressTypeLabel(item), displayRelatedProject(item.relatedProject), item.author, item.year]} />
         <p>{item.context}</p>
         {item.quote && <blockquote>“{item.quote}”</blockquote>}
         <ExternalLink href={item.url}>{item.cta}</ExternalLink>
@@ -733,8 +737,8 @@ function RadioLogRow({ item, index }: { item: PressItem; index: number }) {
     <article className={`radio-row radio-row-${index + 1}`}>
       <span>{String(index + 1).padStart(2, "0")}</span>
       <p>{item.date}</p>
-      <h2>{[item.station, item.programme].filter(Boolean).join(" — ")}</h2>
-      <p>{item.track}</p>
+      <h2><span>{item.station}</span><strong>{item.programme}</strong></h2>
+      <p className="radio-track">{item.track}</p>
       <ExternalLink href={item.url}>{item.cta}</ExternalLink>
     </article>
   );
@@ -756,6 +760,10 @@ function PressMiniLine({ item }: { item: PressItem }) {
 
 function pressTypeLabel(item: PressItem) {
   return item.type === "radio" ? "RADIO AIRPLAY" : item.type;
+}
+
+function displayRelatedProject(relatedProject?: string) {
+  return relatedProject?.replace(" / ", " + ");
 }
 
 function SelectedContexts() {

@@ -17,7 +17,8 @@ const toAppPath = (path: string) => {
     : fallbackBasePath
       ? path.slice(fallbackBasePath.length) || "/"
       : path;
-  return normalized.startsWith("/") ? normalized : `/${normalized}`;
+  const appPath = normalized.startsWith("/") ? normalized : `/${normalized}`;
+  return appPath === "/" ? appPath : appPath.replace(/\/+$/, "");
 };
 const toBrowserPath = (path: string) => `${basePath}${path === "/" ? "/" : path}`;
 const assetUrl = (path: string) => `${basePath}/${path.replace(/^\//, "")}`;

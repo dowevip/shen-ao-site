@@ -2460,7 +2460,13 @@ button.text-arrow::after,
   }
 
   .page-accent-home span:nth-child(1) { left: 9%; top: 18%; }
-  .page-accent-home span:nth-child(2) { right: 13%; top: 57%; }
+  .page-accent-home span:nth-child(2) { right: 13%; top: 73%; }
+  .page-accent-home span:nth-child(3) {
+    display: block;
+    left: auto;
+    right: -20px;
+    top: 93%;
+  }
   .page-accent-work span:nth-child(1),
   .page-accent-music span:nth-child(1),
   .page-accent-live span:nth-child(1),

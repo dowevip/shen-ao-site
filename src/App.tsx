@@ -178,9 +178,9 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
         <img className="role-model-still role-model-still-home" src={assetUrl(roleModel.images![0].src)} alt={roleModel.images![0].alt} />
       </section>
 
-      <AboutPractice navigate={navigate} />
       <LivePreview navigate={navigate} />
       <PracticeProjects navigate={navigate} />
+      <AboutPractice navigate={navigate} />
       <PressRadioPreview navigate={navigate} />
       <Collaboration />
     </main>

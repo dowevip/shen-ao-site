@@ -135,7 +135,13 @@ describe("SHEN AO Round 1 site", () => {
     cleanup();
     render(<App initialPath="/work/no-idea" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "NO IDEA" })).toBeInTheDocument();
-    expect(screen.getByText("Independent music events and online radio.")).toBeInTheDocument();
+    expect(screen.getByText(/An independent ambient \/ experimental event and online-radio practice/)).toBeInTheDocument();
+    expect(screen.getByText("SELECTED EVENTS")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "NO IDEA #2" })).toBeInTheDocument();
+    expect(screen.getByText("ORGANISER + PERFORMER")).toBeInTheDocument();
+    expect(screen.getByAltText("Shen Ao performing at No Idea #2 at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
+    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(screen.getByRole("button", { name: "VIEW EVENT" })).toBeInTheDocument();
 
     cleanup();
     render(<App initialPath="/work/openband-openscore" />);
@@ -144,5 +150,44 @@ describe("SHEN AO Round 1 site", () => {
     cleanup();
     render(<App initialPath="/work/clouds-from-underground" />);
     expect(screen.getByRole("heading", { level: 1, name: "CLOUDS FROM UNDERGROUND" })).toBeInTheDocument();
+  });
+
+  it("renders the No Idea event detail as a Practice sub-route with real media", () => {
+    render(<App initialPath="/practice/no-idea/2026-05-23" />);
+
+    expect(screen.getByRole("navigation").querySelector(".active")).toHaveTextContent("PRACTICE");
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "NO IDEA #2" })).toBeInTheDocument();
+    expect(screen.getByText("NO IDEA / EVENT")).toBeInTheDocument();
+    expect(screen.getByText("17 LATONA RD")).toBeInTheDocument();
+    expect(screen.getByText("LONDON SE15 6RX")).toBeInTheDocument();
+    expect(screen.getByText("AMBIENT / EXPERIMENTAL")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "VIEW ON RESIDENT ADVISOR" })).toHaveAttribute("href", "https://ra.co/events/2432167");
+    expect(screen.getByAltText("Shen Ao performing at No Idea #2 at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
+    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(screen.getAllByAltText(/No Idea #2/)).toHaveLength(9);
+    expect(screen.queryByText(/photography/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/18:30|19:00|7PM/)).not.toBeInTheDocument();
+  });
+
+  it("cross-references No Idea #2 from home, practice, and live without making it a top-level live project", () => {
+    render(<App initialPath="/" />);
+
+    expect(screen.getByText("NO IDEA #2")).toBeInTheDocument();
+    expect(screen.getByText("SHAI SPACE / LONDON")).toBeInTheDocument();
+    expect(screen.getByAltText("Shen Ao performing at No Idea #2 at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
+    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+
+    cleanup();
+    render(<App initialPath="/practice" />);
+    expect(screen.getByText("LATEST DOCUMENTED EVENT")).toBeInTheDocument();
+    expect(screen.getByText("NO IDEA #2 / 23 MAY 2026")).toBeInTheDocument();
+    expect(screen.getByAltText("No Idea #2 event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+
+    cleanup();
+    render(<App initialPath="/live" />);
+    expect(screen.getByText("NO IDEA #2")).toBeInTheDocument();
+    expect(screen.getByText("ORGANISER + PERFORMER")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "VIEW EVENT" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 1, name: "NO IDEA #2" })).not.toBeInTheDocument();
   });
 });

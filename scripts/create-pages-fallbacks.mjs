@@ -17,6 +17,7 @@ const routes = [
   "work/fancy-a-bite",
   "work/two-dreadful-children-unipre",
   "work/no-idea",
+  "practice/no-idea/2026-05-23",
   "work/openband-openscore",
   "work/untitled-land",
   "work/paradise-dream-2",

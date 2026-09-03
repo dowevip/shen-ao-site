@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { archiveFilters, getProject, projects, selectedWorks, type Project } from "./content/projects";
+import { getNoIdeaEvent, latestNoIdeaEvent, noIdeaEvents, type NoIdeaEvent } from "./content/noIdeaEvents";
 import { aboutPressItems, epkPressItems, homePressItems, verifiedPressItems, type PressItem } from "./content/press";
 import "./styles.css";
 
@@ -57,6 +58,10 @@ export default function App({ initialPath }: AppProps) {
     <MusicReleasePage slug="bug-party" navigate={navigate} />
   ) : path.startsWith("/work/role-model") ? (
     <RoleModelPage navigate={navigate} />
+  ) : path.startsWith("/work/no-idea") ? (
+    <NoIdeaPage navigate={navigate} />
+  ) : path.startsWith("/practice/no-idea/") ? (
+    <NoIdeaEventPage slug={path.replace(/^\/practice\/no-idea\//, "").split("/")[0]} navigate={navigate} />
   ) : path.startsWith("/work/") ? (
     <ProjectDetailPage slug={path.replace(/^\/work\//, "").split("/")[0]} navigate={navigate} />
   ) : path.startsWith("/work") ? (
@@ -64,7 +69,7 @@ export default function App({ initialPath }: AppProps) {
   ) : path.startsWith("/music") ? (
     <MusicPage navigate={navigate} />
   ) : path.startsWith("/live") ? (
-    <LivePage />
+    <LivePage navigate={navigate} />
   ) : path.startsWith("/practice") ? (
     <PracticePage navigate={navigate} />
   ) : path.startsWith("/press-radio") ? (
@@ -248,7 +253,8 @@ function MusicPage({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
-function LivePage() {
+function LivePage({ navigate }: { navigate: (path: string) => void }) {
+  const event = latestNoIdeaEvent;
   return (
     <main className="route-page live-page">
       <PageAccentMarks variant="live" />
@@ -257,7 +263,14 @@ function LivePage() {
       </PageIntro>
       <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "DJ SETS", "COLLABORATIVE PERFORMANCE"]} />
       <section className="live-gallery">
-        <MediaPlaceholder title="LIVE" label="ADDITIONAL MEDIA" variant="landscape" />
+        <article className="live-event-reference">
+          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+          <div>
+            <h2>{event.edition.toUpperCase()}</h2>
+            <MetaLines lines={[event.displayDate, `${event.venue} / ${event.city}`, event.roles.join(" + ")]} />
+            <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT</button>
+          </div>
+        </article>
         <MediaPlaceholder title="LIVE" label="PROJECT IMAGE" variant="portrait" />
         <MediaPlaceholder title="LIVE" label="ADDITIONAL MEDIA" variant="square" />
         <MediaPlaceholder title="LIVE" label="MEDIA PLACEHOLDER" variant="cinematic" />
@@ -269,6 +282,7 @@ function LivePage() {
 function PracticePage({ navigate }: { navigate: (path: string) => void }) {
   const noIdea = getProject("no-idea")!;
   const openband = getProject("openband-openscore")!;
+  const event = latestNoIdeaEvent;
   return (
     <main className="route-page practice-page">
       <PageAccentMarks variant="practice" />
@@ -276,7 +290,7 @@ function PracticePage({ navigate }: { navigate: (path: string) => void }) {
         Music-making and event-making occupy different roles in Shen Ao's practice. One grows from accumulated learning; the other from lived experience, listening and making things together.
       </PageIntro>
       <section className="practice-feature-grid">
-        <PracticeFeature project={noIdea} placeholder="NO IDEA / EVENT OR RADIO MATERIAL" onOpen={() => navigate("/work/no-idea")} />
+        <PracticeFeature project={noIdea} event={event} onOpen={() => navigate("/work/no-idea")} />
         <PracticeFeature project={openband} placeholder="OPENBAND / WORKSHOP MATERIAL" onOpen={() => navigate("/work/openband-openscore")} />
       </section>
       <section className="note-band low-key">
@@ -492,6 +506,117 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
+function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
+  const project = getProject("no-idea")!;
+  const event = latestNoIdeaEvent;
+  return (
+    <ProjectShell kicker="PRACTICE / EVENTS + RADIO" title="NO IDEA" project={project}>
+      <section className="no-idea-project-intro">
+        <div>
+          <p className="identity">EVENTS / RADIO</p>
+          <p>{project.description}</p>
+          <div className="link-row">
+            <ExternalLink href={event.externalLinks.noIdeaRadio}>NO IDEA RADIO</ExternalLink>
+            <ExternalLink href={event.externalLinks.residentAdvisorPromoter}>RESIDENT ADVISOR</ExternalLink>
+          </div>
+        </div>
+        <figure className="no-idea-hero-figure">
+          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+        </figure>
+      </section>
+
+      <section className="no-idea-events">
+        <div className="section-kicker">SELECTED EVENTS</div>
+        {noIdeaEvents.map((eventItem) => (
+          <article className="no-idea-event-card" key={eventItem.slug}>
+            <figure className="no-idea-event-photo">
+              <img src={assetUrl(eventItem.heroImage)} alt="No Idea #2 event archive photograph." />
+            </figure>
+            <div className="no-idea-event-copy">
+              <h2>{eventItem.edition.toUpperCase()}</h2>
+              <MetaLines lines={[eventItem.displayDate, eventItem.venue, `${eventItem.room} / ${eventItem.city}`]} />
+              <InfoItem label="SHEN AO ROLE" value={eventItem.roles.join(" + ").toUpperCase()} />
+              <div className="event-lineup">
+                <h3>LINEUP</h3>
+                {eventItem.lineup.map((artist) => <p key={artist}>{artist}</p>)}
+              </div>
+              <div className="link-row">
+                <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${eventItem.slug}`)}>VIEW EVENT</button>
+                <ExternalLink href={eventItem.externalLinks.residentAdvisor}>RA EVENT</ExternalLink>
+              </div>
+            </div>
+            <figure className="no-idea-event-poster">
+              <img src={assetUrl(eventItem.posterImage)} alt="No Idea #2 event poster." />
+            </figure>
+          </article>
+        ))}
+      </section>
+      <NextProject title="OPENBAND / OPENSCORE" onClick={() => navigate("/work/openband-openscore")} />
+    </ProjectShell>
+  );
+}
+
+function NoIdeaEventPage({ slug, navigate }: { slug: string; navigate: (path: string) => void }) {
+  const event = getNoIdeaEvent(slug);
+  if (!event) {
+    return (
+      <main className="project-page project-page-no-idea-event">
+        <PageIntro kicker="NO IDEA / EVENT" title="EVENT NOT FOUND">The requested No Idea event route is not available.</PageIntro>
+      </main>
+    );
+  }
+
+  return (
+    <main className="project-page no-idea-event-page">
+      <PageAccentMarks variant="project" />
+      <section className="project-hero no-idea-event-hero">
+        <div className="section-kicker">NO IDEA / EVENT</div>
+        <h1>{event.edition.toUpperCase()}</h1>
+        <div className="event-hero-meta">
+          <MetaLines lines={[
+            event.displayDate,
+            event.venue,
+            event.room,
+            event.address,
+            `${event.city} ${event.postcode}`,
+            "ROLE",
+            event.roles.join(" + "),
+            event.genres.join(" / ")
+          ]} />
+          <ExternalLink href={event.externalLinks.residentAdvisor}>VIEW ON RESIDENT ADVISOR</ExternalLink>
+        </div>
+      </section>
+
+      <figure className="event-main-photo">
+        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+      </figure>
+
+      <section className="event-poster-section">
+        <figure>
+          <img src={assetUrl(event.posterImage)} alt="No Idea #2 event poster." />
+        </figure>
+        <div>
+          <div className="section-kicker">EVENT POSTER</div>
+          <div className="event-lineup">
+            <h2>LINEUP</h2>
+            {event.lineup.map((artist) => <p key={artist}>{artist}</p>)}
+          </div>
+          <MetaLines lines={[event.displayDate, `${event.venue} / ${event.room}`, event.city]} />
+        </div>
+      </section>
+
+      <section className="no-idea-event-gallery" aria-label="No Idea #2 image gallery">
+        {event.galleryImages.map((image, index) => (
+          <figure className={`no-idea-gallery-item no-idea-gallery-item-${index + 1}`} key={image.src}>
+            <img src={assetUrl(image.src)} alt={image.alt} />
+          </figure>
+        ))}
+      </section>
+      <NextProject title="NO IDEA" onClick={() => navigate("/work/no-idea")} />
+    </main>
+  );
+}
+
 function ProjectShell({ kicker, title, project, children }: { kicker: string; title: ReactNode; project: Project; children: ReactNode }) {
   return (
     <main className={`project-page project-page-${project.slug}`}>
@@ -569,6 +694,7 @@ function AboutPractice({ navigate }: { navigate: (path: string) => void }) {
 }
 
 function LivePreview({ navigate }: { navigate: (path: string) => void }) {
+  const event = latestNoIdeaEvent;
   return (
     <section className="live-preview flow-section">
       <div>
@@ -577,7 +703,14 @@ function LivePreview({ navigate }: { navigate: (path: string) => void }) {
         <p>A recording captures only one aspect of a performance. The live work is different every time.</p>
       </div>
       <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "PERFORMANCE", "DJ SETS"]} />
-      <MediaPlaceholder title="LIVE" label="ADDITIONAL MEDIA" variant="cinematic" />
+      <article className="home-live-event">
+        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at No Idea #2 at Shai Space, London." />
+        <div>
+          <h3>{event.edition.toUpperCase()}</h3>
+          <MetaLines lines={[event.displayDate, `${event.venue} / ${event.city}`, event.roles.join(" + ")]} />
+          <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT</button>
+        </div>
+      </article>
       <button className="text-arrow" onClick={() => navigate("/live")}>EXPLORE LIVE</button>
     </section>
   );
@@ -589,9 +722,19 @@ function PracticeProjects({ navigate }: { navigate: (path: string) => void }) {
     <section className="practice-projects">
       {practice.map((project) => (
         <article key={project.slug}>
-          <MediaPlaceholder title={project.title.toUpperCase()} label={project.slug === "no-idea" ? "EVENT OR RADIO MATERIAL" : "WORKSHOP MATERIAL"} variant="landscape" />
+          {project.slug === "no-idea" ? (
+            <img className="practice-poster-preview" src={assetUrl(latestNoIdeaEvent.posterImage)} alt="No Idea #2 event poster." />
+          ) : (
+            <MediaPlaceholder title={project.title.toUpperCase()} label="WORKSHOP MATERIAL" variant="landscape" />
+          )}
           <h2>{project.title.toUpperCase()}</h2>
           <p>{project.description}</p>
+          {project.slug === "no-idea" && (
+            <div className="latest-event-note">
+              <span>LATEST DOCUMENTED EVENT</span>
+              <strong>{latestNoIdeaEvent.edition.toUpperCase()} / {latestNoIdeaEvent.displayDate}</strong>
+            </div>
+          )}
           <div className="link-row">
             {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
             <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
@@ -669,16 +812,26 @@ function MediaPlaceholder({ title, label, variant = "landscape" }: { title: stri
   );
 }
 
-function PracticeFeature({ project, placeholder, onOpen }: { project: Project; placeholder: string; onOpen: () => void }) {
+function PracticeFeature({ project, placeholder, event, onOpen }: { project: Project; placeholder?: string; event?: NoIdeaEvent; onOpen: () => void }) {
   return (
     <article className="practice-feature">
-      <MediaPlaceholder title={project.title.toUpperCase()} label={placeholder} variant="landscape" />
+      {event ? (
+        <img className="practice-feature-poster" src={assetUrl(event.posterImage)} alt="No Idea #2 event poster." />
+      ) : (
+        <MediaPlaceholder title={project.title.toUpperCase()} label={placeholder ?? "MEDIA PLACEHOLDER"} variant="landscape" />
+      )}
       <div>
         <h2>{project.title}</h2>
-        <p>{project.description}</p>
+        <p>{event ? "Independent ambient / experimental events and online radio." : project.description}</p>
+        {event && (
+          <div className="latest-event-note">
+            <span>LATEST DOCUMENTED EVENT</span>
+            <strong>{event.edition.toUpperCase()} / {event.displayDate}</strong>
+          </div>
+        )}
         <div className="link-row">
           {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
-          <button className="text-arrow" onClick={onOpen}>VIEW PROJECT</button>
+          <button className="text-arrow" onClick={onOpen}>{event ? "VIEW NO IDEA" : "VIEW PROJECT"}</button>
         </div>
       </div>
     </article>

@@ -117,15 +117,22 @@ export const projects: Project[] = [
     title: "No Idea",
     category: "Curation",
     subtype: "Events / Radio",
-    description: "Independent music events and online radio.",
+    description: "An independent ambient / experimental event and online-radio practice focused on creating a listening-oriented space. The work includes programming, budgeting, technical production and the coordination of live events.",
     externalLinks: [
-      { label: "Baihui", url: "https://baihui.live/hosts/no-idea/en/" },
+      { label: "No Idea Radio", url: "https://baihui.live/hosts/no-idea/en/" },
       { label: "Resident Advisor", url: "https://ra.co/promoters/183279" }
+    ],
+    artwork: "/assets/no-idea/2026-05-23/poster.webp",
+    images: [
+      {
+        src: "/assets/no-idea/2026-05-23/hero.webp",
+        alt: "Shen Ao performing at No Idea #2 at Shai Space, London."
+      }
     ],
     featured: "practice",
     selectedOrder: 6,
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "openband-openscore",

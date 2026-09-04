@@ -1,6 +1,21 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { archiveFilters, getProject, projects, selectedWorks, type Project } from "./content/projects";
+import {
+  archiveFilters,
+  archiveProjects,
+  featuredMusicReleases,
+  getProject,
+  kitRecordsReleaseLinks,
+  kitRecordsReleaseNote,
+  musicPlatformLinks,
+  otherMusicReleases,
+  projects,
+  scoringMovingImageProjects,
+  selectedWorks,
+  type Project
+} from "./content/projects";
 import { getNoIdeaEvent, latestNoIdeaEvent, noIdeaEvents, type NoIdeaEvent } from "./content/noIdeaEvents";
+import { djPosterArchive, earlierPerformances, livePlatformLinks, selectedLiveEvents, type DjPosterArchiveItem, type LiveEvent, type LiveMedia } from "./content/liveEvents";
+import { noIdeaProject, openbandProject, practiceProjects, type PracticeProject, type PosterArchiveSlot, type RadioArchiveSlot, type WorkshopEntry } from "./content/practiceProjects";
 import { aboutPressItems, epkPressItems, homePressItems, verifiedPressItems, type PressItem } from "./content/press";
 import "./styles.css";
 
@@ -60,6 +75,8 @@ export default function App({ initialPath }: AppProps) {
     <RoleModelPage navigate={navigate} />
   ) : path.startsWith("/work/no-idea") ? (
     <NoIdeaPage navigate={navigate} />
+  ) : path.startsWith("/work/openband-openscore") ? (
+    <OpenbandPage navigate={navigate} />
   ) : path.startsWith("/practice/no-idea/") ? (
     <NoIdeaEventPage slug={path.replace(/^\/practice\/no-idea\//, "").split("/")[0]} navigate={navigate} />
   ) : path.startsWith("/work/") ? (
@@ -194,32 +211,50 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
 
 function WorkPage({ navigate }: { navigate: (path: string) => void }) {
   const [filter, setFilter] = useState<(typeof archiveFilters)[number]>("ALL");
-  const rows = useMemo(() => projects.filter((project) => filter === "ALL" || toFilter(project) === filter), [filter]);
+  const rows = useMemo(
+    () => archiveProjects.filter((project) => project.visibleInArchive !== false && (filter === "ALL" || toFilter(project) === filter)),
+    [filter]
+  );
 
   return (
     <main className="work-page">
       <PageAccentMarks variant="work" />
       <section className="work-intro">
-        <div className="section-kicker">WORK / SELECTED</div>
+        <div className="section-kicker">WORK / INDEX</div>
         <h1>WORK</h1>
-        <p>Selected Works</p>
+        <p>Selected works and professional projects across releases, moving image, theatre, broadcast and practice.</p>
       </section>
-      <section className="selected-grid editorial-works" data-testid="selected-works">
-        {selectedWorks.map((project, index) => (
-          <article className={`selected-work selected-work-${index + 1} ${selectedLayout(project.slug)}`} data-testid={`selected-work-${project.slug}`} key={project.slug}>
-            {showSelectedMedia(project.slug) && <MediaVisual project={project} />}
-            <div>
-              <h2>{project.title}</h2>
-              <MetaLines lines={[project.year, project.category, project.subtype]} />
-              {(project.slug === "cyberspace" || project.slug === "bug-party" || project.slug === "role-model") && (
+      <section className="work-selected-section">
+        <div className="section-kicker">PRIMARY PROJECTS</div>
+        <h2>SELECTED WORK</h2>
+        <div className="selected-grid editorial-works" data-testid="selected-works">
+          {selectedWorks.map((project, index) => (
+            <article className={`selected-work selected-work-${index + 1} selected-work-${project.slug} ${selectedLayout(project.slug)}`} data-testid={`selected-work-${project.slug}`} key={project.slug}>
+              <MediaVisual project={project} />
+              <div>
+                <h3>{project.title}</h3>
+                <MetaLines lines={[project.year, project.workRoleLabel, project.label, project.category, project.subtype]} />
                 <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
-              )}
-              {project.externalLinks?.[0] && project.slug !== "cyberspace" && project.slug !== "bug-party" && project.slug !== "role-model" && (
-                <ExternalLink href={project.externalLinks[0].url}>OPEN</ExternalLink>
-              )}
-            </div>
-          </article>
-        ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="scoring-section">
+        <div className="section-kicker">SCREEN / STAGE / BROADCAST</div>
+        <h2>SCORING / MOVING IMAGE</h2>
+        <div className="scoring-grid scoring-editorial-grid" data-testid="scoring-moving-image">
+          {scoringMovingImageProjects.map((project) => (
+            <article className="scoring-work" data-testid={`scoring-work-${project.slug}`} key={project.slug}>
+              <MediaVisual project={project} />
+              <div>
+                <h3>{project.title}</h3>
+                <MetaLines lines={[project.year, project.workRoleLabel]} />
+                <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
       <ArchiveTable filter={filter} setFilter={setFilter} rows={rows} />
     </main>
@@ -227,34 +262,83 @@ function WorkPage({ navigate }: { navigate: (path: string) => void }) {
 }
 
 function MusicPage({ navigate }: { navigate: (path: string) => void }) {
-  const musicProjects = projects.filter((project) => project.category === "Music");
   return (
     <main className="route-page music-page">
       <PageAccentMarks variant="music" />
       <PageIntro kicker="MUSIC / RELEASES" title="MUSIC">
         Electronic music, composition and production shaped through improvisation, unconventional harmony and the environments around him.
       </PageIntro>
-      <section className="release-list">
-        {musicProjects.map((project) => (
-          <article className={`release-row release-row-${project.slug}`} key={project.slug}>
-            {project.artwork ? <img className="release-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} /> : <MediaPlaceholder title={project.title} label="ALBUM ARTWORK" variant="square" />}
-            <div>
-              <h2>{project.title}</h2>
-              <MetaLines lines={[project.year, project.label, project.subtype]} />
-              <div className="link-row">
-                {project.externalLinks?.[0] && <ExternalLink href={project.externalLinks[0].url}>LISTEN</ExternalLink>}
-                <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
+      <section className="music-release-section music-featured-section">
+        <div className="section-kicker">FEATURED RELEASES</div>
+        <h2>FEATURED RELEASES</h2>
+        <div className="music-featured-grid">
+          {featuredMusicReleases.map((project) => (
+            <article className={`music-featured-release music-release-${project.slug}`} key={project.slug}>
+              <ReleaseArtwork project={project} />
+              <div className="music-release-copy">
+                <h3>{(project.displayTitle ?? project.title).toUpperCase()}</h3>
+                <MetaLines lines={[project.year, project.label, project.subtype]} />
+                <div className="link-row">
+                  {project.externalLinks?.map((link) => (
+                    <ExternalLink key={link.url} href={link.url}>{`${link.label.toUpperCase()} ↗`}</ExternalLink>
+                  ))}
+                  <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+          ))}
+        </div>
+        <article className="kit-records-note">
+          <div className="section-kicker">2026 / KIT RECORDS</div>
+          <p>{kitRecordsReleaseNote}</p>
+          <div className="music-note-links">
+            {kitRecordsReleaseLinks.map((link) => (
+              <ExternalLink key={link.url} href={link.url}>{`${link.label} ↗`}</ExternalLink>
+            ))}
+          </div>
+        </article>
+      </section>
+      <section className="music-release-section other-release-section">
+        <div className="section-kicker">OTHER RELEASES</div>
+        <h2>OTHER RELEASES</h2>
+        <div className="other-release-grid">
+          {otherMusicReleases.map((project) => (
+            <article className={`other-release-card music-release-${project.slug}`} key={project.slug}>
+              <ReleaseArtwork project={project} />
+              <div className="music-release-copy">
+                <h3>{project.displayTitle ?? project.title}</h3>
+                <MetaLines lines={[project.year, project.label, project.subtype]} />
+                <div className="link-row">
+                  {project.externalLinks?.map((link) => (
+                    <ExternalLink key={link.url} href={link.url}>{`${link.label.toUpperCase()} ↗`}</ExternalLink>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="music-platform-row" aria-label="Music platforms">
+        {musicPlatformLinks.map((link) => (
+          <ExternalLink key={link.url} href={link.url} className="music-platform-link">{link.label}</ExternalLink>
         ))}
       </section>
     </main>
   );
 }
 
+function ReleaseArtwork({ project }: { project: Project }) {
+  const title = project.displayTitle ?? project.title;
+  return project.artwork ? (
+    <img className="release-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />
+  ) : (
+    <MediaPlaceholder title={title} label="ALBUM ARTWORK" variant="square" />
+  );
+}
+
 function LivePage({ navigate }: { navigate: (path: string) => void }) {
   const event = latestNoIdeaEvent;
+  const earlierPerformance = earlierPerformances[0];
   return (
     <main className="route-page live-page">
       <PageAccentMarks variant="live" />
@@ -262,40 +346,102 @@ function LivePage({ navigate }: { navigate: (path: string) => void }) {
         A recording captures only one aspect of a performance. The live work is different every time.
       </PageIntro>
       <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "DJ SETS", "COLLABORATIVE PERFORMANCE"]} />
-      <section className="live-gallery">
-        <article className="live-event-reference">
-          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
+      <section className="selected-live-section">
+        <div className="section-kicker">SELECTED PERFORMANCES / 2026</div>
+        <h2>SELECTED PERFORMANCES / 2026</h2>
+        <div className="selected-live-list">
+          {selectedLiveEvents.map((liveEvent) => <SelectedLiveEvent event={liveEvent} key={liveEvent.id} />)}
+        </div>
+      </section>
+      <section className="dj-teendrum-section">
+        <div className="section-kicker">DJ / TEENDRUM</div>
+        <h2>DJ / TEENDRUM</h2>
+        <div className="dj-teendrum-copy">
+          <MetaLines lines={["DJ", "TEENDRUM", "ARCHIVE"]} />
+          <div className="link-row">
+            {livePlatformLinks.map((link) => <ExternalLink key={link.url} href={link.url}>{`${link.label} ↗`}</ExternalLink>)}
+          </div>
+        </div>
+        <section className="dj-poster-archive">
+          <h3>DJ POSTER ARCHIVE</h3>
           <div>
-            <h2>NO IDEA — SHAI SPACE</h2>
-            <MetaLines lines={[event.displayDate, `${event.venue} / ${event.city}`, event.roles.join(" + ")]} />
-            <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT</button>
+            {djPosterArchive.map((poster) => <DjPosterSlot poster={poster} key={poster.id} />)}
+          </div>
+        </section>
+      </section>
+      <section className="related-practice-reference">
+        <div className="section-kicker">RELATED PRACTICE</div>
+        <h2>LIVE WITH NO IDEA</h2>
+        <MetaLines lines={[`${event.displayDate} · ${event.venue} · ${event.city}`, event.roles.join(" + ")]} />
+        <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT →</button>
+      </section>
+      <section className="earlier-performance-section">
+        <div className="section-kicker">EARLIER PERFORMANCE</div>
+        <h2>EARLIER PERFORMANCE</h2>
+        <article className="earlier-performance">
+          <LiveMediaSlot media={earlierPerformance.livePhoto} label="LIVE PHOTO" title={earlierPerformance.title ?? "Earlier performance"} kind="photo" />
+          <div>
+            <MetaLines lines={[earlierPerformance.year]} />
+            <h3>{earlierPerformance.title?.toUpperCase()}</h3>
+            <p>{earlierPerformance.venue.toUpperCase()}</p>
+            {earlierPerformance.localVenueName && <p className="secondary-language">{earlierPerformance.localVenueName}</p>}
+            {earlierPerformance.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{`${link.label.toUpperCase()} →`}</ExternalLink>)}
           </div>
         </article>
-        <MediaPlaceholder title="LIVE" label="PROJECT IMAGE" variant="portrait" />
-        <MediaPlaceholder title="LIVE" label="ADDITIONAL MEDIA" variant="square" />
-        <MediaPlaceholder title="LIVE" label="MEDIA PLACEHOLDER" variant="cinematic" />
       </section>
     </main>
   );
 }
 
+function SelectedLiveEvent({ event }: { event: LiveEvent }) {
+  return (
+    <article className="selected-live-event">
+      <div className="selected-live-copy">
+        <p className="live-date">{event.displayDate}</p>
+        <MetaLines lines={[`${event.venue} / ${event.city}`, event.billing]} />
+        {event.localVenueName && <p className="secondary-language">{event.localVenueName}</p>}
+      </div>
+      <div className="selected-live-media">
+        <LiveMediaSlot media={event.livePhoto} label="LIVE PHOTO" title={event.displayDate ?? event.venue} kind="photo" />
+        <LiveMediaSlot media={event.poster} label="EVENT POSTER" title={event.displayDate ?? event.venue} kind="poster" />
+      </div>
+    </article>
+  );
+}
+
+function LiveMediaSlot({ media, label, title, kind }: { media?: LiveMedia; label: string; title: string; kind: "photo" | "poster" }) {
+  if (media?.path) {
+    return <img className={`live-media live-media-${kind}`} src={assetUrl(media.path)} alt={`${title} ${label.toLowerCase()}`} />;
+  }
+
+  return (
+    <div className={`live-media-slot live-media-slot-${kind}`}>
+      <MediaPlaceholder title={title} label={label} variant={kind === "photo" ? "landscape" : "portrait"} />
+    </div>
+  );
+}
+
+function DjPosterSlot({ poster }: { poster: DjPosterArchiveItem }) {
+  return poster.path ? (
+    <img className="live-media live-media-poster" src={assetUrl(poster.path)} alt={`${poster.title} poster`} />
+  ) : (
+    <div className="live-media-slot live-media-slot-poster">
+      <MediaPlaceholder title={poster.title} label="EVENT POSTER" variant="portrait" />
+    </div>
+  );
+}
+
 function PracticePage({ navigate }: { navigate: (path: string) => void }) {
-  const noIdea = getProject("no-idea")!;
-  const openband = getProject("openband-openscore")!;
-  const event = latestNoIdeaEvent;
   return (
     <main className="route-page practice-page">
       <PageAccentMarks variant="practice" />
-      <PageIntro kicker="PRACTICE / EVENTS + RADIO" title="PRACTICE">
+      <PageIntro kicker="PRACTICE / EVENTS + COMMUNITY" title="PRACTICE">
         Music-making and event-making occupy different roles in Shen Ao's practice. One grows from accumulated learning; the other from lived experience, listening and making things together.
       </PageIntro>
-      <section className="practice-feature-grid">
-        <PracticeFeature project={noIdea} event={event} onOpen={() => navigate("/work/no-idea")} />
-        <PracticeFeature project={openband} placeholder="OPENBAND / WORKSHOP MATERIAL" onOpen={() => navigate("/work/openband-openscore")} />
-      </section>
-      <section className="note-band low-key">
-        <h2>TUNNEL</h2>
-        <p>Techno label / club practice involving artist coordination, technical requirements, editorial copy and resident / guest DJ activity.</p>
+      <section className="practice-editorial-list">
+        {practiceProjects.map((project) => (
+          <PracticeEditorialEntry project={project} onOpen={() => navigate(`/work/${project.slug}`)} key={project.slug} />
+        ))}
       </section>
     </main>
   );
@@ -474,13 +620,17 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
           <figcaption>{project.photographyCredit}</figcaption>
         </figure>
         <div className="project-meta">
-          <MetaLines lines={[project.year, "FILM", "DIRECTOR", "HONGXUAN WANG"]} />
-          <ExternalLink href={project.externalLinks![0].url}>VIEW PROJECT</ExternalLink>
+          <p>{project.intro}</p>
+          <MetaLines lines={[project.year, "FILM", "SCORE / MIX"]} />
+          <div className="mini-meta"><span>DIRECTOR</span><strong>HONGXUAN WANG</strong></div>
+          <div className="link-row">
+            {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+          </div>
         </div>
       </div>
       <section className="detail-band">
-        <h2>SHEN AO'S ROLE</h2>
-        <ul>{project.role?.map((role) => <li key={role}>{role}</li>)}</ul>
+        <h2>CREATIVE APPROACH</h2>
+        <p>{project.creativeApproach}</p>
       </section>
       <section className="role-model-gallery" aria-label="Role Model image gallery">
         {galleryImages.map((image, index) => (
@@ -502,48 +652,84 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("no-idea")!;
   const event = latestNoIdeaEvent;
   return (
-    <ProjectShell kicker="PRACTICE / EVENTS + RADIO" title="NO IDEA" project={project}>
-      <section className="no-idea-project-intro">
+    <ProjectShell kicker="PRACTICE / EVENTS + RADIO" title={noIdeaProject.title} project={project}>
+      <section className="practice-project-intro no-idea-project-intro">
         <div>
-          <p className="identity">EVENTS / RADIO</p>
-          <p>{project.description}</p>
+          <MetaLines lines={[noIdeaProject.year, noIdeaProject.heading]} />
+          <p>{noIdeaProject.summary}</p>
+          {noIdeaProject.detail && <p className="practice-detail-copy">{noIdeaProject.detail}</p>}
           <div className="link-row">
-            <ExternalLink href={event.externalLinks.noIdeaRadio}>NO IDEA RADIO</ExternalLink>
-            <ExternalLink href={event.externalLinks.residentAdvisorPromoter}>RESIDENT ADVISOR</ExternalLink>
+            {noIdeaProject.links.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
           </div>
+          {noIdeaProject.instagramHandle && <p className="practice-social">{noIdeaProject.instagramHandle}</p>}
         </div>
         <figure className="no-idea-hero-figure">
           <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
         </figure>
       </section>
 
-      <section className="no-idea-events">
-        <div className="section-kicker">SELECTED EVENTS</div>
-        {noIdeaEvents.map((eventItem) => (
-          <article className="no-idea-event-card" key={eventItem.slug}>
-            <figure className="no-idea-event-photo">
-              <img src={assetUrl(eventItem.heroImage)} alt="Live With No Idea event archive photograph." />
-            </figure>
-            <div className="no-idea-event-copy">
-              <h2>{eventItem.edition.toUpperCase()}</h2>
-              <MetaLines lines={[eventItem.displayDate, eventItem.venue, `${eventItem.room} / ${eventItem.city}`]} />
-              <InfoItem label="SHEN AO ROLE" value={eventItem.roles.join(" + ").toUpperCase()} />
-              <div className="event-lineup">
-                <h3>LINEUP</h3>
-                {eventItem.lineup.map((artist) => <p key={artist}>{artist}</p>)}
-              </div>
-              <div className="link-row">
-                <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${eventItem.slug}`)}>VIEW EVENT</button>
-                <ExternalLink href={eventItem.externalLinks.residentAdvisor}>RA EVENT</ExternalLink>
-              </div>
-            </div>
-            <figure className="no-idea-event-poster">
-              <img src={assetUrl(eventItem.posterImage)} alt="Live With No Idea event poster." />
-            </figure>
-          </article>
+      <section className="practice-poster-archive no-idea-events">
+        <div className="section-kicker">LIVE EVENT ARCHIVE</div>
+        <div className="practice-poster-grid">
+          {noIdeaProject.posterArchive?.map((slot) => <NoIdeaPosterSlot slot={slot} navigate={navigate} key={slot.id} />)}
+        </div>
+      </section>
+
+      <section className="practice-radio-archive">
+        <div className="section-kicker">RADIO ARCHIVE</div>
+        <div className="practice-radio-grid">
+          {noIdeaProject.radioArchive?.map((slot) => <RadioArtworkSlot slot={slot} key={slot.id} />)}
+        </div>
+        <ExternalLink href={event.externalLinks.noIdeaRadio}>LISTEN ON BAIHUI ↗</ExternalLink>
+      </section>
+
+      <section className="no-idea-event-gallery" aria-label="Live With No Idea image gallery">
+        {event.galleryImages.map((image, index) => (
+          <figure className={`no-idea-gallery-item no-idea-gallery-item-${index + 1}`} key={image.src}>
+            <img src={assetUrl(image.src)} alt={image.alt} />
+          </figure>
         ))}
       </section>
-      <NextProject title="OPENBAND / OPENSCORE" onClick={() => navigate("/work/openband-openscore")} />
+      <NextProject title="OPENBAND" onClick={() => navigate("/work/openband-openscore")} />
+    </ProjectShell>
+  );
+}
+
+function OpenbandPage({ navigate }: { navigate: (path: string) => void }) {
+  const project = getProject("openband-openscore")!;
+  return (
+    <ProjectShell kicker="PRACTICE / WORKSHOPS" title={openbandProject.title} project={project}>
+      <section className="practice-project-intro openband-project-intro">
+        <div>
+          <MetaLines lines={[openbandProject.year, openbandProject.heading, openbandProject.location]} />
+          <p>{openbandProject.summary}</p>
+          <div className="link-row">
+            {openbandProject.links.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+          </div>
+        </div>
+        <div className="openband-lead-poster">
+          <MediaPlaceholder title="OPENBAND" label="WORKSHOP POSTER" variant="portrait" />
+        </div>
+      </section>
+
+      <section className="practice-poster-archive openband-poster-archive">
+        <div className="section-kicker">MONTHLY WORKSHOP POSTERS</div>
+        <div className="practice-poster-grid">
+          {openbandProject.posterArchive?.map((slot) => <PosterPlaceholderSlot slot={slot} key={slot.id} />)}
+        </div>
+      </section>
+
+      <section className="openband-workshop-list">
+        <div className="section-kicker">LONDON WORKSHOP / ARCHIVE</div>
+        {openbandProject.workshopEntries?.map((entry) => <WorkshopDocumentationEntry entry={entry} key={entry.venue} />)}
+      </section>
+
+      <section className="openband-gallery-grid" aria-label="Openband workshop gallery placeholders">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <MediaPlaceholder title="OPENBAND" label="DOCUMENTATION IMAGE" variant="landscape" key={index} />
+        ))}
+      </section>
+      <NextProject title="NO IDEA" onClick={() => navigate("/work/no-idea")} />
     </ProjectShell>
   );
 }
@@ -648,7 +834,7 @@ function ArchiveTable({ filter, setFilter, rows }: { filter: (typeof archiveFilt
       <div className="archive-table">
         <div className="archive-row archive-head"><span>TITLE</span><span>YEAR</span><span>CATEGORY</span><span>FORMAT</span><span>CONTEXT</span></div>
         {rows.map((project) => (
-          <div className="archive-row" key={project.slug}>
+          <div className="archive-row" data-testid={`archive-row-${project.slug}`} key={project.slug}>
             <span>{project.title.toUpperCase()}</span>
             <span>{project.year ?? ""}</span>
             <span>{project.category.toUpperCase()}</span>
@@ -761,23 +947,51 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
   }
 
   const isPractice = project.slug === "no-idea" || project.slug === "openband-openscore";
+  const [heroSlot, ...gallerySlots] = project.detailMedia ?? [];
   return (
     <ProjectShell kicker={`PROJECT / ${project.category.toUpperCase()}`} title={project.title.toUpperCase()} project={project}>
-      <div className={`project-layout project-layout-loose ${isPractice ? "practice-detail-layout" : ""}`}>
-        {project.artwork ? <img className="project-art album-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} /> : <MediaPlaceholder title={project.title.toUpperCase()} label={project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER"} variant={project.category === "Music" ? "square" : "landscape"} />}
+      <div className={`project-layout project-layout-loose ${isPractice ? "practice-detail-layout" : "structured-detail-layout"}`}>
+        {project.artwork ? (
+          <img className="project-art album-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />
+        ) : (
+          <MediaPlaceholder
+            title={project.title.toUpperCase()}
+            label={heroSlot?.label ?? (project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER")}
+            variant={heroSlot?.variant ?? (project.category === "Music" ? "square" : "landscape")}
+          />
+        )}
         <div className="project-meta">
-          {project.description && <p>{project.description}</p>}
-          <MetaLines lines={[project.year, project.label, project.subtype, project.location]} />
-          {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+          {project.intro ? <p>{project.intro}</p> : project.description && <p>{project.description}</p>}
+          <MetaLines lines={[project.year, project.subtype, project.role?.join(" / "), project.label, project.location]} />
+          <div className="link-row">
+            {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+          </div>
         </div>
       </div>
+      {project.creativeApproach && (
+        <section className="detail-band">
+          <h2>CREATIVE APPROACH</h2>
+          <p>{project.creativeApproach}</p>
+        </section>
+      )}
       {isPractice && (
         <section className="detail-band">
           <h2>RELATED PRACTICE</h2>
           <p>{project.slug === "no-idea" ? "Events, radio, programming, budgeting, technical production and coordination around immersive live experiences." : "Open, non-hierarchical approaches to sound-making with musicians, artists, visual practitioners and local collaborators."}</p>
         </section>
       )}
-      <PlaceholderSequence labels={project.category === "Music" ? ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"] : ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]} />
+      {gallerySlots.length > 0 ? (
+        <section className={`placeholder-sequence detail-media-grid detail-media-${project.slug}`}>
+          {gallerySlots.map((slot, index) => (
+            <MediaPlaceholder key={`${slot.label}-${index}`} title={project.title.toUpperCase()} label={slot.label} variant={slot.variant} />
+          ))}
+        </section>
+      ) : (
+        <PlaceholderSequence labels={project.category === "Music" ? ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"] : ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]} />
+      )}
+      {project.selectedCases && <SelectedCases cases={project.selectedCases} />}
+      {project.relatedTitles && <ArchiveList titles={project.relatedTitles} />}
+      {project.relatedWorks && <RelatedWorks works={project.relatedWorks} />}
       {project.press && <KnownPress press={project.press} />}
       <NextProject title={nextProjectFor(project.slug).title} onClick={() => navigate(nextProjectFor(project.slug).path)} />
     </ProjectShell>
@@ -801,6 +1015,73 @@ function MediaPlaceholder({ title, label, variant = "landscape" }: { title: stri
       <strong>{label}</strong>
       <em>MEDIA SLOT</em>
     </div>
+  );
+}
+
+function PracticeEditorialEntry({ project, onOpen }: { project: PracticeProject; onOpen: () => void }) {
+  const isNoIdea = project.slug === "no-idea";
+  return (
+    <article className={`practice-editorial-entry practice-editorial-${project.slug}`}>
+      <div className="practice-entry-media">
+        {isNoIdea ? (
+          <img className="practice-feature-poster" src={assetUrl(latestNoIdeaEvent.posterImage)} alt="Live With No Idea event poster." />
+        ) : (
+          <MediaPlaceholder title="OPENBAND" label="WORKSHOP POSTER" variant="portrait" />
+        )}
+      </div>
+      <div className="practice-entry-copy">
+        <MetaLines lines={[project.year]} />
+        <p className="practice-entry-secondary">{project.heading}</p>
+        <h2>{project.title}</h2>
+        <p>{isNoIdea ? project.summary : "A Shen Ao-led improvisation workshop series developed at fRUITYSPACE in Beijing, built around collective music-making and open improvisation."}</p>
+        <button className="text-arrow" onClick={onOpen}>{isNoIdea ? "VIEW NO IDEA →" : "VIEW OPENBAND →"}</button>
+      </div>
+    </article>
+  );
+}
+
+function NoIdeaPosterSlot({ slot, navigate }: { slot: PosterArchiveSlot; navigate: (path: string) => void }) {
+  if (slot.image && slot.eventSlug) {
+    return (
+      <article className="practice-poster-slot practice-poster-slot-confirmed">
+        <img src={assetUrl(slot.image)} alt="Live With No Idea event poster." />
+        <div>
+          <h2>{slot.title}</h2>
+          <MetaLines lines={[slot.label, latestNoIdeaEvent.roles.join(" + ")]} />
+          <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${slot.eventSlug}`)}>VIEW EVENT</button>
+        </div>
+      </article>
+    );
+  }
+
+  return <PosterPlaceholderSlot slot={slot} />;
+}
+
+function PosterPlaceholderSlot({ slot }: { slot: PosterArchiveSlot }) {
+  return (
+    <article className="practice-poster-slot">
+      <MediaPlaceholder title={slot.title} label={slot.label} variant="portrait" />
+    </article>
+  );
+}
+
+function RadioArtworkSlot({ slot }: { slot: RadioArchiveSlot }) {
+  return (
+    <article className="practice-radio-slot">
+      <MediaPlaceholder title={slot.title} label={slot.label} variant="square" />
+    </article>
+  );
+}
+
+function WorkshopDocumentationEntry({ entry }: { entry: WorkshopEntry }) {
+  return (
+    <article className="openband-workshop-entry">
+      <div>
+        <h2>{entry.venue}</h2>
+        <MetaLines lines={[entry.label]} />
+      </div>
+      <MediaPlaceholder title="OPENBAND" label="DOCUMENTATION IMAGE" variant="landscape" />
+    </article>
   );
 }
 
@@ -863,6 +1144,52 @@ function KnownPress({ press }: { press: NonNullable<Project["press"]> }) {
     <section className="detail-band">
       <h2>KNOWN PRESS</h2>
       <ul>{press.map((item) => <li key={item.title}>{[item.context, item.title].filter(Boolean).join(" / ")}</li>)}</ul>
+    </section>
+  );
+}
+
+function SelectedCases({ cases }: { cases: NonNullable<Project["selectedCases"]> }) {
+  return (
+    <section className="selected-cases">
+      <h2>SELECTED BROADCAST WORK</h2>
+      <div className="selected-case-grid">
+        {cases.map((item) => (
+          <article className="selected-case" key={item.url}>
+            {item.media && <MediaPlaceholder title="CCTV-13" label={item.media.label} variant={item.media.variant} />}
+            <div>
+              <ExternalLink href={item.url}>{item.title} ↗</ExternalLink>
+              {item.description && <p>{item.description}</p>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ArchiveList({ titles }: { titles: string[] }) {
+  return (
+    <section className="detail-band archive-list-band">
+      <h2>ARCHIVE</h2>
+      <ul>{titles.map((title) => <li key={title}>{title}</li>)}</ul>
+    </section>
+  );
+}
+
+function RelatedWorks({ works }: { works: NonNullable<Project["relatedWorks"]> }) {
+  return (
+    <section className="related-work-section">
+      <div className="section-kicker">RELATED WORK</div>
+      {works.map((work) => (
+        <article className="related-work-entry" key={work.title}>
+          {work.media && <MediaPlaceholder title="MEDIA" label={work.media.label} variant={work.media.variant} />}
+          <div>
+            <h2>{work.title}</h2>
+            <MetaLines lines={[work.year, work.role]} />
+            {work.description && <p>{work.description}</p>}
+          </div>
+        </article>
+      ))}
     </section>
   );
 }

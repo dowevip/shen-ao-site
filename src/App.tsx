@@ -146,27 +146,34 @@ function Header({ active, navigate }: { active: string; navigate: (path: string)
 function HomePage({ navigate }: { navigate: (path: string) => void }) {
   const featuredReleases = [getProject("cyberspace")!, getProject("bug-party")!];
   const roleModel = getProject("role-model")!;
+  const latestLiveEvent = selectedLiveEvents[0];
+  const quietusPress = homePressItems.find((item) => item.id === "quietus-spools-out-july")!;
+  const contactLinks = [
+    musicPlatformLinks.find((link) => link.label === "BANDCAMP")!,
+    musicPlatformLinks.find((link) => link.label === "SOUNDCLOUD")!,
+    livePlatformLinks.find((link) => link.label === "MIXCLOUD")!
+  ];
 
   return (
     <main className="home-page">
       <PageAccentMarks variant="home" />
-      <section className="hero plan-b-hero flow-section">
+      <section className="hero plan-b-hero flow-section" data-testid="home-hero">
         <div className="section-kicker">HOME / HERO</div>
         <div className="hero-copy">
           <h1 className="plan-b-title" data-title="SHEN AO">SHEN AO</h1>
           <p className="identity">COMPOSER / PRODUCER / SOUND ARTIST</p>
-          <p className="short-copy">Electronic music, composition and sound practice across moving image, performance and collaboration.</p>
+          <p className="short-copy">Electronic music, composition and sound practice across moving image, performance and collaborative projects.</p>
           <p className="mono-place">LONDON</p>
         </div>
         <div className="plan-b-hero-marks">
-          <img className="hero-monster hero-monster-primary" src={assetUrl("/assets/plan-b/monster-pink.png")} alt="Hand-drawn Plan B character" />
-          <img className="hero-pixel-play" src={assetUrl("/assets/plan-b/pixel-play.png")} alt="Plan B pixel play marker" />
+          <img className="hero-monster hero-monster-primary" src={assetUrl("/assets/plan-b/monster-pink.png")} alt="Hand-drawn pink character illustration" />
+          <img className="hero-pixel-play" src={assetUrl("/assets/plan-b/pixel-play.png")} alt="Pixel play marker illustration" />
           <img className="hero-doodle-ring" src={assetUrl("/assets/plan-b/doodle-blue-ring.png")} alt="" />
           <span className="hero-bit hero-bit-b">PLAY?</span>
         </div>
       </section>
 
-      <section className="feature feature-music plan-b-music flow-section" data-testid="plan-b-featured-music">
+      <section className="feature feature-music plan-b-music flow-section" data-testid="home-featured-music">
         <div className="section-kicker">FEATURED WORK / MUSIC</div>
         <div className="featured-releases">
           {featuredReleases.map((release, index) => (
@@ -179,34 +186,85 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
               <div className="plan-b-release-copy">
                 {release.slug === "bug-party" && <span className="release-badge">LEFT ON DESK</span>}
                 <h2>{release.title.toUpperCase()}</h2>
-                <MetaLines lines={[release.label, "ALBUM / RELEASE"]} />
-                <ExternalLink className="listen-link" href="https://shenao.bandcamp.com/">LISTEN</ExternalLink>
+                <MetaLines lines={[release.label, "2026"]} />
+                <ExternalLink className="listen-link" href={homeListenLink(release)}>LISTEN</ExternalLink>
                 <button className="text-arrow" onClick={() => navigate(`/work/${release.slug}`)}>VIEW PROJECT</button>
               </div>
             </article>
           ))}
         </div>
+        <button className="home-route-link home-more-music" onClick={() => navigate("/music")}>MORE MUSIC →</button>
       </section>
 
-      <section className="feature feature-film flow-section">
-        <div className="section-kicker">FEATURED WORK / MOVING IMAGE</div>
+      <section className="feature feature-film home-role-model flow-section" data-testid="home-role-model">
+        <div className="section-kicker">SELECTED WORK / MOVING IMAGE</div>
         <div className="feature-text">
           <h2>ROLE MODEL</h2>
-          <MetaLines lines={[roleModel.year, "FILM", "AUDIOVISUAL COMPOSITION / MIX"]} />
-          <div className="mini-meta"><span>DIRECTOR</span><strong>HONGXUAN WANG</strong></div>
-          <p className="photo-credit">{roleModel.photographyCredit}</p>
+          <MetaLines lines={[roleModel.year, "FILM", "SCORE / MIX"]} />
+          <p>A moving-image work with Hongxuan Wang, shaped by a distorted-piano score and an unstable sense of memory.</p>
+          <div className="mini-meta"><span>PHOTO</span><strong>{roleModel.photographyCredit}</strong></div>
           <button className="text-arrow" onClick={() => navigate("/work/role-model")}>VIEW PROJECT</button>
+          <button className="home-route-link" onClick={() => navigate("/work")}>MORE WORK →</button>
         </div>
         <img className="role-model-still role-model-still-home" src={assetUrl(roleModel.images![0].src)} alt={roleModel.images![0].alt} />
       </section>
 
-      <LivePreview navigate={navigate} />
-      <PracticeProjects navigate={navigate} />
-      <AboutPractice navigate={navigate} />
-      <PressRadioPreview navigate={navigate} />
-      <Collaboration />
+      <section className="live-preview home-live-section flow-section" data-testid="home-live">
+        <div>
+          <div className="section-kicker">LIVE</div>
+          <h2>LIVE</h2>
+        </div>
+        <article className="home-live-event">
+          <MediaPlaceholder title="LIVE" label="LIVE PHOTO" variant="landscape" />
+          <div>
+            <h3>{latestLiveEvent.displayDate}</h3>
+            <MetaLines lines={[`${latestLiveEvent.venue} / ${latestLiveEvent.city}`, latestLiveEvent.billing]} />
+            <button className="home-route-link" onClick={() => navigate("/live")}>ALL LIVE →</button>
+          </div>
+        </article>
+      </section>
+
+      <section className="practice-projects home-practice-section" data-testid="home-practice">
+        <article>
+          <img className="practice-poster-preview" src={assetUrl(noIdeaProject.posterArchive![0].image!)} alt="Live With No Idea event poster." />
+          <h2>{noIdeaProject.title}</h2>
+          <MetaLines lines={[noIdeaProject.heading]} />
+        </article>
+        <article>
+          <MediaPlaceholder title={openbandProject.title} label="WORKSHOP MATERIAL" variant="landscape" />
+          <h2>{openbandProject.title}</h2>
+          <MetaLines lines={[openbandProject.heading]} />
+        </article>
+        <button className="home-route-link" onClick={() => navigate("/practice")}>VIEW PRACTICE →</button>
+      </section>
+
+      <section className="press-radio-preview home-press-section" data-testid="home-press">
+        <div className="section-kicker">PRESS</div>
+        <h2>THE QUIETUS / {quietusPress.year}</h2>
+        {quietusPress.quote && <blockquote>“{quietusPress.quote}”</blockquote>}
+        <button className="home-route-link" onClick={() => navigate("/press-radio")}>PRESS / RADIO →</button>
+      </section>
+
+      <section className="collaboration home-about-contact" data-testid="home-about-contact">
+        <h2>ABOUT / CONTACT</h2>
+        <div>
+          <p>London-based composer, producer and sound artist working across electronic music, moving image, live performance and collaborative projects.</p>
+          <div className="home-contact-actions">
+            <button className="home-route-link" onClick={() => navigate("/about")}>ABOUT →</button>
+            <button className="home-route-link" onClick={() => navigate("/epk")}>EPK →</button>
+          </div>
+          <a className="home-email-link" href="mailto:lerezero@gmail.com">lerezero@gmail.com</a>
+          <div className="home-platform-links">
+            {contactLinks.map((link) => <ExternalLink key={link.url} href={link.url} className="music-platform-link">{link.label}</ExternalLink>)}
+          </div>
+        </div>
+      </section>
     </main>
   );
+}
+
+function homeListenLink(project: Project) {
+  return project.externalLinks?.find((link) => link.label === "NetEase Music")?.url ?? project.externalLinks?.[0]?.url ?? "https://shenao.bandcamp.com/";
 }
 
 function WorkPage({ navigate }: { navigate: (path: string) => void }) {
@@ -269,7 +327,7 @@ function MusicPage({ navigate }: { navigate: (path: string) => void }) {
         Electronic music, composition and production shaped through improvisation, unconventional harmony and the environments around him.
       </PageIntro>
       <section className="music-release-section music-featured-section">
-        <div className="section-kicker">FEATURED RELEASES</div>
+        <div className="section-kicker">MUSIC / RELEASES</div>
         <h2>FEATURED RELEASES</h2>
         <div className="music-featured-grid">
           {featuredMusicReleases.map((project) => (
@@ -299,7 +357,7 @@ function MusicPage({ navigate }: { navigate: (path: string) => void }) {
         </article>
       </section>
       <section className="music-release-section other-release-section">
-        <div className="section-kicker">OTHER RELEASES</div>
+        <div className="section-kicker">MUSIC / ARCHIVE</div>
         <h2>OTHER RELEASES</h2>
         <div className="other-release-grid">
           {otherMusicReleases.map((project) => (
@@ -347,14 +405,14 @@ function LivePage({ navigate }: { navigate: (path: string) => void }) {
       </PageIntro>
       <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "DJ SETS", "COLLABORATIVE PERFORMANCE"]} />
       <section className="selected-live-section">
-        <div className="section-kicker">SELECTED PERFORMANCES / 2026</div>
+        <div className="section-kicker">LIVE / 2026</div>
         <h2>SELECTED PERFORMANCES / 2026</h2>
         <div className="selected-live-list">
           {selectedLiveEvents.map((liveEvent) => <SelectedLiveEvent event={liveEvent} key={liveEvent.id} />)}
         </div>
       </section>
       <section className="dj-teendrum-section">
-        <div className="section-kicker">DJ / TEENDRUM</div>
+        <div className="section-kicker">LIVE / DJ</div>
         <h2>DJ / TEENDRUM</h2>
         <div className="dj-teendrum-copy">
           <MetaLines lines={["DJ", "TEENDRUM", "ARCHIVE"]} />
@@ -376,7 +434,7 @@ function LivePage({ navigate }: { navigate: (path: string) => void }) {
         <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT →</button>
       </section>
       <section className="earlier-performance-section">
-        <div className="section-kicker">EARLIER PERFORMANCE</div>
+        <div className="section-kicker">LIVE / ARCHIVE</div>
         <h2>EARLIER PERFORMANCE</h2>
         <article className="earlier-performance">
           <LiveMediaSlot media={earlierPerformance.livePhoto} label="LIVE PHOTO" title={earlierPerformance.title ?? "Earlier performance"} kind="photo" />
@@ -451,20 +509,25 @@ function AboutPage({ navigate }: { navigate: (path: string) => void }) {
   return (
     <main className="route-page about-page">
       <PageAccentMarks variant="about" />
-      <PageIntro kicker="ABOUT / BIO" title="ABOUT">
+      <PageIntro kicker="ABOUT / BIO" title="ABOUT" testId="about-bio">
         Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making. His practice includes independent releases, film and theatre composition, live electronics, improvisation, DJ performance and collaborative projects.
       </PageIntro>
-      <section className="about-layout">
-        <div className="about-copy">
+      <section className="about-layout" data-testid="about-portrait">
+        <div className="about-copy about-short-bio">
+          <p className="identity">COMPOSER / PRODUCER / SOUND ARTIST</p>
           <p>His recent work includes releases with Kit Records and projects spanning moving image, theatre, broadcast and interdisciplinary performance. Alongside his music-making, he has developed independent event, radio and improvisation practices through projects including No Idea and Openband / Openscore.</p>
-          <h2>ARTIST STATEMENT</h2>
-          <p>Keyboard improvisation is central to Shen Ao's way of processing sound. It is a tool through which different musical languages and the environments around him are absorbed, tested and reorganised. Unconventional harmonic movement remains a recurring part of this process.</p>
-          <p>His music is shaped by the environments he moves through. Electronic and minimalist music sit alongside the sound of the city, becoming material that can be processed through improvisation and production rather than treated as separate influences.</p>
-          <p>For Shen, experimentation is a working method rather than a genre. A work often begins with an imagined structure or expectation. During the process, that structure is gradually allowed to loosen, opening the work toward accident, instability and a degree of loss of control.</p>
-          <p>This is also why live performance matters. A recording preserves only one aspect of an event; each performance remains contingent on the room, the performers and the moment.</p>
-          <p>His event practice operates differently from his music-making. Shen describes music production as the accumulation of learning, while organising events grows from lived experience and from the simple pleasure of completing something with other people.</p>
         </div>
         <img className="artist-portrait artist-portrait-about" src={assetUrl("/assets/portrait/shen-ao-childhood.avif")} alt="Childhood portrait of Shen Ao." />
+      </section>
+      <section className="about-statement" data-testid="about-statement">
+        <div className="about-copy">
+          <h2>ARTIST STATEMENT</h2>
+          <p className="statement-lead">Keyboard improvisation is central to Shen Ao's working method. It is where different musical languages, passing environments and unconventional harmonic movement are absorbed, tested and reorganised.</p>
+          <p>Electronic and minimalist music meet the city in his work as material for improvisation and production, rather than as separate references to be explained.</p>
+          <p>For Shen, experimentation is a working method, not a genre. A piece may begin with a clear imagined structure; over time, control loosens into instability, accident and a degree of loss of control.</p>
+          <p>Live performance keeps that instability open. A recording preserves one aspect of an event; each performance is changed by the room, the performers and the moment.</p>
+          <p>Event-making and music-making remain parallel practices: different in origin and function, but connected by listening, collaboration and the pleasure of completing something with other people.</p>
+        </div>
       </section>
       <CvSections />
       <PressSection navigate={navigate} />
@@ -500,19 +563,24 @@ function PressRadioPage() {
 }
 
 function EpkPage({ navigate }: { navigate: (path: string) => void }) {
+  const contactLinks = [
+    musicPlatformLinks.find((link) => link.label === "BANDCAMP")!,
+    musicPlatformLinks.find((link) => link.label === "SOUNDCLOUD")!,
+    livePlatformLinks.find((link) => link.label === "MIXCLOUD")!
+  ];
   const selectedWork = [
     ["CYBERSPACE", "KIT RECORDS / RELEASE", "/work/cyberspace"],
     ["BUG PARTY", "KIT RECORDS / RELEASE", "/work/bug-party"],
     ["ROLE MODEL", "MOVING IMAGE / 2024", "/work/role-model"],
     ["FANCY A BITE?", "THEATRE / 2024", "/work/fancy-a-bite"],
     ["NO IDEA", "EVENTS / RADIO", "/work/no-idea"],
-    ["OPENBAND / OPENSCORE", "INTERDISCIPLINARY IMPROVISATION", "/work/openband-openscore"]
+    ["OPENBAND", "INTERDISCIPLINARY IMPROVISATION", "/work/openband-openscore"]
   ];
 
   return (
     <main className="route-page epk-page">
       <PageAccentMarks variant="epk" />
-      <section className="epk-hero">
+      <section className="epk-hero" data-testid="epk-hero">
         <div>
           <h1>SHEN AO</h1>
           <p>COMPOSER / PRODUCER / SOUND ARTIST</p>
@@ -522,33 +590,26 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
       </section>
 
       <section className="epk-dossier">
-        <article className="epk-main-copy">
+        <article className="epk-main-copy" data-testid="epk-short-bio">
           <h2>SHORT BIO</h2>
           <p>Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making. His practice includes independent releases, film and theatre composition, live electronics, improvisation, DJ performance and collaborative projects.</p>
-
-          <h2>ARTIST STATEMENT</h2>
-          <p>Keyboard improvisation is central to Shen Ao's way of processing sound. It is a tool through which different musical languages and the environments around him are absorbed, tested and reorganised. Unconventional harmonic movement remains a recurring part of this process.</p>
-          <p>His music is shaped by the environments he moves through. Electronic and minimalist music sit alongside the sound of the city, becoming material that can be processed through improvisation and production rather than treated as separate influences.</p>
-          <p>For Shen, experimentation is a working method rather than a genre. A work often begins with an imagined structure or expectation. During the process, that structure is gradually allowed to loosen, opening the work toward accident, instability and a degree of loss of control.</p>
-          <p>This is also why live performance matters. A recording preserves only one aspect of an event; each performance remains contingent on the room, the performers and the moment.</p>
-          <p>His event practice operates differently from his music-making. Shen describes music production as the accumulation of learning, while organising events grows from lived experience and from the simple pleasure of completing something with other people.</p>
+          <p className="epk-statement-brief">His work uses keyboard improvisation, unconventional harmony and electronic/minimalist language as practical methods for shaping sound. In live and collaborative settings, fixed structures are allowed to become unstable and responsive to the room.</p>
         </article>
 
-        <aside className="epk-facts" aria-label="Quick facts">
+        <aside className="epk-facts" aria-label="Quick facts" data-testid="epk-quick-facts">
+          <h2>QUICK FACTS</h2>
           <InfoItem label="BASED IN" value="London" />
           <InfoItem label="PRACTICE" value="Music / Moving Image / Live / Event-making" />
           <InfoItem label="WORKING ACROSS" value="Composition / Production / Improvisation / Performance" />
           <InfoItem label="CONTACT" value="lerezero@gmail.com" />
           <div className="epk-listen">
             <h2>LISTEN</h2>
-            <ExternalLink href="https://shenao.bandcamp.com/">BANDCAMP</ExternalLink>
-            <ExternalLink href="https://soundcloud.com/shen-ao">SOUNDCLOUD</ExternalLink>
-            <ExternalLink href="https://www.mixcloud.com/teendrum/">MIXCLOUD</ExternalLink>
+            {contactLinks.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
           </div>
         </aside>
       </section>
 
-      <section className="epk-selected-work">
+      <section className="epk-selected-work" data-testid="epk-selected-work">
         <h2>SELECTED WORK</h2>
         <div>
           {selectedWork.map(([title, meta, path]) => (
@@ -560,11 +621,15 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
         </div>
       </section>
 
-      <section className="epk-lower-grid">
+      <section className="epk-lower-grid" data-testid="epk-press-radio">
         <article className="epk-press">
           <h2>SELECTED PRESS / RADIO</h2>
           {epkPressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
         </article>
+      </section>
+
+      <section className="epk-cv-grid" data-testid="epk-education-experience">
+        <div className="section-kicker">EDUCATION / PROFESSIONAL EXPERIENCE</div>
         <article>
           <h2>EDUCATION</h2>
           <p><span>2023-2025</span>Goldsmiths, University of London<br />MMus Creative Practice</p>
@@ -578,13 +643,11 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
         </article>
       </section>
 
-      <section className="epk-contact">
+      <section className="epk-contact" data-testid="epk-contact">
         <h2>CONTACT / BOOKINGS / COLLABORATION</h2>
-        <p>lerezero@gmail.com</p>
+        <a href="mailto:lerezero@gmail.com">lerezero@gmail.com</a>
         <div>
-          <ExternalLink href="https://shenao.bandcamp.com/">BANDCAMP</ExternalLink>
-          <ExternalLink href="https://soundcloud.com/shen-ao">SOUNDCLOUD</ExternalLink>
-          <ExternalLink href="https://www.mixcloud.com/teendrum/">MIXCLOUD</ExternalLink>
+          {contactLinks.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
         </div>
       </section>
     </main>
@@ -998,9 +1061,9 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
   );
 }
 
-function PageIntro({ kicker, title, children }: { kicker: string; title: string; children: ReactNode }) {
+function PageIntro({ kicker, title, children, testId }: { kicker: string; title: string; children: ReactNode; testId?: string }) {
   return (
-    <section className="page-intro">
+    <section className="page-intro" data-testid={testId}>
       <div className="section-kicker">{kicker}</div>
       <h1>{title}</h1>
       <p>{children}</p>
@@ -1114,14 +1177,14 @@ function PracticeFeature({ project, placeholder, event, onOpen }: { project: Pro
 function CvSections() {
   return (
     <section className="cv-grid">
-      <div>
+      <div data-testid="about-education">
         <h2>EDUCATION</h2>
         <p><span>2023-2025</span>Goldsmiths, University of London<br />MMus Creative Practice</p>
         <p><span>2018-2022</span>Jazz piano studies with Kong Hongwei</p>
         <p><span>2014-2018</span>Tianjin Conservatory of Music</p>
       </div>
-      <div>
-        <h2>PROFESSIONAL WORK</h2>
+      <div data-testid="about-experience">
+        <h2>PROFESSIONAL EXPERIENCE</h2>
         <p><span>2021.09-2023.04</span>China Television Media / 中视前卫影视传媒<br />Audio Editing / Music Production</p>
         <p>Participated in audio and music production for more than 50 short-form promotional projects for CCTV-13.</p>
       </div>
@@ -1131,7 +1194,7 @@ function CvSections() {
 
 function PressSection({ navigate }: { navigate: (path: string) => void }) {
   return (
-    <section className="press-section">
+    <section className="press-section" data-testid="about-press">
       <h2>SELECTED PRESS</h2>
       {aboutPressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
       <button className="text-arrow" onClick={() => navigate("/press-radio")}>MORE PRESS / RADIO</button>

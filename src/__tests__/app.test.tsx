@@ -5,32 +5,92 @@ import App from "../App";
 afterEach(cleanup);
 
 describe("SHEN AO Round 1 site", () => {
-  it("renders the Plan B home hero and featured music without changing the artist facts", () => {
+  it("renders the curated home landing page without turning it into a full site directory", () => {
     render(<App initialPath="/" />);
 
     expect(screen.getByRole("heading", { name: "SHEN AO" })).toBeInTheDocument();
     expect(screen.getByText("COMPOSER / PRODUCER / SOUND ARTIST")).toBeInTheDocument();
-    expect(screen.getByAltText("Hand-drawn Plan B character")).toHaveAttribute("src", "/assets/plan-b/monster-pink.png");
-    expect(screen.getByAltText("Plan B pixel play marker")).toHaveAttribute("src", "/assets/plan-b/pixel-play.png");
-    expect(screen.getByRole("heading", { name: "CYBERSPACE" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "BUG PARTY" })).toBeInTheDocument();
-    expect(screen.getByAltText("Cyberspace album artwork")).toHaveAttribute("src", "/assets/cyberspace.jpg");
-    expect(screen.getByAltText("Bug Party album artwork")).toHaveAttribute("src", "/assets/bugparty.jpg");
-    expect(screen.getAllByText("KIT RECORDS").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText("ALBUM / RELEASE")).toHaveLength(2);
-    const featuredMusic = within(screen.getByTestId("plan-b-featured-music"));
+    expect(screen.getByText("Electronic music, composition and sound practice across moving image, performance and collaborative projects.")).toBeInTheDocument();
+    expect(within(screen.getByTestId("home-hero")).getByText("LONDON")).toBeInTheDocument();
+    expect(screen.getByAltText("Hand-drawn pink character illustration")).toHaveAttribute("src", "/assets/plan-b/monster-pink.png");
+    expect(screen.getByAltText("Pixel play marker illustration")).toHaveAttribute("src", "/assets/plan-b/pixel-play.png");
+
+    const homeSections = [
+      "home-hero",
+      "home-featured-music",
+      "home-role-model",
+      "home-live",
+      "home-practice",
+      "home-press",
+      "home-about-contact"
+    ].map((id) => screen.getByTestId(id));
+    for (let index = 0; index < homeSections.length - 1; index += 1) {
+      expect(Boolean(homeSections[index].compareDocumentPosition(homeSections[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+    }
+
+    const featuredMusic = within(screen.getByTestId("home-featured-music"));
+    expect(featuredMusic.getByRole("heading", { name: "CYBERSPACE" })).toBeInTheDocument();
+    expect(featuredMusic.getByRole("heading", { name: "BUG PARTY" })).toBeInTheDocument();
+    expect(featuredMusic.getByAltText("Cyberspace album artwork")).toHaveAttribute("src", "/assets/cyberspace.jpg");
+    expect(featuredMusic.getByAltText("Bug Party album artwork")).toHaveAttribute("src", "/assets/bugparty.jpg");
+    expect(featuredMusic.getAllByText("KIT RECORDS")).toHaveLength(2);
+    expect(featuredMusic.getAllByText("2026")).toHaveLength(2);
     expect(featuredMusic.queryByText("MENU ITEM")).not.toBeInTheDocument();
     expect(featuredMusic.getByText("LEFT ON DESK")).toBeInTheDocument();
     expect(featuredMusic.getAllByRole("button", { name: "VIEW PROJECT" })).toHaveLength(2);
     expect(featuredMusic.getAllByRole("link", { name: "LISTEN" })).toHaveLength(2);
-    expect(screen.getByRole("heading", { name: "PRESS / RADIO" })).toBeInTheDocument();
-    expect(screen.getByText("NTS RADIO — TREVOR JACKSON")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "VIEW PRESS / RADIO" })).toBeInTheDocument();
+    expect(featuredMusic.getByRole("button", { name: "MORE MUSIC →" })).toBeInTheDocument();
+
+    const roleModel = within(screen.getByTestId("home-role-model"));
+    expect(roleModel.getByRole("heading", { name: "ROLE MODEL" })).toBeInTheDocument();
+    expect(roleModel.getByAltText("Exhibition view showing a projected close-up from Role Model.")).toHaveAttribute("src", "/assets/role-model/DSC0944_1600px_sRGB.jpg");
+    expect(roleModel.getByText("2024")).toBeInTheDocument();
+    expect(roleModel.getByText("FILM")).toBeInTheDocument();
+    expect(roleModel.getByText("SCORE / MIX")).toBeInTheDocument();
+    expect(roleModel.getByRole("button", { name: "VIEW PROJECT" })).toBeInTheDocument();
+    expect(roleModel.getByRole("button", { name: "MORE WORK →" })).toBeInTheDocument();
+    expect(roleModel.queryByText(/confronting racial discrimination/i)).not.toBeInTheDocument();
+
+    const live = within(screen.getByTestId("home-live"));
+    expect(live.getByText("08 AUG 2026")).toBeInTheDocument();
+    expect(live.getByText("LOOSE.FM / LONDON")).toBeInTheDocument();
+    expect(live.getByText("DUO WITH AVIN NOORBAKHSH")).toBeInTheDocument();
+    expect(live.getByText("LIVE PHOTO")).toBeInTheDocument();
+    expect(live.getByRole("button", { name: "ALL LIVE →" })).toBeInTheDocument();
+    expect(live.queryByText("23 JUL 2026")).not.toBeInTheDocument();
+    expect(live.queryByText("17 JUL 2026")).not.toBeInTheDocument();
+
+    const practice = within(screen.getByTestId("home-practice"));
+    expect(practice.getByRole("heading", { name: "NO IDEA" })).toBeInTheDocument();
+    expect(practice.getByRole("heading", { name: "OPENBAND" })).toBeInTheDocument();
+    expect(practice.getByText("RADIO / LIVE EVENTS")).toBeInTheDocument();
+    expect(practice.getByText("IMPROVISATION WORKSHOPS")).toBeInTheDocument();
+    expect(practice.getByAltText("Live With No Idea event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(practice.getByText("WORKSHOP MATERIAL")).toBeInTheDocument();
+    expect(practice.getByRole("button", { name: "VIEW PRACTICE →" })).toBeInTheDocument();
+    expect(practice.queryByText("RADIO ARCHIVE")).not.toBeInTheDocument();
+
+    const press = within(screen.getByTestId("home-press"));
+    expect(press.getByText("THE QUIETUS / 2026")).toBeInTheDocument();
+    expect(press.getByText("“astounding statements of intent”")).toBeInTheDocument();
+    expect(press.getByRole("button", { name: "PRESS / RADIO →" })).toBeInTheDocument();
+    expect(press.queryByText("NTS RADIO — TREVOR JACKSON")).not.toBeInTheDocument();
+
+    const aboutContact = within(screen.getByTestId("home-about-contact"));
+    expect(aboutContact.getByText(/London-based composer, producer and sound artist/i)).toBeInTheDocument();
+    expect(aboutContact.getByRole("button", { name: "ABOUT →" })).toBeInTheDocument();
+    expect(aboutContact.getByRole("button", { name: "EPK →" })).toBeInTheDocument();
+    expect(aboutContact.getByRole("link", { name: "lerezero@gmail.com" })).toHaveAttribute("href", "mailto:lerezero@gmail.com");
+    expect(aboutContact.getByRole("link", { name: "BANDCAMP" })).toHaveAttribute("href", "https://shenao.bandcamp.com/");
+    expect(aboutContact.getByRole("link", { name: "SOUNDCLOUD" })).toHaveAttribute("href", "https://soundcloud.com/shen-ao/");
+    expect(aboutContact.getByRole("link", { name: "MIXCLOUD" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");
+
     expect(screen.queryByRole("heading", { name: "SELECTED CONTEXTS" })).not.toBeInTheDocument();
     expect(screen.queryByText("CONTEXTS")).not.toBeInTheDocument();
     expect(screen.queryByAltText("Data horizon signal field")).not.toBeInTheDocument();
     expect(screen.queryByText("申奡")).not.toBeInTheDocument();
     expect(screen.queryByAltText(/portrait/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("SOUND AS PROCESS")).not.toBeInTheDocument();
   });
 
   it("renders WORK with selected works, archive, and functional filters", () => {
@@ -188,7 +248,25 @@ describe("SHEN AO Round 1 site", () => {
     cleanup();
     render(<App initialPath="/about" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "ABOUT" })).toBeInTheDocument();
-    expect(screen.getByText("ARTIST STATEMENT")).toBeInTheDocument();
+    expect(screen.getByText("COMPOSER / PRODUCER / SOUND ARTIST")).toBeInTheDocument();
+    const aboutSections = [
+      "about-bio",
+      "about-portrait",
+      "about-statement",
+      "about-education",
+      "about-experience",
+      "about-press"
+    ].map((id) => screen.getByTestId(id));
+    for (let index = 0; index < aboutSections.length - 1; index += 1) {
+      expect(Boolean(aboutSections[index].compareDocumentPosition(aboutSections[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+    }
+    expect(within(screen.getByTestId("about-statement")).getByRole("heading", { name: "ARTIST STATEMENT" })).toBeInTheDocument();
+    expect(screen.getByText(/Keyboard improvisation is central to Shen Ao's working method/i)).toBeInTheDocument();
+    expect(screen.getByText(/unconventional harmonic movement/i)).toBeInTheDocument();
+    expect(screen.getByText(/Electronic and minimalist music meet the city/i)).toBeInTheDocument();
+    expect(screen.getByText(/experimentation is a working method, not a genre/i)).toBeInTheDocument();
+    expect(screen.getByText(/control loosens into instability/i)).toBeInTheDocument();
+    expect(screen.getByText(/event-making and music-making remain parallel practices/i)).toBeInTheDocument();
     expect(screen.getByAltText("Childhood portrait of Shen Ao.")).toHaveAttribute("src", "/assets/portrait/shen-ao-childhood.avif");
     expect(screen.getByText((content) => content.includes("Goldsmiths, University of London"))).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "MORE PRESS / RADIO" })).toBeInTheDocument();
@@ -198,10 +276,39 @@ describe("SHEN AO Round 1 site", () => {
     cleanup();
     render(<App initialPath="/epk" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "SHEN AO" })).toBeInTheDocument();
+    expect(screen.getByText("COMPOSER / PRODUCER / SOUND ARTIST")).toBeInTheDocument();
+    expect(within(screen.getByTestId("epk-hero")).getByText("LONDON")).toBeInTheDocument();
     expect(screen.getByAltText("Childhood portrait of Shen Ao.")).toHaveAttribute("src", "/assets/portrait/shen-ao-childhood.avif");
-    expect(screen.getByText("SHORT BIO")).toBeInTheDocument();
-    expect(screen.getByText("SELECTED PRESS / RADIO")).toBeInTheDocument();
-    expect(screen.getByText("MUITO RADIO")).toBeInTheDocument();
+    const epkSections = [
+      "epk-hero",
+      "epk-short-bio",
+      "epk-quick-facts",
+      "epk-selected-work",
+      "epk-press-radio",
+      "epk-education-experience",
+      "epk-contact"
+    ].map((id) => screen.getByTestId(id));
+    for (let index = 0; index < epkSections.length - 1; index += 1) {
+      expect(Boolean(epkSections[index].compareDocumentPosition(epkSections[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+    }
+    expect(within(screen.getByTestId("epk-short-bio")).getByRole("heading", { name: "SHORT BIO" })).toBeInTheDocument();
+    expect(within(screen.getByTestId("epk-quick-facts")).getByText("QUICK FACTS")).toBeInTheDocument();
+    for (const label of ["BASED IN", "PRACTICE", "WORKING ACROSS", "CONTACT", "LISTEN"]) {
+      expect(within(screen.getByTestId("epk-quick-facts")).getByText(label)).toBeInTheDocument();
+    }
+    for (const title of ["CYBERSPACE", "BUG PARTY", "ROLE MODEL", "FANCY A BITE?", "NO IDEA", "OPENBAND"]) {
+      expect(within(screen.getByTestId("epk-selected-work")).getByRole("button", { name: new RegExp(title) })).toBeInTheDocument();
+    }
+    expect(within(screen.getByTestId("epk-press-radio")).getByText("SELECTED PRESS / RADIO")).toBeInTheDocument();
+    expect(within(screen.getByTestId("epk-press-radio")).getByText("MUITO RADIO")).toBeInTheDocument();
+    expect(within(screen.getByTestId("epk-education-experience")).getByText("EDUCATION / PROFESSIONAL EXPERIENCE")).toBeInTheDocument();
+    expect(within(screen.getByTestId("epk-contact")).getByRole("link", { name: "lerezero@gmail.com" })).toHaveAttribute("href", "mailto:lerezero@gmail.com");
+    expect(within(screen.getByTestId("epk-contact")).getByRole("link", { name: "BANDCAMP" })).toHaveAttribute("href", "https://shenao.bandcamp.com/");
+    expect(within(screen.getByTestId("epk-contact")).getByRole("link", { name: "SOUNDCLOUD" })).toHaveAttribute("href", "https://soundcloud.com/shen-ao/");
+    expect(within(screen.getByTestId("epk-contact")).getByRole("link", { name: "MIXCLOUD" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");
+    expect(screen.queryByRole("heading", { name: "ARTIST STATEMENT" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Keyboard improvisation is central to Shen Ao's way of processing sound/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/His event practice operates differently from his music-making/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/download epk/i)).not.toBeInTheDocument();
   });
 
@@ -308,10 +415,12 @@ describe("SHEN AO Round 1 site", () => {
   it("cross-references No Idea from home, practice, and live without making it a top-level live project", () => {
     render(<App initialPath="/" />);
 
-    expect(screen.getByText("NO IDEA — SHAI SPACE")).toBeInTheDocument();
-    expect(screen.getByText("SHAI SPACE / LONDON")).toBeInTheDocument();
-    expect(screen.getByAltText("Shen Ao performing at Live With No Idea at Shai Space, London.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
-    expect(screen.getByAltText("Live With No Idea event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    const homePractice = within(screen.getByTestId("home-practice"));
+    expect(homePractice.getByRole("heading", { name: "NO IDEA" })).toBeInTheDocument();
+    expect(homePractice.getByText("RADIO / LIVE EVENTS")).toBeInTheDocument();
+    expect(homePractice.getByAltText("Live With No Idea event poster.")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/poster.webp");
+    expect(screen.queryByText("NO IDEA — SHAI SPACE")).not.toBeInTheDocument();
+    expect(screen.queryByAltText("Shen Ao performing at Live With No Idea at Shai Space, London.")).not.toBeInTheDocument();
 
     cleanup();
     render(<App initialPath="/practice" />);

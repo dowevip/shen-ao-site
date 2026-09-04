@@ -21,7 +21,8 @@ const routes = [
   "work/openband-openscore",
   "work/untitled-land",
   "work/paradise-dream-2",
-  "work/clouds-from-underground"
+  "work/clouds-from-underground",
+  "work/cctv-selected-broadcast-work"
 ];
 
 for (const route of routes) {

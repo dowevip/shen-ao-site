@@ -110,15 +110,7 @@ a {
 }
 
 .site-header nav button:nth-child(2)::before {
-  position: absolute;
-  left: -10px;
-  top: 1px;
-  width: 16px;
-  height: 5px;
-  content: "";
-  background: var(--pink);
-  opacity: .9;
-  transform: rotate(-8deg);
+  display: none;
 }
 
 .site-header nav button.active::after,
@@ -1092,6 +1084,49 @@ button.text-arrow::after,
 
 .home-live-event .meta-lines {
   margin: 24px 0 28px;
+}
+
+.home-related-live-section h2 {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.home-live-list {
+  display: grid;
+  margin-top: 26px;
+  border-top: 1px solid #151515;
+}
+
+.home-live-row {
+  display: grid;
+  grid-template-columns: 54px minmax(120px, .24fr) minmax(220px, .56fr) minmax(64px, auto);
+  gap: 20px;
+  align-items: center;
+  border-bottom: 1px solid rgba(21,21,21,.52);
+  padding: 11px 0;
+}
+
+.home-live-row span,
+.home-live-row strong,
+.home-live-row em {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.home-live-row img {
+  display: block;
+  width: 54px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: #fff;
+}
+
+.home-live-row em {
+  justify-self: end;
 }
 
 .stage-media {
@@ -2314,6 +2349,22 @@ button.text-arrow::after,
   margin-top: 34px;
 }
 
+.music-index-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 44px 34px;
+  margin-top: 34px;
+}
+
+.music-index-item {
+  display: grid;
+  grid-template-columns: minmax(150px, .38fr) minmax(0, .62fr);
+  gap: 24px;
+  align-items: end;
+  border-top: 1px solid rgba(21,21,21,.68);
+  padding-top: 20px;
+}
+
 .music-featured-release {
   position: relative;
   display: grid;
@@ -2871,7 +2922,8 @@ button.text-arrow::after,
 .selected-live-section,
 .dj-teendrum-section,
 .related-practice-reference,
-.earlier-performance-section {
+.earlier-performance-section,
+.live-archive-section {
   position: relative;
   margin-top: 66px;
 }
@@ -2879,12 +2931,43 @@ button.text-arrow::after,
 .selected-live-section > h2,
 .dj-teendrum-section > h2,
 .related-practice-reference > h2,
-.earlier-performance-section > h2 {
+.earlier-performance-section > h2,
+.live-archive-section > h2 {
   margin-top: 20px;
   font-family: var(--mono);
   font-size: 18px;
   font-weight: 500;
   letter-spacing: 0;
+}
+
+.live-archive-table {
+  display: grid;
+  margin-top: 34px;
+  border-top: 1px solid #151515;
+}
+
+.live-archive-row {
+  display: grid;
+  grid-template-columns: minmax(120px, .16fr) minmax(210px, .26fr) minmax(240px, .32fr) minmax(150px, .18fr) minmax(72px, .08fr);
+  gap: 18px;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(21,21,21,.52);
+  padding: 18px 0;
+}
+
+.live-archive-head {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.live-archive-row strong,
+.live-archive-row span {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.35;
+  text-transform: uppercase;
 }
 
 .selected-live-list {
@@ -3775,6 +3858,346 @@ button.text-arrow::after,
   margin-top: 20px;
 }
 
+.home-page {
+  padding: 22px 30px 0;
+}
+
+.home-page .feature-music {
+  min-height: 0;
+  margin-top: 18px;
+  padding: 26px 0 52px;
+}
+
+.home-page .flow-section::before {
+  width: 100%;
+  background: rgba(21,21,21,.64);
+}
+
+.home-page .feature-music::before {
+  display: none;
+}
+
+.home-page .featured-releases {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 64px);
+  align-items: start;
+}
+
+.home-page .featured-release,
+.home-page .featured-release-1,
+.home-page .featured-release-2 {
+  display: grid;
+  grid-column: auto;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 0;
+}
+
+.home-page .featured-release img,
+.home-page .featured-release-1 img,
+.home-page .featured-release-2 img,
+.home-page .featured-release-1 > div,
+.home-page .featured-release-2 > div {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+.home-page .featured-release h2,
+.home-page .featured-release-1 h2,
+.home-page .featured-release-2 h2 {
+  font-size: clamp(34px, 4.4vw, 72px);
+}
+
+.home-page .featured-release .meta-lines {
+  margin: 14px 0 18px;
+}
+
+.home-related-live-section {
+  padding: 34px 0 0;
+}
+
+.home-live-list {
+  border-top: 0;
+}
+
+.home-live-row {
+  border-bottom: 0;
+  padding: 8px 0;
+}
+
+.home-press-section {
+  display: block;
+  margin-top: 42px;
+  border-top: 1px solid rgba(21,21,21,.64);
+  padding: 22px 0 0;
+}
+
+.home-press-section::after,
+.home-page .plan-b-music::before,
+.home-page .plan-b-release::before,
+.home-page .plan-b-release::after {
+  display: none;
+}
+
+.home-press-section h2 {
+  position: static;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.home-press-section .home-press-index {
+  display: grid;
+  margin-top: 18px;
+}
+
+.home-press-line {
+  display: grid;
+  grid-template-columns: minmax(116px, .18fr) minmax(0, 1fr) minmax(76px, auto);
+  gap: 24px;
+  align-items: baseline;
+  border-top: 1px solid rgba(184,184,178,.6);
+  padding: 12px 0;
+}
+
+.home-press-line:first-child {
+  border-top: 0;
+}
+
+.home-press-line strong,
+.home-press-line span,
+.home-press-line a {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-transform: none;
+}
+
+.home-press-line strong {
+  text-transform: uppercase;
+}
+
+.home-press-line a {
+  justify-self: end;
+  margin-right: 0;
+}
+
+.home-press-line a::after,
+.music-index-item .link-row a::after {
+  content: "";
+}
+
+.music-page .page-intro,
+.live-page .page-intro,
+.about-page .page-intro {
+  min-height: 120px;
+}
+
+.music-page .music-featured-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 5vw, 78px);
+}
+
+.music-page .music-index-item-featured {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.music-page .music-index-item-featured .music-release-copy h3 {
+  font-size: clamp(40px, 5vw, 86px);
+}
+
+.music-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.music-index-item-secondary {
+  grid-template-columns: minmax(84px, .34fr) minmax(0, .66fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.music-index-item-secondary .music-release-copy h3 {
+  font-size: clamp(20px, 2.1vw, 32px);
+  line-height: 1;
+}
+
+.music-index-item-secondary .meta-lines {
+  margin-top: 12px;
+}
+
+.music-archive-list,
+.production-scoring-grid {
+  display: grid;
+  margin-top: 22px;
+  border-top: 1px solid rgba(21,21,21,.42);
+  padding-top: 16px;
+}
+
+.music-archive-list {
+  gap: 14px;
+}
+
+.production-scoring-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 30px 24px;
+}
+
+.music-index-item-archive {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+  border-top: 0;
+  padding: 0;
+}
+
+.music-index-item-archive .music-release-copy {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.music-index-item-archive.no-media {
+  grid-template-columns: 1fr;
+  padding-left: 0;
+}
+
+.music-index-item-archive .release-cover {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.music-index-item-archive .music-release-copy h3 {
+  font-family: var(--mono);
+  font-size: clamp(15px, 1.35vw, 20px);
+  font-weight: 500;
+  line-height: 1.12;
+}
+
+.music-index-item-archive .meta-lines {
+  margin-top: 0;
+}
+
+.music-index-item-archive .link-row {
+  margin-top: 0;
+  justify-content: flex-start;
+}
+
+.live-archive-list {
+  display: grid;
+  gap: 26px;
+  margin-top: 30px;
+  border-top: 1px solid rgba(21,21,21,.64);
+  padding-top: 28px;
+}
+
+.live-archive-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+  gap: 24px;
+  align-items: start;
+  border-bottom: 0;
+  padding: 0;
+}
+
+.live-archive-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.live-archive-copy [data-testid="live-date"] {
+  color: #151515;
+  font-size: clamp(18px, 2.2vw, 28px);
+}
+
+.live-archive-copy strong,
+.live-archive-copy span {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.live-archive-media {
+  display: block;
+  order: 2;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.about-page .page-intro h1 {
+  font-size: clamp(46px, 7vw, 96px);
+}
+
+.about-page .page-intro p {
+  align-self: end;
+  max-width: 360px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.about-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 780px) minmax(120px, 190px);
+  gap: clamp(28px, 6vw, 90px);
+  align-items: start;
+  margin-top: 28px;
+  border-top: 1px solid rgba(21,21,21,.64);
+  padding-top: 30px;
+}
+
+.about-profile-layout .about-copy {
+  display: grid;
+  gap: 52px;
+  max-width: 680px;
+}
+
+.about-profile-layout .about-copy p {
+  max-width: 66ch;
+  font-size: 27px;
+  line-height: 1.72;
+}
+
+.about-copy-group {
+  display: grid;
+  gap: 28px;
+}
+
+.about-profile-layout .artist-portrait-about {
+  width: min(100%, 170px);
+  justify-self: end;
+  opacity: .92;
+}
+
+.about-portfolio-lists {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 52px;
+}
+
+.about-portfolio-lists h2 {
+  font-size: 12px;
+}
+
+.about-portfolio-lists p {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
 @media (max-width: 760px) {
   .site-shell {
     padding: 14px 12px 24px;
@@ -4315,6 +4738,9 @@ button.text-arrow::after,
   }
 
   .music-featured-grid,
+  .music-index-grid,
+  .music-secondary-grid,
+  .production-scoring-grid,
   .other-release-grid {
     grid-template-columns: 1fr;
   }
@@ -4375,10 +4801,73 @@ button.text-arrow::after,
   .selected-live-event,
   .selected-live-event:nth-child(2n),
   .selected-live-media,
+  .live-archive-row,
+  .live-archive-copy,
+  .music-index-item-archive .music-release-copy,
+  .about-profile-layout,
+  .about-portfolio-lists,
+  .music-index-item,
   .dj-teendrum-section,
   .dj-poster-archive > div,
   .earlier-performance {
     grid-template-columns: 1fr;
+  }
+
+  .home-page {
+    padding: 0 10px;
+  }
+
+  .home-page .featured-releases,
+  .home-page .featured-release,
+  .home-page .featured-release-1,
+  .home-page .featured-release-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .music-index-item-archive .link-row {
+    justify-content: flex-start;
+  }
+
+  .live-archive-media {
+    order: 0;
+    max-width: 220px;
+  }
+
+  .about-profile-layout .artist-portrait-about {
+    justify-self: start;
+    width: min(48vw, 160px);
+  }
+
+  .home-live-row {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 8px 12px;
+  }
+
+  .home-live-row img {
+    width: 46px;
+    grid-row: span 3;
+  }
+
+  .home-live-row em {
+    justify-self: start;
+  }
+
+  .home-press-line {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .home-press-line a {
+    justify-self: start;
+  }
+
+  .about-profile-layout .about-copy {
+    gap: 42px;
+  }
+
+  .about-profile-layout .about-copy p {
+    font-size: 23px;
+    line-height: 1.68;
   }
 
   .selected-live-event:nth-child(2n) .selected-live-copy {

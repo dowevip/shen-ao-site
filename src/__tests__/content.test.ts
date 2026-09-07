@@ -117,7 +117,6 @@ describe("structured project content", () => {
       intro: "Clouds from Underground is an experimental short film by independent director Shao Ze, examining the history and present condition of Anshan as a resource-based industrial city.",
       creativeApproach: "The score combines piano, violin and synthesiser drones through a minimalist approach drawing on both electronic and classical music, creating the suffocating mechanical atmosphere present in the film.",
       externalLinks: [
-        { label: "BANDCAMP ↗", url: "https://shenao.bandcamp.com/album/clouds-from-underground-2" },
         { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=131037851" }
       ],
       relatedWorks: [
@@ -229,8 +228,7 @@ describe("structured project content", () => {
       billing: "Duo with Avin Noorbakhsh",
       type: "Live performance",
       selected: true,
-      livePhoto: { status: "placeholder" },
-      poster: { status: "placeholder" }
+      poster: { path: "/assets/live/portfolio/loose-fm-2026.jpeg", status: "confirmed" }
     });
     expect(selectedLiveEvents[2]).toMatchObject({
       venue: "Yuanliao Space",
@@ -252,7 +250,7 @@ describe("structured project content", () => {
         localVenueName: "天津音乐厅 · 儒熙艺术馆",
         type: "Solo concert",
         externalLinks: [{ label: "Watch", url: "https://www.youtube.com/watch?v=T8jVsSjHzhA" }],
-        livePhoto: { status: "placeholder" },
+        livePhoto: { path: "/assets/live/portfolio/solo-concert-2018.jpeg", status: "confirmed" },
         selected: false
       }
     ]);

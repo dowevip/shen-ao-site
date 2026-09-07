@@ -46,8 +46,8 @@ export const selectedLiveEvents: LiveEvent[] = [
     billing: "Duo with Avin Noorbakhsh",
     collaborators: ["Avin Noorbakhsh"],
     type: "Live performance",
-    livePhoto: { status: "placeholder" },
-    poster: { status: "placeholder" },
+    externalLinks: [{ label: "INFO ↗", url: "https://www.threads.com/%40kitrecs/post/DbxwVOGDahQ/the-kitrecs-radio-show-is-back-on-loose-fm-this-evening-at-pm-uk-summer-time/" }],
+    poster: { path: "/assets/live/portfolio/loose-fm-2026.jpeg", status: "confirmed" },
     selected: true
   },
   {
@@ -59,8 +59,8 @@ export const selectedLiveEvents: LiveEvent[] = [
     billing: "With Vic Bang / Yoto / K Means",
     collaborators: ["Vic Bang", "Yoto", "K Means"],
     type: "Live performance",
-    livePhoto: { status: "placeholder" },
-    poster: { status: "placeholder" },
+    externalLinks: [{ label: "INFO ↗", url: "https://gel.now/events/566" }],
+    poster: { path: "/assets/live/portfolio/spanners-2026.jpeg", status: "confirmed" },
     selected: true
   },
   {
@@ -73,8 +73,8 @@ export const selectedLiveEvents: LiveEvent[] = [
     billing: "With 4ChannelClub / Cloud Choir",
     collaborators: ["4ChannelClub", "Cloud Choir"],
     type: "Live performance",
-    livePhoto: { status: "placeholder" },
-    poster: { status: "placeholder" },
+    externalLinks: [{ label: "INFO ↗", url: "https://www.instagram.com/p/DacdwQTlH1O/?img_index=2" }],
+    poster: { path: "/assets/live/portfolio/yuanliao-space-2026.jpeg", status: "confirmed" },
     selected: true
   },
   {
@@ -86,8 +86,8 @@ export const selectedLiveEvents: LiveEvent[] = [
     billing: "With Visit Me / Barreleye / Guthlac",
     collaborators: ["Visit Me", "Barreleye", "Guthlac"],
     type: "Live performance",
-    livePhoto: { status: "placeholder" },
-    poster: { status: "placeholder" },
+    externalLinks: [{ label: "INFO ↗", url: "https://ma.to/event/kit-records-album-launch-17-jun-2026" }],
+    livePhoto: { path: "/assets/live/portfolio/george-tavern-2026.jpeg", status: "confirmed" },
     selected: true
   }
 ];
@@ -112,7 +112,7 @@ export const earlierPerformances: LiveEvent[] = [
     localVenueName: "天津音乐厅 · 儒熙艺术馆",
     type: "Solo concert",
     externalLinks: [{ label: "Watch", url: "https://www.youtube.com/watch?v=T8jVsSjHzhA" }],
-    livePhoto: { status: "placeholder" },
+    livePhoto: { path: "/assets/live/portfolio/solo-concert-2018.jpeg", status: "confirmed" },
     selected: false
   }
 ];

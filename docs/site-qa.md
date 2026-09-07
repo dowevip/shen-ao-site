@@ -1,15 +1,40 @@
 # SITE QA
 
-## OPEN
+## CURRENT IA
 
-- Recheck spacing, crop and visual rhythm across Live / Practice / Work after real assets are added.
-- Review whether Practice detail pages should use a more semantic related-practice navigation instead of `NEXT PROJECT`.
-- Add favicon.
-- Final SEO review: page titles, descriptions and metadata.
-- Add / verify OG image and social sharing metadata.
-- Final dead-link check.
-- Final responsive QA after all real assets are in place.
-- Final direct-refresh check for all public routes before launch.
+- Primary navigation is limited to `HOME / MUSIC / LIVE / ABOUT`.
+- `WORK`, `PRACTICE`, `PRESS / RADIO`, and `EPK` remain available as routes but are no longer part of the primary navigation.
+- Detail routes and existing project data remain in place.
+
+## CURRENT PAGE STRUCTURE
+
+### HOME
+
+- Header: `SHEN AO` plus `HOME / MUSIC / LIVE / ABOUT`.
+- Featured releases: `Cyberspace` and `Bug Party`, each with the real cover, title, `2026`, `KIT RECORDS`, `LISTEN`, and `INFO`.
+- `RELATED LIVE`: 17 Jun 2026 at The George Tavern, 17 Jul 2026 at Yuanliao Space, 23 Jul 2026 at Spanners, and 08 Aug 2026 at LOOSE.fm.
+- `PRESS`: only verified release-related The Quietus and Muito entries already present in the repo.
+
+### MUSIC
+
+- A full music index.
+- `RELEASES`: own releases from existing structured data.
+- `PRODUCTION / SCORING`: production, scoring, moving image, game, broadcast, theatre, exhibition, and cross-media music work from existing project data.
+- Rows stay short: image or placeholder, title, year, type / role when known, and existing external links.
+
+### LIVE
+
+- A single reverse-chronological archive.
+- Rows show date, location / venue, event / activity, role, and an external link only where existing data provides one.
+- Previous `Selected Performances`, `DJ / Teendrum`, and `Earlier Performance` page sections have been collapsed into the unified archive.
+
+### ABOUT
+
+- English-first content is based on pages 1-3 of `Shen Ao Portfolio - CN 2026.pptx`.
+- Identity line: `MUSIC PRODUCER / COMPOSER & ARRANGER / EVENT ORGANISER`.
+- Bio follows the source deck's order and emphasis.
+- Project lists cover Music, Scoring, Event Projects, Bandcamp, NetEase, SoundCloud, Mixcloud, and email.
+- The previous interview-derived `ARTIST STATEMENT` has been removed from the About page.
 
 ## WAITING FOR ASSETS
 
@@ -26,7 +51,7 @@
 - 17 Jul 2026 — Yuanliao Space: live photo + poster
 - 23 Jul 2026 — Spanners: live photo + poster
 - 08 Aug 2026 — LOOSE.fm: live photo + poster
-- DJ / Teendrum — poster archive
+- DJ / Teendrum — dated poster archive if it should return to the main Live archive
 - 2018 solo concert — documentation photo(s)
 
 ### NO IDEA
@@ -68,26 +93,16 @@
 
 - Two Dreadful Children / Unipre year: `2022` or `2024`
 - Paradise Dream 2 year: `2018` or `2019`
-- Final identity wording. Current site: `COMPOSER / PRODUCER / SOUND ARTIST`
-- Openband host official English spellings, if the host list is to be published
+- Final English rendering of `Teendrum`, `no idea`, `OPENBAND`, and venue names from the Portfolio
+- Whether undated DJ / Teendrum poster material should be added to the unified Live archive after dates are verified
 - No Idea remaining two London events: dates / venues / titles
 
 ## CLOSED
 
-- GitHub Pages repository base path fixed.
-- MUSIC duplicate section kicker / heading combinations fixed.
-- LIVE duplicate section kicker / heading combinations fixed.
-- Work `SCORING / MOVING IMAGE` desktop layout changed from crowded five-column presentation to editorial 2–3-column layout.
-- Work Detail responsive grids fixed.
-- Work Detail mobile horizontal overflow fixed and checked at 375px / 759px.
-- Openband workshop mobile overflow fixed.
-- CCTV `/work/cctv-selected-broadcast-work` direct-route fallback added.
-- Home obsolete user-facing `Plan B` alt text removed.
-- Home restructured as a curated artist landing page.
-- Home now prioritises Featured Music, Role Model, latest Live, Practice, selected Press and lightweight About / Contact.
-- About refined as the narrative artist / practice page.
-- EPK refined as a shorter professional reference page.
-- Full repeated Artist Statement removed from EPK.
-- About / EPK responsive QA passed at 375px / 759px / desktop.
-- Current test suite passes.
-- Current GitHub Pages build passes.
+- GitHub `main` fetched and checked before editing; local `main` matched `origin/main` at `2a8bc474087f201a993eb8017bdb77909de51784`.
+- Primary navigation reduced to `HOME / MUSIC / LIVE / ABOUT`.
+- Home reduced to `Cyberspace`, `Bug Party`, related live, and release-related press only.
+- Home removed Role Model, No Idea, Openband, About preview, Contact block, slogan, artist statement, identity string, and style-tag copy.
+- Music changed from a releases page to a fuller music work index.
+- Live changed from separate page sections to one reverse-chronological archive.
+- About replaced with a Portfolio pages 1-3 based English version.

@@ -143,6 +143,12 @@ export const projects: Project[] = [
       { label: "PROJECT / PRESS ↗", url: "https://cptheatre.co.uk/whatson/Big-Bang-18-March-2024" },
       { label: "SOUNDCLOUD ↗", url: "https://soundcloud.com/fancy-a-bite/fancy-a-bite" }
     ],
+    images: [
+      {
+        src: "/assets/portfolio-projects/fancy-a-bite-stage.jpeg",
+        alt: "Stage image from Fancy A BITE? with live projection."
+      }
+    ],
     detailMedia: [
       { label: "HERO PHOTO", variant: "landscape" },
       { label: "SECONDARY STAGE IMAGE", variant: "landscape" },
@@ -153,7 +159,7 @@ export const projects: Project[] = [
     workSection: "selected",
     workRoleLabel: "THEATRE / COMPOSITION",
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "let-me-speak",
@@ -251,6 +257,12 @@ export const projects: Project[] = [
       { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=146407778" },
       { label: "SOUNDCLOUD ↗", url: "https://soundcloud.com/shen-ao/sets/untitled-land" }
     ],
+    images: [
+      {
+        src: "/assets/portfolio-projects/untitled-land-project.jpeg",
+        alt: "Untitled Land project image from the portfolio."
+      }
+    ],
     detailMedia: [
       { label: "HERO / PROJECT IMAGE", variant: "landscape" },
       { label: "FILM STILL", variant: "landscape" },
@@ -263,7 +275,7 @@ export const projects: Project[] = [
     workSection: "scoring",
     workRoleLabel: "EXPERIMENTAL FILM / SCORE",
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "paradise-dream-2",
@@ -271,7 +283,7 @@ export const projects: Project[] = [
     year: "2019",
     category: "Exhibition",
     subtype: "Cross-media",
-    externalLinks: [{ label: "YouTube", url: "http://youtu.be/DxFpkAjWu98?si=hG1fLMVpPATLvIqX" }],
+    externalLinks: [{ label: "WATCH ↗", url: "https://youtube.com/playlist?list=PLg8zSVDXI0lFa7DHc4Lq9zd5Vu5FBtMPZ" }],
     archiveOrder: 5,
     workSection: "archive",
     verificationStatus: "confirmed",
@@ -287,8 +299,13 @@ export const projects: Project[] = [
     intro: "Clouds from Underground is an experimental short film by independent director Shao Ze, examining the history and present condition of Anshan as a resource-based industrial city.",
     creativeApproach: "The score combines piano, violin and synthesiser drones through a minimalist approach drawing on both electronic and classical music, creating the suffocating mechanical atmosphere present in the film.",
     externalLinks: [
-      { label: "BANDCAMP ↗", url: "https://shenao.bandcamp.com/album/clouds-from-underground-2" },
       { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=131037851" }
+    ],
+    images: [
+      {
+        src: "/assets/portfolio-projects/clouds-from-underground-artwork.jpeg",
+        alt: "Clouds from Underground artwork from the portfolio."
+      }
     ],
     relatedWorks: [
       {
@@ -310,7 +327,7 @@ export const projects: Project[] = [
     workSection: "scoring",
     workRoleLabel: "EXPERIMENTAL FILM / SCORE",
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "cctv-selected-broadcast-work",
@@ -340,19 +357,92 @@ export const projects: Project[] = [
       }
     ],
     relatedTitles: ["大美边疆行", "中国空间站系列", "高端访谈"],
+    images: [
+      {
+        src: "/assets/portfolio-projects/cctv-13-space-station.jpeg",
+        alt: "CCTV-13 China Space Station promotional image from the portfolio."
+      }
+    ],
     detailMedia: [{ label: "REPRESENTATIVE HERO", variant: "landscape" }],
     scoringOrder: 5,
     workSection: "scoring",
     workRoleLabel: "BROADCAST / MUSIC EDITING + PRODUCTION",
     verificationStatus: "archive-only",
+    mediaStatus: "confirmed"
+  },
+  {
+    slug: "douyin-cultural-promo",
+    title: "Douyin Cultural Product Promo",
+    year: "2021",
+    category: "Moving Image",
+    subtype: "Promo",
+    role: ["Score"],
+    archiveOrder: 6,
+    workSection: "archive",
+    workRoleLabel: "PROMO / SCORE",
+    verificationStatus: "archive-only",
     mediaStatus: "placeholder"
   },
-  { slug: "douyin-cultural-promo", title: "Douyin Cultural Product Promo", category: "Moving Image", archiveOrder: 6, workSection: "archive", verificationStatus: "archive-only", mediaStatus: "placeholder" },
-  { slug: "zhang-jian-jingdezhen", title: "Zhang Jian and Jingdezhen", category: "Moving Image", archiveOrder: 1, workSection: "archive", verificationStatus: "archive-only", mediaStatus: "placeholder" },
-  { slug: "nostopia-playable-nft", title: "Nostopia Playable NFT", category: "Cross-media", archiveOrder: 2, workSection: "archive", verificationStatus: "archive-only", mediaStatus: "placeholder" },
-  { slug: "iqiyi-vr-se", title: "iQIYI VR SE Promo", category: "Moving Image", archiveOrder: 3, workSection: "archive", verificationStatus: "archive-only", mediaStatus: "placeholder" },
+  {
+    slug: "zhang-jian-jingdezhen",
+    title: "Zhang Jian and Jingdezhen",
+    year: "2021",
+    category: "Moving Image",
+    subtype: "Documentary",
+    role: ["Score"],
+    images: [
+      {
+        src: "/assets/portfolio-projects/zhang-jian-jingdezhen-still.jpeg",
+        alt: "Zhang Jian and Jingdezhen documentary still from the portfolio."
+      }
+    ],
+    archiveOrder: 1,
+    workSection: "archive",
+    workRoleLabel: "DOCUMENTARY / SCORE",
+    verificationStatus: "archive-only",
+    mediaStatus: "confirmed"
+  },
+  { slug: "nostopia-playable-nft", title: "Nostopia Playable NFT", year: "2022", category: "Cross-media", subtype: "Game music", role: ["Score"], archiveOrder: 2, workSection: "archive", workRoleLabel: "GAME MUSIC", verificationStatus: "archive-only", mediaStatus: "placeholder" },
+  {
+    slug: "iqiyi-vr-se",
+    title: "iQIYI VR SE Promo",
+    year: "2020",
+    category: "Moving Image",
+    subtype: "Promo",
+    role: ["Score"],
+    images: [
+      {
+        src: "/assets/portfolio-projects/iqiyi-vr-se-promo.jpeg",
+        alt: "iQIYI VR SE promo image from the portfolio."
+      }
+    ],
+    archiveOrder: 3,
+    workSection: "archive",
+    workRoleLabel: "PROMO / SCORE",
+    verificationStatus: "archive-only",
+    mediaStatus: "confirmed"
+  },
   { slug: "mr-monster-resource", title: "Mr.Monster Resource", category: "Cross-media", archiveOrder: 7, workSection: "archive", verificationStatus: "archive-only", mediaStatus: "placeholder" },
-  { slug: "the-back-door-of-stage", title: "the back door of stage", category: "Cross-media", archiveOrder: 4, workSection: "archive", verificationStatus: "archive-only", mediaStatus: "placeholder" },
+  {
+    slug: "the-back-door-of-stage",
+    title: "the back door of stage",
+    year: "2019",
+    category: "Cross-media",
+    subtype: "Game music",
+    role: ["Score"],
+    externalLinks: [{ label: "INFO ↗", url: "https://www.gcores.com/articles/115352" }],
+    images: [
+      {
+        src: "/assets/portfolio-projects/the-back-door-of-stage-title.jpeg",
+        alt: "The Back Door of Stage title image from the portfolio."
+      }
+    ],
+    archiveOrder: 4,
+    workSection: "archive",
+    workRoleLabel: "GAME MUSIC",
+    verificationStatus: "archive-only",
+    mediaStatus: "confirmed"
+  },
   { slug: "tunnel", title: "Tunnel", category: "Cross-media", subtype: "Moving Image", archiveOrder: 8, workSection: "archive", verificationStatus: "needs-review", mediaStatus: "placeholder" }
 ];
 

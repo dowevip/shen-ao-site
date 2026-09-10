@@ -10,6 +10,7 @@ import {
   type ProjectLink,
   scoringMovingImageProjects,
   selectedWorks,
+  kitRecordsReleaseNote,
   type Project
 } from "./content/projects";
 import { getNoIdeaEvent, latestNoIdeaEvent, noIdeaEvents, type NoIdeaEvent } from "./content/noIdeaEvents";
@@ -66,10 +67,8 @@ function usePath(initialPath?: string) {
 export default function App({ initialPath }: AppProps) {
   const { path, navigate } = usePath(initialPath);
 
-  const page = path.startsWith("/work/cyberspace-bug-party") || path.startsWith("/work/cyberspace") ? (
-    <MusicReleasePage slug="cyberspace" navigate={navigate} />
-  ) : path.startsWith("/work/bug-party") ? (
-    <MusicReleasePage slug="bug-party" navigate={navigate} />
+  const page = isKitRecordsReleaseRoute(path) ? (
+    <MusicReleasePage navigate={navigate} />
   ) : path.startsWith("/work/role-model") ? (
     <RoleModelPage navigate={navigate} />
   ) : path.startsWith("/work/no-idea") ? (
@@ -155,7 +154,7 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
                 <h2>{release.title.toUpperCase()}</h2>
                 <MetaLines lines={["2026", release.label?.toUpperCase()]} />
                 <ExternalLink className="listen-link" href={homeListenLink(release)}>LISTEN</ExternalLink>
-                <button className="text-arrow" onClick={() => navigate(`/work/${release.slug}`)}>INFO</button>
+                <button className="text-arrow" onClick={() => navigate(releaseDetailPath(release))}>INFO</button>
               </div>
             </article>
           ))}
@@ -187,7 +186,17 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
 }
 
 function homeListenLink(project: Project) {
-  return project.externalLinks?.find((link) => link.label === "NetEase Music")?.url ?? project.externalLinks?.[0]?.url ?? "https://shenao.bandcamp.com/";
+  return project.externalLinks?.find((link) => /bandcamp/i.test(`${link.label} ${link.url}`))?.url
+    ?? project.externalLinks?.find((link) => isListenLink(link))?.url
+    ?? "https://shenao.bandcamp.com/";
+}
+
+function isKitRecordsReleaseRoute(path: string) {
+  return ["/work/cyberspace-bug-party", "/work/cyberspace", "/work/bug-party"].some((route) => path.startsWith(route));
+}
+
+function releaseDetailPath(project: Project) {
+  return project.slug === "cyberspace" || project.slug === "bug-party" ? "/work/cyberspace-bug-party" : `/work/${project.slug}`;
 }
 
 function WorkPage({ navigate }: { navigate: (path: string) => void }) {
@@ -284,7 +293,7 @@ function MusicIndexItem({ project, navigate, variant }: { project: Project; navi
   const title = (project.displayTitle ?? project.title).toUpperCase();
   const watchLink = project.externalLinks?.find((link) => isWatchLink(link));
   const listenLink = project.externalLinks?.find((link) => !isWatchLink(link) && isListenLink(link));
-  const infoLink = project.externalLinks?.find((link) => !isWatchLink(link) && !isListenLink(link));
+  const infoLink = project.externalLinks?.find((link) => !isWatchLink(link) && !isListenLink(link) && !isNetEaseLink(link));
   const hasMedia = hasProjectMedia(project) || variant !== "archive";
   return (
     <article className={`music-index-item music-index-item-${variant} music-release-${project.slug} ${hasMedia ? "has-media" : "no-media"}`}>
@@ -296,7 +305,7 @@ function MusicIndexItem({ project, navigate, variant }: { project: Project; navi
           {watchLink && <ExternalLink href={watchLink.url}>WATCH ↗</ExternalLink>}
           {listenLink && <ExternalLink href={listenLink.url}>LISTEN ↗</ExternalLink>}
           {infoLink && <ExternalLink href={infoLink.url}>INFO ↗</ExternalLink>}
-          {!infoLink && <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>INFO</button>}
+          {!infoLink && <button className="text-arrow" onClick={() => navigate(releaseDetailPath(project))}>INFO</button>}
         </div>
       </div>
     </article>
@@ -312,7 +321,11 @@ function isWatchLink(link: ProjectLink) {
 }
 
 function isListenLink(link: ProjectLink) {
-  return /bandcamp|soundcloud|netease|soundtrack/i.test(`${link.label} ${link.url}`);
+  return /bandcamp|soundcloud|soundtrack/i.test(`${link.label} ${link.url}`);
+}
+
+function isNetEaseLink(link: ProjectLink) {
+  return /netease|music\.163\.com/i.test(`${link.label} ${link.url}`);
 }
 
 function ReleaseArtwork({ project, showPlaceholder = true }: { project: Project; showPlaceholder?: boolean }) {
@@ -647,27 +660,89 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
-function MusicReleasePage({ slug, navigate }: { slug: "cyberspace" | "bug-party"; navigate: (path: string) => void }) {
-  const project = getProject(slug)!;
-  const nextProject = slug === "cyberspace" ? { title: "BUG PARTY", path: "/work/bug-party" } : { title: "ROLE MODEL", path: "/work/role-model" };
+function MusicReleasePage({ navigate }: { navigate: (path: string) => void }) {
+  const releases = [getProject("cyberspace")!, getProject("bug-party")!];
+  const project = releases[0];
+  const releasePress = verifiedPressItems.filter((item) => item.id === "quietus-spools-out-july" || item.id === "muito-buy-music-club-27");
+  const relatedLive = [...selectedLiveEvents].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+
   return (
-    <ProjectShell kicker="PROJECT / MUSIC" title={project.title.toUpperCase()} project={project}>
-      <div className="project-layout project-layout-loose">
-        <img className="project-art album-cover" src={assetUrl(project.artwork!)} alt={`${project.title} album artwork`} />
-        <div className="project-meta">
-          <MetaLines lines={[project.label, "ALBUM / RELEASE"]} />
-          <ExternalLink href="https://shenao.bandcamp.com/">LISTEN</ExternalLink>
-        </div>
+    <ProjectShell kicker="PROJECT / MUSIC" title="CYBERSPACE / BUG PARTY" project={project}>
+      <div className="release-pair-hero">
+        {releases.map((release) => <ReleaseCoverPanel release={release} key={release.slug} />)}
       </div>
-      <PlaceholderSequence labels={["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]} />
-      <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
+
+      <section className="release-detail-note">
+        <h2>ABOUT THE RELEASE</h2>
+        <p>{kitRecordsReleaseNote}</p>
+      </section>
+
+      <section className="release-detail-press home-press-section">
+        <h2>PRESS</h2>
+        <div className="home-press-index">
+          {releasePress.map((item) => <ReleasePressLine item={item} key={item.id} />)}
+        </div>
+      </section>
+
+      <section className="release-detail-live home-related-live-section">
+        <h2>RELATED LIVE</h2>
+        <div className="release-live-list">
+          {relatedLive.map((event) => <ReleaseLiveLine event={event} key={event.id} />)}
+        </div>
+      </section>
+
+      <NextProject title="ROLE MODEL" onClick={() => navigate("/work/role-model")} />
     </ProjectShell>
+  );
+}
+
+function ReleaseCoverPanel({ release }: { release: Project }) {
+  const listenLink = release.externalLinks?.find((link) => /bandcamp/i.test(`${link.label} ${link.url}`));
+
+  return (
+    <article className="release-cover-panel">
+      <img className="project-art album-cover" src={assetUrl(release.artwork!)} alt={`${release.title} album artwork`} />
+      <div className="release-cover-meta">
+        <h2>{release.title}</h2>
+        <p className="release-detail-label">2026 / {release.label?.toUpperCase()}</p>
+        {listenLink && <ExternalLink href={listenLink.url} ariaLabel={`${release.title} LISTEN ↗`}>LISTEN ↗</ExternalLink>}
+      </div>
+    </article>
+  );
+}
+
+function ReleasePressLine({ item }: { item: PressItem }) {
+  const source = item.outlet ?? item.station ?? "";
+  const cta = item.id === "muito-buy-music-club-27" ? "VIEW" : "READ";
+
+  return (
+    <div className="home-press-line release-press-line">
+      <strong>{source}</strong>
+      <span>{item.title}</span>
+      <em>{displayRelatedProject(item.relatedProject)?.toUpperCase()}</em>
+      <ExternalLink href={item.url}>{cta} ↗</ExternalLink>
+    </div>
+  );
+}
+
+function ReleaseLiveLine({ event }: { event: LiveEvent }) {
+  const media = getLiveArchiveMedia(event);
+  const link = event.externalLinks?.[0];
+
+  return (
+    <ExternalLink className="release-live-row" href={link!.url}>
+      {media && <img src={assetUrl(media.path)} alt={media.alt} />}
+      <span>{event.displayDate}</span>
+      <strong>{formatVenue(event)}</strong>
+      <em>{link!.label}</em>
+    </ExternalLink>
   );
 }
 
 function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("role-model")!;
   const [heroImage, ...galleryImages] = project.images!;
+  const nextProject = nextProjectFor(project.slug);
   return (
     <ProjectShell kicker="PROJECT / MOVING IMAGE" title="ROLE MODEL" project={project}>
       <div className="project-layout project-layout-loose film-layout">
@@ -699,7 +774,7 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
         <h2>CREDITS</h2>
         <p>DIRECTOR / HONGXUAN WANG</p>
       </section>
-      <NextProject title="CYBERSPACE" onClick={() => navigate("/work/cyberspace")} />
+      <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
     </ProjectShell>
   );
 }
@@ -1373,8 +1448,8 @@ function MetaLines({ lines }: { lines: Array<string | undefined> }) {
   return <div className="meta-lines">{lines.filter(Boolean).map((line) => <span key={line}>{line!.toUpperCase()}</span>)}</div>;
 }
 
-function ExternalLink({ href, children, className = "text-arrow" }: { href: string; children: React.ReactNode; className?: string }) {
-  return <a className={className} href={href} target="_blank" rel="noreferrer">{children}</a>;
+function ExternalLink({ href, children, className = "text-arrow", ariaLabel }: { href: string; children: React.ReactNode; className?: string; ariaLabel?: string }) {
+  return <a className={className} href={href} target="_blank" rel="noreferrer" aria-label={ariaLabel}>{children}</a>;
 }
 
 function LinkList({ heading, links }: { heading: string; links: { label: string; url: string }[] }) {
@@ -1421,5 +1496,8 @@ function nextProjectFor(slug: string) {
   const visibleProjects = selectedWorks.filter((project) => project.verificationStatus !== "needs-review");
   const index = visibleProjects.findIndex((project) => project.slug === slug);
   const next = visibleProjects[index >= 0 ? (index + 1) % visibleProjects.length : 0];
-  return { title: next.title.toUpperCase(), path: `/work/${next.slug}` };
+  const title = next.slug === "cyberspace" || next.slug === "bug-party"
+    ? "CYBERSPACE / BUG PARTY"
+    : next.title.toUpperCase();
+  return { title, path: releaseDetailPath(next) };
 }

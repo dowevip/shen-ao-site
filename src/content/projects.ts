@@ -57,7 +57,7 @@ export const projects: Project[] = [
     label: "Kit Records",
     artwork: "/assets/cyberspace.jpg",
     externalLinks: [
-      { label: "Bandcamp", url: "https://shenao.bandcamp.com/" },
+      { label: "Bandcamp", url: "https://shenao.bandcamp.com/album/cyberspace" },
       { label: "NetEase Music", url: "https://music.163.com/#/album?id=368232911" }
     ],
     press: [{ title: "Spool's Out - cassette reviews", context: "THE QUIETUS" }],
@@ -77,7 +77,7 @@ export const projects: Project[] = [
     label: "Kit Records",
     artwork: "/assets/bugparty.jpg",
     externalLinks: [
-      { label: "Bandcamp", url: "https://shenao.bandcamp.com/" },
+      { label: "Bandcamp", url: "https://shenao.bandcamp.com/album/bug-party" },
       { label: "NetEase Music", url: "https://music.163.com/#/album?id=371692074" }
     ],
     press: [{ title: "MUITO PICKS" }],

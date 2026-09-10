@@ -47,6 +47,10 @@ describe("SHEN AO site IA", () => {
     expect(music.getAllByText("2026")).toHaveLength(2);
     expect(music.getAllByText("KIT RECORDS")).toHaveLength(2);
     expect(music.getAllByRole("link", { name: "LISTEN" })).toHaveLength(2);
+    expect(music.getAllByRole("link", { name: "LISTEN" }).map((link) => link.getAttribute("href"))).toEqual([
+      "https://shenao.bandcamp.com/album/cyberspace",
+      "https://shenao.bandcamp.com/album/bug-party"
+    ]);
     expect(music.getAllByRole("button", { name: "INFO" })).toHaveLength(2);
 
     const live = within(screen.getByTestId("home-related-live"));
@@ -110,7 +114,14 @@ describe("SHEN AO site IA", () => {
     expect(screen.getAllByText("SCORE").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("FILM / SCORE + MIX")).toBeInTheDocument();
     expect(screen.getAllByText("COMPOSITION").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByRole("link", { name: "LISTEN ↗" })[0]).toHaveAttribute("href", "https://shenao.bandcamp.com/");
+    const musicListenHrefs = screen.getAllByRole("link", { name: "LISTEN ↗" }).map((link) => link.getAttribute("href"));
+    expect(musicListenHrefs).toEqual(expect.arrayContaining([
+      "https://shenao.bandcamp.com/album/cyberspace",
+      "https://shenao.bandcamp.com/album/bug-party",
+      "https://shenao.bandcamp.com/album/two-dreadful-children-unipre",
+      "https://soundcloud.com/shen-ao/bamboo-blend"
+    ]));
+    expect(musicListenHrefs.some((href) => href?.includes("music.163.com"))).toBe(false);
     expect(screen.getAllByRole("button", { name: "INFO" }).length).toBeGreaterThanOrEqual(5);
     expect(screen.getByAltText("Exhibition view showing a projected close-up from Role Model.")).toHaveAttribute("src", "/assets/role-model/DSC0944_1600px_sRGB.jpg");
     expect(screen.queryByText(/Role Model follows the experience/i)).not.toBeInTheDocument();
@@ -216,6 +227,78 @@ describe("SHEN AO site IA", () => {
     cleanup();
     render(<App initialPath="/practice/no-idea/2026-05-23" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "LIVE WITH NO IDEA" })).toBeInTheDocument();
+  });
+
+  it("renders Cyberspace and Bug Party as one combined release detail page", () => {
+    render(<App initialPath="/work/cyberspace-bug-party" />);
+
+    const main = within(screen.getByRole("main"));
+    expect(main.getByRole("heading", { level: 1, name: "CYBERSPACE / BUG PARTY" })).toBeInTheDocument();
+    expect(main.getByAltText("Cyberspace album artwork")).toHaveAttribute("src", "/assets/cyberspace.jpg");
+    expect(main.getByAltText("Bug Party album artwork")).toHaveAttribute("src", "/assets/bugparty.jpg");
+    expect(main.getByRole("heading", { name: "Cyberspace" })).toBeInTheDocument();
+    expect(main.getByRole("heading", { name: "Bug Party" })).toBeInTheDocument();
+    expect(main.getAllByText("2026 / KIT RECORDS")).toHaveLength(2);
+    expect(main.getByRole("link", { name: "Cyberspace LISTEN ↗" })).toHaveAttribute("href", "https://shenao.bandcamp.com/album/cyberspace");
+    expect(main.getByRole("link", { name: "Bug Party LISTEN ↗" })).toHaveAttribute("href", "https://shenao.bandcamp.com/album/bug-party");
+    expect(main.queryByRole("link", { name: "BANDCAMP ↗" })).not.toBeInTheDocument();
+    expect(main.getByRole("heading", { name: "ABOUT THE RELEASE" })).toBeInTheDocument();
+    expect(main.getByText(/In 2026, Shen Ao released two EPs through Kit Records/i)).toBeInTheDocument();
+    expect(main.getByText("THE QUIETUS")).toBeInTheDocument();
+    expect(main.getByText("CYBERSPACE / BUG PARTY")).toBeInTheDocument();
+    expect(main.getByRole("link", { name: "READ ↗" })).toHaveAttribute("href", "https://thequietus.com/quietus-reviews/cassettes/spools-out-cassette-reviews-for-july-by-daryl-worthington/");
+    expect(main.getByText("MUITO RADIO")).toBeInTheDocument();
+    expect(main.getByText("CYBERSPACE")).toBeInTheDocument();
+    expect(main.getByRole("link", { name: "VIEW ↗" })).toHaveAttribute("href", "https://muitoradio.com/buymusicclub/27");
+    for (const venue of ["THE GEORGE TAVERN / LONDON", "YUANLIAO SPACE / BEIJING", "SPANNERS / LONDON", "LOOSE.FM / LONDON"]) {
+      expect(main.getByText(venue)).toBeInTheDocument();
+    }
+    expect(main.getAllByRole("img").map((image) => image.getAttribute("src"))).toEqual(expect.arrayContaining([
+      "/assets/live/portfolio/george-tavern-2026.jpeg",
+      "/assets/live/portfolio/yuanliao-space-2026.jpeg",
+      "/assets/live/portfolio/spanners-2026.jpeg",
+      "/assets/live/portfolio/loose-fm-2026.jpeg"
+    ]));
+    expect(main.getByRole("button", { name: /NEXT PROJECT ROLE MODEL/ })).toBeInTheDocument();
+    for (const removedText of ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]) {
+      expect(main.queryByText(removedText)).not.toBeInTheDocument();
+    }
+  });
+
+  it("keeps Role Model links distinct and sends next project to Fancy a Bite", () => {
+    render(<App initialPath="/work/role-model" />);
+
+    const main = within(screen.getByRole("main"));
+    expect(main.getByRole("link", { name: "PROJECT ↗" })).toHaveAttribute(
+      "href",
+      "https://www.thebluecoat.org.uk/library/event/dahong-hongxuan-wang-role-model"
+    );
+    expect(main.getByRole("link", { name: "LISTEN TO SOUNDTRACK ↗" })).toHaveAttribute(
+      "href",
+      "https://soundcloud.com/shen-ao/role-model-soundtrack"
+    );
+
+    fireEvent.click(main.getByRole("button", { name: /NEXT PROJECT FANCY A BITE\?/ }));
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "FANCY A BITE?" })).toBeInTheDocument();
+  });
+
+  it("maps the old release routes and release INFO buttons to the combined detail page", () => {
+    render(<App initialPath="/work/cyberspace" />);
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "CYBERSPACE / BUG PARTY" })).toBeInTheDocument();
+
+    cleanup();
+    render(<App initialPath="/work/bug-party" />);
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "CYBERSPACE / BUG PARTY" })).toBeInTheDocument();
+
+    cleanup();
+    render(<App initialPath="/" />);
+    fireEvent.click(within(screen.getByTestId("home-featured-music")).getAllByRole("button", { name: "INFO" })[0]);
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "CYBERSPACE / BUG PARTY" })).toBeInTheDocument();
+
+    cleanup();
+    render(<App initialPath="/music" />);
+    fireEvent.click(within(screen.getByTestId("music-featured-releases")).getAllByRole("button", { name: "INFO" })[0]);
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "CYBERSPACE / BUG PARTY" })).toBeInTheDocument();
   });
 
   it("navigates between the four primary pages", () => {

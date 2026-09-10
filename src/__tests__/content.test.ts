@@ -172,8 +172,16 @@ describe("structured project content", () => {
       mediaStatus: "placeholder"
     });
     expect(projects.find((project) => project.slug === "cyberspace")?.externalLinks).toContainEqual({
+      label: "Bandcamp",
+      url: "https://shenao.bandcamp.com/album/cyberspace"
+    });
+    expect(projects.find((project) => project.slug === "cyberspace")?.externalLinks).toContainEqual({
       label: "NetEase Music",
       url: "https://music.163.com/#/album?id=368232911"
+    });
+    expect(projects.find((project) => project.slug === "bug-party")?.externalLinks).toContainEqual({
+      label: "Bandcamp",
+      url: "https://shenao.bandcamp.com/album/bug-party"
     });
     expect(projects.find((project) => project.slug === "bug-party")?.externalLinks).toContainEqual({
       label: "NetEase Music",

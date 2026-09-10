@@ -71,6 +71,8 @@ export default function App({ initialPath }: AppProps) {
     <MusicReleasePage navigate={navigate} />
   ) : path.startsWith("/work/role-model") ? (
     <RoleModelPage navigate={navigate} />
+  ) : path.startsWith("/work/fancy-a-bite") ? (
+    <FancyABitePage navigate={navigate} />
   ) : path.startsWith("/work/no-idea") ? (
     <NoIdeaPage navigate={navigate} />
   ) : path.startsWith("/work/openband-openscore") ? (
@@ -773,6 +775,41 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
       <section className="detail-band">
         <h2>CREDITS</h2>
         <p>DIRECTOR / HONGXUAN WANG</p>
+      </section>
+      <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
+    </ProjectShell>
+  );
+}
+
+function FancyABitePage({ navigate }: { navigate: (path: string) => void }) {
+  const project = getProject("fancy-a-bite")!;
+  const [heroImage, ...galleryImages] = project.images!;
+  const nextProject = nextProjectFor(project.slug);
+
+  return (
+    <ProjectShell kicker="PROJECT / THEATRE" title="FANCY A BITE?" project={project}>
+      <div className="project-layout project-layout-loose structured-detail-layout">
+        <figure className="project-figure fancy-a-bite-hero-figure">
+          <img className="fancy-a-bite-image fancy-a-bite-hero-image" src={assetUrl(heroImage.src)} alt={heroImage.alt} />
+        </figure>
+        <div className="project-meta">
+          <p>{project.intro}</p>
+          <MetaLines lines={[project.year, project.subtype, project.role?.join(" / ")]} />
+          <div className="link-row">
+            {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+          </div>
+        </div>
+      </div>
+      <section className="detail-band">
+        <h2>CREATIVE APPROACH</h2>
+        <p>{project.creativeApproach}</p>
+      </section>
+      <section className="fancy-a-bite-gallery" aria-label="Fancy A BITE? image gallery">
+        {galleryImages.map((image, index) => (
+          <figure className={`project-figure fancy-a-bite-gallery-item fancy-a-bite-gallery-item-${index + 1}`} key={image.src}>
+            <img className="fancy-a-bite-image" src={assetUrl(image.src)} alt={image.alt} />
+          </figure>
+        ))}
       </section>
       <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
     </ProjectShell>
@@ -1495,7 +1532,9 @@ function showSelectedMedia(slug: string) {
 function nextProjectFor(slug: string) {
   const visibleProjects = selectedWorks.filter((project) => project.verificationStatus !== "needs-review");
   const index = visibleProjects.findIndex((project) => project.slug === slug);
-  const next = visibleProjects[index >= 0 ? (index + 1) % visibleProjects.length : 0];
+  const requestedNext = getProject(slug)?.nextProjectSlug;
+  const next = (requestedNext && getProject(requestedNext))
+    || visibleProjects[index >= 0 ? (index + 1) % visibleProjects.length : 0];
   const title = next.slug === "cyberspace" || next.slug === "bug-party"
     ? "CYBERSPACE / BUG PARTY"
     : next.title.toUpperCase();

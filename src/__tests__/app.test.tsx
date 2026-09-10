@@ -10,6 +10,7 @@ beforeEach(() => {
 
 afterEach(() => {
   window.scrollTo = originalScrollTo;
+  window.history.replaceState({}, "", "/");
   cleanup();
 });
 
@@ -280,6 +281,34 @@ describe("SHEN AO site IA", () => {
 
     fireEvent.click(main.getByRole("button", { name: /NEXT PROJECT FANCY A BITE\?/ }));
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "FANCY A BITE?" })).toBeInTheDocument();
+  });
+
+  it("renders the confirmed Fancy A BITE? hero, stage gallery, and poster without media placeholders", () => {
+    render(<App initialPath="/work/fancy-a-bite" />);
+
+    const main = within(screen.getByRole("main"));
+    expect(main.getAllByRole("img").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/portfolio-projects/fancy-a-bite-stage-projection.jpeg",
+      "/assets/portfolio-projects/fancy-a-bite-stage.jpeg",
+      "/assets/portfolio-projects/fancy-a-bite-dark-stage.jpeg",
+      "/assets/portfolio-projects/fancy-a-bite-monochrome-performance.jpeg",
+      "/assets/portfolio-projects/fancy-a-bite-poster.jpeg"
+    ]);
+    expect(main.getByAltText("Performer in white beside blue live projection in Fancy A BITE?.")).toBeInTheDocument();
+    expect(main.getByAltText("Fancy A BITE? performance poster for Camden People's Theatre.")).toBeInTheDocument();
+    for (const placeholderText of ["HERO PHOTO", "SECONDARY STAGE IMAGE", "POSTER", "MEDIA SLOT"]) {
+      expect(main.queryByText(placeholderText)).not.toBeInTheDocument();
+    }
+  });
+
+  it("sends Fancy A BITE? to Untitled Land through the shared next-project sequence", () => {
+    window.history.replaceState({}, "", "/work/fancy-a-bite");
+    render(<App />);
+
+    const main = within(screen.getByRole("main"));
+    fireEvent.click(main.getByRole("button", { name: /NEXT PROJECT UNTITLED LAND/ }));
+    expect(window.location.pathname).toBe("/work/untitled-land");
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "UNTITLED LAND" })).toBeInTheDocument();
   });
 
   it("maps the old release routes and release INFO buttons to the combined detail page", () => {

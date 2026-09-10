@@ -2068,6 +2068,24 @@ button.text-arrow::after,
   pointer-events: none;
 }
 
+.fancy-a-bite-hero-figure {
+  align-self: start;
+}
+
+.fancy-a-bite-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.fancy-a-bite-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px;
+  align-items: start;
+  margin-top: 72px;
+}
+
 .work-media.work-project-image {
   border: 0;
   background: transparent;
@@ -4668,6 +4686,11 @@ button.text-arrow::after,
   }
 
   .role-model-gallery {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .fancy-a-bite-gallery {
     grid-template-columns: 1fr;
     gap: 28px;
   }

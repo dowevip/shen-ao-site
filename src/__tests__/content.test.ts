@@ -89,12 +89,30 @@ describe("structured project content", () => {
         { label: "PROJECT / PRESS ↗", url: "https://cptheatre.co.uk/whatson/Big-Bang-18-March-2024" },
         { label: "SOUNDCLOUD ↗", url: "https://soundcloud.com/fancy-a-bite/fancy-a-bite" }
       ],
-      detailMedia: [
-        { label: "HERO PHOTO", variant: "landscape" },
-        { label: "SECONDARY STAGE IMAGE", variant: "landscape" },
-        { label: "POSTER", variant: "portrait" }
+      images: [
+        {
+          src: "/assets/portfolio-projects/fancy-a-bite-stage-projection.jpeg",
+          alt: "Performer in white beside blue live projection in Fancy A BITE?."
+        },
+        {
+          src: "/assets/portfolio-projects/fancy-a-bite-stage.jpeg",
+          alt: "Animal silhouettes in front of a projected stage image in Fancy A BITE?."
+        },
+        {
+          src: "/assets/portfolio-projects/fancy-a-bite-dark-stage.jpeg",
+          alt: "Performers gathered around a table in a dark scene from Fancy A BITE?."
+        },
+        {
+          src: "/assets/portfolio-projects/fancy-a-bite-monochrome-performance.jpeg",
+          alt: "Black-and-white performance image from Fancy A BITE?."
+        },
+        {
+          src: "/assets/portfolio-projects/fancy-a-bite-poster.jpeg",
+          alt: "Fancy A BITE? performance poster for Camden People's Theatre."
+        }
       ]
     });
+    expect(projects.find((project) => project.slug === "fancy-a-bite")?.detailMedia).toBeUndefined();
 
     expect(projects.find((project) => project.slug === "untitled-land")).toMatchObject({
       category: "Moving Image",

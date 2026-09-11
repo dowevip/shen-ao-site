@@ -629,7 +629,7 @@ export const projects: Project[] = [
     verificationStatus: "archive-only",
     mediaStatus: "confirmed"
   },
-  { slug: "nostopia-playable-nft", title: "Nostopia Playable NFT", year: "2022", category: "Cross-media", subtype: "Game music", role: ["Score"], archiveOrder: 2, workSection: "archive", workRoleLabel: "GAME MUSIC", verificationStatus: "archive-only", mediaStatus: "placeholder" },
+  { slug: "nostopia-playable-nft", title: "Nostopia Playable NFT", year: "2022", category: "Cross-media", subtype: "Game music", role: ["Score"], archiveOrder: 2, workSection: "archive", workRoleLabel: "GAME MUSIC / SCORE", verificationStatus: "archive-only", mediaStatus: "placeholder" },
   {
     slug: "iqiyi-vr-se",
     title: "iQIYI VR SE Promo",
@@ -666,7 +666,7 @@ export const projects: Project[] = [
     ],
     archiveOrder: 4,
     workSection: "archive",
-    workRoleLabel: "GAME MUSIC",
+    workRoleLabel: "GAME MUSIC / SCORE",
     verificationStatus: "archive-only",
     mediaStatus: "confirmed"
   },

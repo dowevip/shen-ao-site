@@ -275,13 +275,13 @@ function MusicPage({ navigate }: { navigate: (path: string) => void }) {
         </div>
       </section>
       <section className="music-release-section other-release-section" data-testid="music-scoring-commissioned">
-        <h2>SCORING / COMMISSIONED MUSIC</h2>
+        <h2>SELECTED WORKS</h2>
         <div className="production-scoring-grid">
           {musicScoringProjects.map((project) => <MusicIndexItem project={project} navigate={navigate} variant="archive" key={project.slug} />)}
         </div>
       </section>
       <section className="music-release-section music-more-commissioned-section" data-testid="music-more-commissioned">
-        <h2>ADDITIONAL COMMISSIONED WORK</h2>
+        <h2>ADDITIONAL WORKS</h2>
         <div className="more-commissioned-grid" data-testid="music-more-commissioned-images">
           {moreCommissionedImageProjects.map((project) => <MusicIndexItem project={project} navigate={navigate} variant="commissioned-archive-image" key={project.slug} />)}
         </div>
@@ -310,7 +310,7 @@ function MusicIndexItem({ project, navigate, variant }: { project: Project; navi
       {showArtwork && <ReleaseArtwork project={project} showPlaceholder={false} />}
       <div className="music-release-copy">
         <h3>{title}</h3>
-        <MetaLines lines={[project.year, project.subtype, project.workRoleLabel, project.role?.join(" / "), project.label]} />
+        <MetaLines lines={musicIndexMetaLines(project, variant)} />
         {!isArchiveOnly && (
           <div className="link-row">
             {watchLink && <ExternalLink href={watchLink.url}>WATCH ↗</ExternalLink>}
@@ -323,6 +323,18 @@ function MusicIndexItem({ project, navigate, variant }: { project: Project; navi
       </div>
     </article>
   );
+}
+
+function musicIndexMetaLines(project: Project, variant: "featured" | "secondary" | "archive" | "commissioned-archive-image" | "commissioned-archive-text") {
+  if (variant === "secondary") {
+    return [project.year, project.subtype];
+  }
+
+  if (variant === "archive" || variant === "commissioned-archive-image" || variant === "commissioned-archive-text") {
+    return [project.year, project.workRoleLabel ?? project.subtype ?? project.category];
+  }
+
+  return [project.year, project.subtype, project.workRoleLabel, project.role?.join(" / "), project.label];
 }
 
 function hasProjectMedia(project: Project) {
@@ -1528,12 +1540,13 @@ function Collaboration() {
 function Footer() {
   return (
     <footer className="site-footer">
-      <span>SHEN AO</span>
-      <a href="https://shenao.bandcamp.com/">BANDCAMP</a>
-      <a href="https://soundcloud.com/shen-ao">SOUNDCLOUD</a>
-      <a href="https://www.mixcloud.com/teendrum/">MIXCLOUD</a>
-      <span>LONDON</span>
-      <span>© 2026 SHEN AO</span>
+      <span className="footer-brand">SHEN AO</span>
+      <div className="footer-platforms" aria-label="Music platforms">
+        <a href="https://shenao.bandcamp.com/">BANDCAMP</a>
+        <a href="https://soundcloud.com/shen-ao">SOUNDCLOUD</a>
+        <a href="https://www.mixcloud.com/teendrum/">MIXCLOUD</a>
+      </div>
+      <span className="footer-credit">© 2026 SHEN AO · LONDON</span>
     </footer>
   );
 }

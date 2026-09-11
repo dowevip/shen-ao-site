@@ -86,7 +86,7 @@ describe("SHEN AO site IA", () => {
     }
   });
 
-  it("renders MUSIC with releases, a primary commissioned-music group, and a weaker secondary group", () => {
+  it("renders MUSIC with releases, selected works, and a weaker additional works group", () => {
     render(<App initialPath="/music" />);
 
     const main = within(screen.getByRole("main"));
@@ -94,8 +94,10 @@ describe("SHEN AO site IA", () => {
     expect(screen.queryByText("MUSIC / INDEX")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "FEATURED" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "RELEASES" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "SCORING / COMMISSIONED MUSIC" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "ADDITIONAL COMMISSIONED WORK" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "SELECTED WORKS" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "ADDITIONAL WORKS" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 2, name: "SCORING / COMMISSIONED MUSIC" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 2, name: "ADDITIONAL COMMISSIONED WORK" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 2, name: "PRODUCTION / SCORING" })).not.toBeInTheDocument();
 
     for (const title of [
@@ -159,10 +161,16 @@ describe("SHEN AO site IA", () => {
     expect(within(more.getByTestId("music-index-item-zhang-jian-jingdezhen")).queryByRole("link")).not.toBeInTheDocument();
     expect(within(more.getByTestId("music-index-item-zhang-jian-jingdezhen")).queryByRole("button")).not.toBeInTheDocument();
     expect(within(more.getByTestId("music-index-item-the-back-door-of-stage")).queryByRole("link")).not.toBeInTheDocument();
+    expect(within(more.getByTestId("music-index-item-nostopia-playable-nft")).queryByRole("img")).not.toBeInTheDocument();
+    expect(within(more.getByTestId("music-index-item-douyin-cultural-promo")).queryByRole("img")).not.toBeInTheDocument();
+    expect(within(more.getByTestId("music-index-item-mr-monster-resource")).queryByRole("img")).not.toBeInTheDocument();
+    expect(within(more.getByTestId("music-index-item-tunnel")).queryByRole("img")).not.toBeInTheDocument();
 
-    expect(screen.getAllByText("SCORE").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("FILM / SCORE + MIX")).toBeInTheDocument();
-    expect(screen.getAllByText("COMPOSITION").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("EXPERIMENTAL FILM / SCORE").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("THEATRE / COMPOSITION").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("AUDIOVISUAL COMPOSITION / MIX")).not.toBeInTheDocument();
+    expect(screen.getAllByText("GAME MUSIC / SCORE").length).toBeGreaterThanOrEqual(1);
     const musicListenHrefs = screen.getAllByRole("link", { name: "LISTEN ↗" }).map((link) => link.getAttribute("href"));
     expect(musicListenHrefs).toEqual(expect.arrayContaining([
       "https://shenao.bandcamp.com/album/cyberspace",
@@ -200,6 +208,18 @@ describe("SHEN AO site IA", () => {
     expect(main.queryByRole("link", { name: "BANDCAMP" })).not.toBeInTheDocument();
     expect(main.queryByRole("link", { name: "SOUNDCLOUD" })).not.toBeInTheDocument();
     expect(main.queryByRole("link", { name: "NETEASE MUSIC" })).not.toBeInTheDocument();
+  });
+
+  it("renders a concise footer with music platform links", () => {
+    render(<App initialPath="/music" />);
+
+    const footer = within(screen.getByRole("contentinfo"));
+    expect(footer.getByText("SHEN AO")).toBeInTheDocument();
+    expect(footer.getByText("© 2026 SHEN AO · LONDON")).toBeInTheDocument();
+    expect(footer.getByRole("link", { name: "BANDCAMP" })).toHaveAttribute("href", "https://shenao.bandcamp.com/");
+    expect(footer.getByRole("link", { name: "SOUNDCLOUD" })).toHaveAttribute("href", "https://soundcloud.com/shen-ao");
+    expect(footer.getByRole("link", { name: "MIXCLOUD" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");
+    expect(footer.queryByText("LONDON")).not.toBeInTheDocument();
   });
 
   it("routes each primary commissioned MUSIC INFO button to its internal detail page", () => {

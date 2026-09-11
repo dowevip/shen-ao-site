@@ -84,6 +84,9 @@ describe("SHEN AO site IA", () => {
     ]) {
       expect(within(screen.getByRole("main")).queryByText(removedHomeText)).not.toBeInTheDocument();
     }
+
+    fireEvent.click(live.getByRole("button", { name: "ALL LIVE" }));
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "LIVE" })).toBeInTheDocument();
   });
 
   it("renders MUSIC with releases, selected works, and a weaker additional works group", () => {

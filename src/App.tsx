@@ -166,7 +166,7 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
       </section>
 
       <section className="home-related-live-section flow-section" data-testid="home-related-live">
-        <h2>RELATED LIVE</h2>
+        <SectionHeadingRow title="RELATED LIVE" actionLabel="ALL LIVE" onAction={() => navigate("/live")} />
         <div className="home-live-list">
           {relatedLive.map((event) => (
             <ExternalLink className="home-live-row" href={event.externalLinks![0].url} key={event.id}>
@@ -180,12 +180,21 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
       </section>
 
       <section className="press-radio-preview home-press-section" data-testid="home-press">
-        <h2>PRESS</h2>
+        <SectionHeadingRow title="PRESS" />
         <div className="home-press-index">
           {releasePress.map((item) => <HomePressLine item={item} key={item.id} />)}
         </div>
       </section>
     </main>
+  );
+}
+
+function SectionHeadingRow({ title, actionLabel, onAction }: { title: string; actionLabel?: string; onAction?: () => void }) {
+  return (
+    <div className="section-heading-row">
+      <h2>{title}</h2>
+      {actionLabel && <button className="text-arrow" onClick={onAction}>{actionLabel}</button>}
+    </div>
   );
 }
 

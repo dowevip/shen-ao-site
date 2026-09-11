@@ -2,12 +2,23 @@ import { pressItems } from "./press";
 
 export type ProjectCategory = "Music" | "Moving Image" | "Live" | "Cross-media" | "Curation" | "Theatre" | "Exhibition" | "Broadcast";
 
-export type ProjectLink = { label: string; url: string };
+export type ProjectLink = {
+  label: string;
+  url: string;
+  englishNote?: string;
+  hideFromEnglishUi?: boolean;
+};
 export type MusicReleaseSection = "featured" | "other";
 export type WorkSection = "selected" | "scoring" | "archive";
-export type MediaSlot = { label: string; variant: "portrait" | "landscape" | "cinematic" | "square" };
+export type MediaSlot = {
+  label: string;
+  variant: "portrait" | "landscape" | "cinematic" | "square";
+  src?: string;
+  alt?: string;
+};
 export type RelatedWork = { title: string; year?: string; role?: string; description?: string; media?: MediaSlot };
 export type SelectedCase = { title: string; url: string; description?: string; media?: MediaSlot };
+export type ArchiveGalleryItem = { title: string; src: string; alt: string; url?: string };
 
 export type Project = {
   slug: string;
@@ -28,9 +39,12 @@ export type Project = {
   relatedTitles?: string[];
   relatedWorks?: RelatedWork[];
   selectedCases?: SelectedCase[];
+  archiveGallery?: ArchiveGalleryItem[];
   detailMedia?: MediaSlot[];
   artwork?: string;
   images?: { src: string; alt: string }[];
+  showImagesOnDetail?: boolean;
+  externalAccessNote?: string;
   photographyCredit?: string;
   featured?: "home-primary" | "home-secondary" | "practice";
   selectedOrder?: number;
@@ -181,12 +195,16 @@ export const projects: Project[] = [
     year: "2024",
     category: "Music",
     subtype: "Release",
-    externalLinks: [{ label: "NetEase Music", url: "https://music.163.com/#/album?id=147663057" }],
+    externalLinks: [
+      { label: "Bandcamp", url: "https://shenao.bandcamp.com/album/rang-wo-shuo" },
+      { label: "NetEase Music", url: "https://music.163.com/#/album?id=147663057" }
+    ],
+    artwork: "/assets/portfolio-projects/let-me-speak-cover.jpg",
     musicReleaseSection: "other",
     musicReleaseOrder: 1,
     visibleInArchive: false,
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "two-dreadful-children-unipre",
@@ -197,10 +215,11 @@ export const projects: Project[] = [
     subtype: "Release",
     label: "Self-released",
     externalLinks: [{ label: "Bandcamp", url: "https://shenao.bandcamp.com/album/two-dreadful-children-unipre" }],
+    artwork: "/assets/portfolio-projects/two-dreadful-children-unipre-cover.png",
     musicReleaseSection: "other",
     musicReleaseOrder: 2,
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "bamboo-blend",
@@ -209,11 +228,12 @@ export const projects: Project[] = [
     category: "Music",
     subtype: "Release",
     externalLinks: [{ label: "SoundCloud", url: "https://soundcloud.com/shen-ao/bamboo-blend" }],
+    artwork: "/assets/portfolio-projects/bamboo-blend-cover.jpg",
     musicReleaseSection: "other",
     musicReleaseOrder: 3,
     visibleInArchive: false,
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "no-idea",
@@ -266,24 +286,42 @@ export const projects: Project[] = [
     intro: "Untitled Land is an experimental short film by independent director Yuan Ye, exploring the experience of constructing virtual worlds and the effects of that process on perception.",
     creativeApproach: "The score combines analogue synthesiser with acoustic instruments, seeking a sense of reality being constructed through virtual means and responding to the film’s continual movement between physical and virtual imagery.",
     externalLinks: [
-      { label: "WATCH / PROJECT ↗", url: "https://2022art.cafa.edu.cn/pc/infoDetails/331" },
-      { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=146407778" },
+      {
+        label: "WATCH / PROJECT ↗",
+        url: "https://2022art.cafa.edu.cn/pc/infoDetails/331",
+        englishNote: "This project page may not be accessible outside mainland China."
+      },
+      { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=146407778", hideFromEnglishUi: true },
       { label: "SOUNDCLOUD ↗", url: "https://soundcloud.com/shen-ao/sets/untitled-land" }
     ],
     images: [
       {
         src: "/assets/portfolio-projects/untitled-land-project.jpeg",
-        alt: "Untitled Land project image from the portfolio."
+        alt: "Untitled Land title image showing a monochrome virtual landscape."
+      },
+      {
+        src: "/assets/portfolio-projects/untitled-land-film-still-01.png",
+        alt: "Dark blue virtual landscape with pale suspended forms in Untitled Land."
+      },
+      {
+        src: "/assets/portfolio-projects/untitled-land-film-still-02.png",
+        alt: "White virtual vegetation with green foliage in Untitled Land."
+      },
+      {
+        src: "/assets/portfolio-projects/untitled-land-film-still-03.png",
+        alt: "A ladder rising through a blue virtual sky in Untitled Land."
+      },
+      {
+        src: "/assets/portfolio-projects/untitled-land-film-still-04.png",
+        alt: "Grey virtual vegetation beneath a blue sky in Untitled Land."
+      },
+      {
+        src: "/assets/portfolio-projects/untitled-land-film-still-05.png",
+        alt: "Dense white virtual vegetation in Untitled Land."
       }
     ],
-    detailMedia: [
-      { label: "HERO / PROJECT IMAGE", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" }
-    ],
+    showImagesOnDetail: true,
+    nextProjectSlug: "clouds-from-underground",
     scoringOrder: 3,
     workSection: "scoring",
     workRoleLabel: "EXPERIMENTAL FILM / SCORE",
@@ -297,10 +335,16 @@ export const projects: Project[] = [
     category: "Exhibition",
     subtype: "Cross-media",
     externalLinks: [{ label: "WATCH ↗", url: "https://youtube.com/playlist?list=PLg8zSVDXI0lFa7DHc4Lq9zd5Vu5FBtMPZ" }],
+    images: [
+      {
+        src: "/assets/portfolio-projects/paradise-dream-2.jpg",
+        alt: "Paradise Dream 2 exhibition image."
+      }
+    ],
     archiveOrder: 5,
     workSection: "archive",
     verificationStatus: "confirmed",
-    mediaStatus: "placeholder"
+    mediaStatus: "confirmed"
   },
   {
     slug: "clouds-from-underground",
@@ -312,30 +356,59 @@ export const projects: Project[] = [
     intro: "Clouds from Underground is an experimental short film by independent director Shao Ze, examining the history and present condition of Anshan as a resource-based industrial city.",
     creativeApproach: "The score combines piano, violin and synthesiser drones through a minimalist approach drawing on both electronic and classical music, creating the suffocating mechanical atmosphere present in the film.",
     externalLinks: [
-      { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=131037851" }
+      { label: "WATCH ↗", url: "https://youtu.be/BbDtWCoWifU" },
+      {
+        label: "NETEASE MUSIC ↗",
+        url: "https://music.163.com/#/album?id=131037851",
+        englishNote: "This link may not be accessible outside mainland China."
+      }
     ],
     images: [
       {
-        src: "/assets/portfolio-projects/clouds-from-underground-artwork.jpeg",
-        alt: "Clouds from Underground artwork from the portfolio."
+        src: "/assets/portfolio-projects/clouds-from-underground-cover.jpg",
+        alt: "Clouds from Underground cover artwork."
+      },
+      {
+        src: "/assets/portfolio-projects/clouds-from-underground-film-still-01.jpg",
+        alt: "Film still from Clouds from Underground showing smoke rising from an industrial excavation."
+      },
+      {
+        src: "/assets/portfolio-projects/clouds-from-underground-film-still-02.jpg",
+        alt: "Film still from Clouds from Underground showing a rail control room and landscape through windows."
+      },
+      {
+        src: "/assets/portfolio-projects/clouds-from-underground-film-still-03.jpg",
+        alt: "Film still from Clouds from Underground showing an aerial view of an open industrial site."
+      },
+      {
+        src: "/assets/portfolio-projects/clouds-from-underground-film-still-04.jpg",
+        alt: "Film still from Clouds from Underground showing a monitor inside industrial equipment."
+      },
+      {
+        src: "/assets/portfolio-projects/clouds-from-underground-film-still-05.jpg",
+        alt: "Film still from Clouds from Underground showing railway tracks and industrial machinery."
+      },
+      {
+        src: "/assets/portfolio-projects/clouds-from-underground-film-still-06.jpg",
+        alt: "Film still from Clouds from Underground showing vehicles entering an industrial tunnel."
       }
     ],
+    showImagesOnDetail: true,
     relatedWorks: [
       {
         title: "YISUO / 忆所",
         year: "2021",
         role: "PERFORMANCE VIDEO / SCORE",
         description: "A related performance-documentation score created with a Mother-32 synthesiser as a continuous seven-minute ambient work.",
-        media: { label: "RELATED WORK MEDIA", variant: "landscape" }
+        media: {
+          label: "RELATED WORK MEDIA",
+          variant: "landscape",
+          src: "/assets/portfolio-projects/yisuo-performance-video.jpg",
+          alt: "Still from YISUO / 忆所 showing a performer seated among white stuffed material."
+        }
       }
     ],
-    detailMedia: [
-      { label: "HERO / PROJECT ARTWORK", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" },
-      { label: "FILM STILL", variant: "landscape" }
-    ],
+    nextProjectSlug: "cctv-selected-broadcast-work",
     scoringOrder: 4,
     workSection: "scoring",
     workRoleLabel: "EXPERIMENTAL FILM / SCORE",
@@ -350,33 +423,174 @@ export const projects: Project[] = [
     subtype: "Broadcast",
     role: ["Music editing", "Production"],
     intro: "From 2021 to 2022, Shen Ao worked on music editing and production for CCTV-13 promotional content, contributing to more than 50 short-form television promotional projects.",
+    externalAccessNote: "Some links on this page may not be accessible outside mainland China.",
     selectedCases: [
       {
-        title: "LONG TENG HU YUE ZHONG GUO NIAN / 龙腾虎跃中国年",
+        title: "Year of the Tiger: A Festive Chinese New Year",
         url: "https://www.bilibili.com/video/BV1pS4y1y72L",
-        description: "A Chinese New Year promotional animation combining the Winter Olympics with the Year of the Tiger. The score uses Chinese traditional instruments and percussion ensemble passages for heightened dramatic tension.",
-        media: { label: "SELECTED WORK THUMBNAIL", variant: "landscape" }
+        description: "A Chinese New Year animation combining the Winter Olympics with the Year of the Tiger, scored with Chinese instruments and percussion ensemble passages.",
+        media: {
+          label: "SELECTED WORK THUMBNAIL",
+          variant: "landscape",
+          src: "/assets/portfolio-projects/cctv-long-teng-hu-yue.jpeg",
+          alt: "CCTV-13 Year of the Tiger promotional animation title image."
+        }
       },
       {
-        title: "IN THE FIELD OF HOPE / 在希望的田野上",
+        title: "In the Field of Hope",
         url: "https://www.bilibili.com/video/BV1Jt4y1s7De",
         description: "A promotional short centred on summer grain cultivation, using orchestral writing to rework the Chinese song “In the Field of Hope”.",
-        media: { label: "SELECTED WORK THUMBNAIL", variant: "landscape" }
+        media: {
+          label: "SELECTED WORK THUMBNAIL",
+          variant: "landscape",
+          src: "/assets/portfolio-projects/cctv-zai-xi-wang-de-tian-ye.jpeg",
+          alt: "CCTV-13 In the Field of Hope promotional short title image."
+        }
       },
       {
-        title: "RUI TU CHENG XIANG ZHONG GUO NIAN / 瑞兔呈祥中国年",
+        title: "Year of the Rabbit: A Festive Chinese New Year",
         url: "https://www.bilibili.com/video/BV11d4y1V7jD",
-        media: { label: "SELECTED WORK THUMBNAIL", variant: "landscape" }
+        description: "A CCTV-13 Chinese New Year promotional short for the Year of the Rabbit.",
+        media: {
+          label: "SELECTED WORK THUMBNAIL",
+          variant: "landscape",
+          src: "/assets/portfolio-projects/cctv-rui-tu-cheng-xiang.jpeg",
+          alt: "CCTV-13 Year of the Rabbit promotional short title image."
+        }
       }
     ],
-    relatedTitles: ["大美边疆行", "中国空间站系列", "高端访谈"],
+    archiveGallery: [
+      {
+        title: "CCTV News Channel: China Space Station Series",
+        src: "/assets/portfolio-projects/cctv-13-space-station.jpeg",
+        alt: "CCTV News Channel China Space Station series poster.",
+        url: "https://www.bilibili.com/video/BV1A5DbY9EBL"
+      },
+      {
+        title: "National Moral Role Models",
+        src: "/assets/portfolio-projects/cctv-archive-quan-guo-dao-de-mo-fan.jpeg",
+        alt: "CCTV-13 National Moral Role Models poster."
+      },
+      {
+        title: "13th China Airshow",
+        src: "/assets/portfolio-projects/cctv-archive-airshow-china.jpeg",
+        alt: "CCTV-13 Airshow China 2021 poster."
+      },
+      {
+        title: "Full Moon, Full Bloom",
+        src: "/assets/portfolio-projects/cctv-archive-yue-hua-yuan.jpeg",
+        alt: "CCTV-13 Full Moon, Full Bloom poster."
+      },
+      {
+        title: "Meeting in a Great Era",
+        src: "/assets/portfolio-projects/cctv-archive-gou-jian-fa-zhi-da-shi-dai.jpeg",
+        alt: "CCTV-13 Meeting in a Great Era poster."
+      },
+      {
+        title: "Spotlight on COP15 Biodiversity Conference",
+        src: "/assets/portfolio-projects/cctv-archive-cop15-biodiversity.jpeg",
+        alt: "CCTV-13 COP15 biodiversity convention poster."
+      },
+      {
+        title: "Together for a Shared Future",
+        src: "/assets/portfolio-projects/cctv-archive-together-for-a-shared-future-trophy.jpeg",
+        alt: "CCTV-13 Together for a Shared Future trophy poster."
+      },
+      {
+        title: "Winter Olympics Countdown",
+        src: "/assets/portfolio-projects/cctv-archive-together-for-a-shared-future-snow.jpeg",
+        alt: "CCTV-13 Together for a Shared Future snow poster."
+      },
+      {
+        title: "Disaster Prevention, Safer Lives",
+        src: "/assets/portfolio-projects/cctv-archive-anti-fraud-safety-awareness.jpeg",
+        alt: "CCTV-13 public safety awareness poster."
+      },
+      {
+        title: "My Family, My Country",
+        src: "/assets/portfolio-projects/cctv-archive-qi-hang-zhong-guo.jpeg",
+        alt: "CCTV-13 My Family, My Country poster."
+      },
+      {
+        title: "Cherish Life, Prevent Drowning",
+        src: "/assets/portfolio-projects/cctv-archive-zhen-ai-sheng-ming-yu-fang-ni-shui.jpeg",
+        alt: "CCTV-13 Cherish Life, Prevent Drowning poster."
+      },
+      {
+        title: "Spring Festival Travel Diary",
+        src: "/assets/portfolio-projects/cctv-archive-chun-yun-jin-xing-shi.jpeg",
+        alt: "CCTV-13 Spring Festival Travel Diary poster."
+      },
+      {
+        title: "Spring Festival at the Grassroots 2022",
+        src: "/assets/portfolio-projects/cctv-archive-xin-chun-zou-ji-ceng-2022.jpeg",
+        alt: "CCTV-13 Spring Festival at the Grassroots 2022 poster."
+      },
+      {
+        title: "Setting Sail in a New Era",
+        src: "/assets/portfolio-projects/cctv-archive-qi-hang-xin-shi-dai.jpeg",
+        alt: "CCTV-13 Setting Sail in a New Era poster."
+      },
+      {
+        title: "Journey Along China’s Frontiers",
+        src: "/assets/portfolio-projects/cctv-da-mei-bian-jiang-xing.jpeg",
+        alt: "CCTV-13 Journey Along China’s Frontiers poster.",
+        url: "https://www.bilibili.com/video/BV1Wt4y1H78k"
+      },
+      {
+        title: "China in the New Era",
+        src: "/assets/portfolio-projects/cctv-archive-xin-shi-dai-de-zhong-guo.jpeg",
+        alt: "CCTV-13 China in the New Era poster."
+      },
+      {
+        title: "Advancing on a New Journey",
+        src: "/assets/portfolio-projects/cctv-archive-fen-jin-xin-zheng-cheng.jpeg",
+        alt: "CCTV-13 Advancing on a New Journey poster."
+      },
+      {
+        title: "The Two Sessions and Us",
+        src: "/assets/portfolio-projects/cctv-archive-liang-hui-ni-wo-ta.jpeg",
+        alt: "CCTV-13 The Two Sessions and Us poster."
+      },
+      {
+        title: "Turning the Blade Inward",
+        src: "/assets/portfolio-projects/cctv-archive-jiu-wen-zhong-guo.jpeg",
+        alt: "CCTV-13 Turning the Blade Inward poster."
+      },
+      {
+        title: "Striving Fulfils Dreams",
+        src: "/assets/portfolio-projects/cctv-archive-fen-dou-cheng-jiu-meng-xiang.jpeg",
+        alt: "CCTV-13 Striving Fulfils Dreams poster."
+      },
+      {
+        title: "County Development in Focus",
+        src: "/assets/portfolio-projects/cctv-archive-zou-jin-xian-cheng-kan-fa-zhan.jpeg",
+        alt: "CCTV-13 County Development in Focus poster."
+      },
+      {
+        title: "China Through Foreign Eyes",
+        src: "/assets/portfolio-projects/cctv-archive-fei-fan-shi-nian-wai-yan-kan-zhong-guo.jpeg",
+        alt: "CCTV-13 China Through Foreign Eyes poster."
+      },
+      {
+        title: "Top Talk",
+        src: "/assets/portfolio-projects/cctv-gao-duan-fang-tan.jpeg",
+        alt: "CCTV-13 Top Talk poster.",
+        url: "http://www.bilibili.com/video/BV16f7BzMEJU"
+      },
+      {
+        title: "Archaeology of China: Tracing Civilisation Origins",
+        src: "/assets/portfolio-projects/cctv-archive-kao-gu-zhong-guo.jpeg",
+        alt: "CCTV-13 Archaeology of China poster."
+      }
+    ],
     images: [
       {
         src: "/assets/portfolio-projects/cctv-13-space-station.jpeg",
         alt: "CCTV-13 China Space Station promotional image from the portfolio."
       }
     ],
-    detailMedia: [{ label: "REPRESENTATIVE HERO", variant: "landscape" }],
+    showImagesOnDetail: true,
     scoringOrder: 5,
     workSection: "scoring",
     workRoleLabel: "BROADCAST / MUSIC EDITING + PRODUCTION",
@@ -405,7 +619,7 @@ export const projects: Project[] = [
     role: ["Score"],
     images: [
       {
-        src: "/assets/portfolio-projects/zhang-jian-jingdezhen-still.jpeg",
+        src: "/assets/portfolio-projects/zhang-jian-jingdezhen.jpg",
         alt: "Zhang Jian and Jingdezhen documentary still from the portfolio."
       }
     ],
@@ -470,6 +684,32 @@ export const scoringMovingImageProjects = projects
 export const archiveProjects = projects
   .filter((project) => project.workSection === "archive" && project.archiveOrder)
   .sort((a, b) => Number(a.archiveOrder) - Number(b.archiveOrder));
+
+const musicScoringSlugs = [
+  "role-model",
+  "fancy-a-bite",
+  "untitled-land",
+  "clouds-from-underground",
+  "cctv-selected-broadcast-work"
+];
+
+const moreCommissionedSlugs = [
+  "iqiyi-vr-se",
+  "the-back-door-of-stage",
+  "nostopia-playable-nft",
+  "paradise-dream-2",
+  "zhang-jian-jingdezhen",
+  "douyin-cultural-promo",
+  "mr-monster-resource",
+  "tunnel"
+];
+
+const orderedProjects = (slugs: string[]) => projects
+  .filter((project) => slugs.includes(project.slug))
+  .sort((a, b) => slugs.indexOf(a.slug) - slugs.indexOf(b.slug));
+
+export const musicScoringProjects = orderedProjects(musicScoringSlugs);
+export const moreCommissionedProjects = orderedProjects(moreCommissionedSlugs);
 
 export const getProject = (slug: string) => projects.find((project) => project.slug === slug);
 

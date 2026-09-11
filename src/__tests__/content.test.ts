@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { archiveFilters, archiveProjects, featuredMusicReleases, musicPlatformLinks, otherMusicReleases, projects, scoringMovingImageProjects, selectedWorks } from "../content/projects";
+import { archiveFilters, archiveProjects, featuredMusicReleases, moreCommissionedProjects, musicPlatformLinks, musicScoringProjects, otherMusicReleases, projects, scoringMovingImageProjects, selectedWorks } from "../content/projects";
 import { noIdeaEvents } from "../content/noIdeaEvents";
 import { djPosterArchive, earlierPerformances, livePlatformLinks, selectedLiveEvents } from "../content/liveEvents";
 import { noIdeaProject, openbandProject, practiceProjects } from "../content/practiceProjects";
@@ -67,6 +67,45 @@ describe("structured project content", () => {
     expect(archiveProjects.find((project) => project.slug === "paradise-dream-2")?.year).toBe("2019");
   });
 
+  it("exposes the curated MUSIC commissioned-music groupings without changing WORK groupings", () => {
+    expect(musicScoringProjects.map((project) => project.slug)).toEqual([
+      "role-model",
+      "fancy-a-bite",
+      "untitled-land",
+      "clouds-from-underground",
+      "cctv-selected-broadcast-work"
+    ]);
+    expect(moreCommissionedProjects.map((project) => project.slug)).toEqual([
+      "iqiyi-vr-se",
+      "the-back-door-of-stage",
+      "nostopia-playable-nft",
+      "paradise-dream-2",
+      "zhang-jian-jingdezhen",
+      "douyin-cultural-promo",
+      "mr-monster-resource",
+      "tunnel"
+    ]);
+    expect(musicScoringProjects.filter((project) => project.images?.[0]).map((project) => project.slug)).toEqual([
+      "role-model",
+      "fancy-a-bite",
+      "untitled-land",
+      "clouds-from-underground",
+      "cctv-selected-broadcast-work"
+    ]);
+    expect(moreCommissionedProjects.filter((project) => project.images?.[0]).map((project) => project.slug)).toEqual([
+      "iqiyi-vr-se",
+      "the-back-door-of-stage",
+      "paradise-dream-2",
+      "zhang-jian-jingdezhen"
+    ]);
+    expect(moreCommissionedProjects.filter((project) => !project.images?.[0] && !project.artwork).map((project) => project.slug)).toEqual([
+      "nostopia-playable-nft",
+      "douyin-cultural-promo",
+      "mr-monster-resource",
+      "tunnel"
+    ]);
+  });
+
   it("exposes complete first-stage WORK detail content without unconfirmed private material", () => {
     expect(projects.find((project) => project.slug === "role-model")).toMatchObject({
       intro: "Role Model follows the experience of Chinese-American Hollywood star Anna May Wong as she returned to her ancestral home in Taishan, Guangdong, after confronting racial discrimination and the sense of being caught between being “too American” and “not Chinese enough”.",
@@ -118,14 +157,28 @@ describe("structured project content", () => {
       category: "Moving Image",
       subtype: "Experimental Film",
       role: ["Score"],
+      nextProjectSlug: "clouds-from-underground",
       intro: "Untitled Land is an experimental short film by independent director Yuan Ye, exploring the experience of constructing virtual worlds and the effects of that process on perception.",
       creativeApproach: "The score combines analogue synthesiser with acoustic instruments, seeking a sense of reality being constructed through virtual means and responding to the film’s continual movement between physical and virtual imagery.",
       externalLinks: [
-        { label: "WATCH / PROJECT ↗", url: "https://2022art.cafa.edu.cn/pc/infoDetails/331" },
-        { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=146407778" },
+        {
+          label: "WATCH / PROJECT ↗",
+          url: "https://2022art.cafa.edu.cn/pc/infoDetails/331",
+          englishNote: "This project page may not be accessible outside mainland China."
+        },
+        { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=146407778", hideFromEnglishUi: true },
         { label: "SOUNDCLOUD ↗", url: "https://soundcloud.com/shen-ao/sets/untitled-land" }
+      ],
+      images: [
+        { src: "/assets/portfolio-projects/untitled-land-project.jpeg" },
+        { src: "/assets/portfolio-projects/untitled-land-film-still-01.png" },
+        { src: "/assets/portfolio-projects/untitled-land-film-still-02.png" },
+        { src: "/assets/portfolio-projects/untitled-land-film-still-03.png" },
+        { src: "/assets/portfolio-projects/untitled-land-film-still-04.png" },
+        { src: "/assets/portfolio-projects/untitled-land-film-still-05.png" }
       ]
     });
+    expect(projects.find((project) => project.slug === "untitled-land")?.detailMedia).toBeUndefined();
 
     const clouds = projects.find((project) => project.slug === "clouds-from-underground");
     expect(clouds).toMatchObject({
@@ -134,37 +187,81 @@ describe("structured project content", () => {
       role: ["Score"],
       intro: "Clouds from Underground is an experimental short film by independent director Shao Ze, examining the history and present condition of Anshan as a resource-based industrial city.",
       creativeApproach: "The score combines piano, violin and synthesiser drones through a minimalist approach drawing on both electronic and classical music, creating the suffocating mechanical atmosphere present in the film.",
+      nextProjectSlug: "cctv-selected-broadcast-work",
       externalLinks: [
-        { label: "NETEASE MUSIC ↗", url: "https://music.163.com/#/album?id=131037851" }
+        { label: "WATCH ↗", url: "https://youtu.be/BbDtWCoWifU" },
+        {
+          label: "NETEASE MUSIC ↗",
+          url: "https://music.163.com/#/album?id=131037851",
+          englishNote: "This link may not be accessible outside mainland China."
+        }
+      ],
+      images: [
+        { src: "/assets/portfolio-projects/clouds-from-underground-cover.jpg" },
+        { src: "/assets/portfolio-projects/clouds-from-underground-film-still-01.jpg" },
+        { src: "/assets/portfolio-projects/clouds-from-underground-film-still-02.jpg" },
+        { src: "/assets/portfolio-projects/clouds-from-underground-film-still-03.jpg" },
+        { src: "/assets/portfolio-projects/clouds-from-underground-film-still-04.jpg" },
+        { src: "/assets/portfolio-projects/clouds-from-underground-film-still-05.jpg" },
+        { src: "/assets/portfolio-projects/clouds-from-underground-film-still-06.jpg" }
       ],
       relatedWorks: [
         {
           title: "YISUO / 忆所",
           year: "2021",
           role: "PERFORMANCE VIDEO / SCORE",
-          description: "A related performance-documentation score created with a Mother-32 synthesiser as a continuous seven-minute ambient work."
+          description: "A related performance-documentation score created with a Mother-32 synthesiser as a continuous seven-minute ambient work.",
+          media: {
+            src: "/assets/portfolio-projects/yisuo-performance-video.jpg"
+          }
         }
       ]
     });
-    expect(clouds?.externalLinks?.some((link) => /youtube/i.test(link.url))).toBe(false);
+    expect(clouds?.detailMedia).toBeUndefined();
 
     expect(projects.find((project) => project.slug === "cctv-selected-broadcast-work")).toMatchObject({
       intro: "From 2021 to 2022, Shen Ao worked on music editing and production for CCTV-13 promotional content, contributing to more than 50 short-form television promotional projects.",
       selectedCases: [
         {
-          title: "LONG TENG HU YUE ZHONG GUO NIAN / 龙腾虎跃中国年",
+          title: "Year of the Tiger: A Festive Chinese New Year",
           url: "https://www.bilibili.com/video/BV1pS4y1y72L"
         },
         {
-          title: "IN THE FIELD OF HOPE / 在希望的田野上",
+          title: "In the Field of Hope",
           url: "https://www.bilibili.com/video/BV1Jt4y1s7De"
         },
         {
-          title: "RUI TU CHENG XIANG ZHONG GUO NIAN / 瑞兔呈祥中国年",
+          title: "Year of the Rabbit: A Festive Chinese New Year",
           url: "https://www.bilibili.com/video/BV11d4y1V7jD"
         }
       ],
-      relatedTitles: ["大美边疆行", "中国空间站系列", "高端访谈"]
+      externalAccessNote: "Some links on this page may not be accessible outside mainland China.",
+      archiveGallery: [
+        { title: "CCTV News Channel: China Space Station Series", url: "https://www.bilibili.com/video/BV1A5DbY9EBL" },
+        { title: "National Moral Role Models" },
+        { title: "13th China Airshow" },
+        { title: "Full Moon, Full Bloom" },
+        { title: "Meeting in a Great Era" },
+        { title: "Spotlight on COP15 Biodiversity Conference" },
+        { title: "Together for a Shared Future" },
+        { title: "Winter Olympics Countdown" },
+        { title: "Disaster Prevention, Safer Lives" },
+        { title: "My Family, My Country" },
+        { title: "Cherish Life, Prevent Drowning" },
+        { title: "Spring Festival Travel Diary" },
+        { title: "Spring Festival at the Grassroots 2022" },
+        { title: "Setting Sail in a New Era" },
+        { title: "Journey Along China’s Frontiers" },
+        { title: "China in the New Era" },
+        { title: "Advancing on a New Journey" },
+        { title: "The Two Sessions and Us" },
+        { title: "Turning the Blade Inward" },
+        { title: "Striving Fulfils Dreams" },
+        { title: "County Development in Focus" },
+        { title: "China Through Foreign Eyes" },
+        { title: "Top Talk" },
+        { title: "Archaeology of China: Tracing Civilisation Origins" }
+      ]
     });
   });
 
@@ -181,13 +278,25 @@ describe("structured project content", () => {
       year: "2024",
       subtype: "Release",
       verificationStatus: "confirmed",
-      mediaStatus: "placeholder"
+      mediaStatus: "confirmed",
+      artwork: "/assets/portfolio-projects/let-me-speak-cover.jpg",
+      externalLinks: [
+        { label: "Bandcamp", url: "https://shenao.bandcamp.com/album/rang-wo-shuo" },
+        { label: "NetEase Music", url: "https://music.163.com/#/album?id=147663057" }
+      ]
+    });
+    expect(projects.find((project) => project.slug === "two-dreadful-children-unipre")).toMatchObject({
+      artwork: "/assets/portfolio-projects/two-dreadful-children-unipre-cover.png",
+      year: "2024",
+      mediaStatus: "confirmed",
+      externalLinks: [{ label: "Bandcamp", url: "https://shenao.bandcamp.com/album/two-dreadful-children-unipre" }]
     });
     expect(projects.find((project) => project.slug === "bamboo-blend")).toMatchObject({
       title: "Bamboo Blend",
       year: "2024",
+      artwork: "/assets/portfolio-projects/bamboo-blend-cover.jpg",
       externalLinks: [{ label: "SoundCloud", url: "https://soundcloud.com/shen-ao/bamboo-blend" }],
-      mediaStatus: "placeholder"
+      mediaStatus: "confirmed"
     });
     expect(projects.find((project) => project.slug === "cyberspace")?.externalLinks).toContainEqual({
       label: "Bandcamp",
@@ -210,6 +319,17 @@ describe("structured project content", () => {
       { label: "SOUNDCLOUD", url: "https://soundcloud.com/shen-ao/" },
       { label: "NETEASE MUSIC", url: "https://music.163.com/#/artist?id=46923018" }
     ]);
+  });
+
+  it("keeps the uploaded MUSIC images in the project data", () => {
+    expect(projects.find((project) => project.slug === "paradise-dream-2")).toMatchObject({
+      images: [{ src: "/assets/portfolio-projects/paradise-dream-2.jpg" }],
+      mediaStatus: "confirmed"
+    });
+    expect(projects.find((project) => project.slug === "zhang-jian-jingdezhen")).toMatchObject({
+      images: [{ src: "/assets/portfolio-projects/zhang-jian-jingdezhen.jpg" }],
+      mediaStatus: "confirmed"
+    });
   });
 
   it("keeps No Idea event archive facts in a single source without inventing extra credits", () => {

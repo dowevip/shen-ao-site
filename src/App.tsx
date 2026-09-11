@@ -4,7 +4,9 @@ import {
   archiveProjects,
   featuredMusicReleases,
   getProject,
+  moreCommissionedProjects,
   musicPlatformLinks,
+  musicScoringProjects,
   otherMusicReleases,
   projects,
   type ProjectLink,
@@ -254,12 +256,8 @@ function WorkPage({ navigate }: { navigate: (path: string) => void }) {
 }
 
 function MusicPage({ navigate }: { navigate: (path: string) => void }) {
-  const productionProjects = [
-    ...scoringMovingImageProjects,
-    ...archiveProjects.filter((project) => ["Moving Image", "Cross-media", "Exhibition", "Broadcast", "Theatre"].includes(project.category))
-  ]
-    .filter((project, index, list) => list.findIndex((item) => item.slug === project.slug) === index)
-    .sort((a, b) => Number(!hasProjectMedia(a)) - Number(!hasProjectMedia(b)));
+  const moreCommissionedImageProjects = moreCommissionedProjects.filter(hasProjectMedia);
+  const moreCommissionedTextProjects = moreCommissionedProjects.filter((project) => !hasProjectMedia(project));
 
   return (
     <main className="route-page music-page">
@@ -276,39 +274,52 @@ function MusicPage({ navigate }: { navigate: (path: string) => void }) {
           {otherMusicReleases.map((project) => <MusicIndexItem project={project} navigate={navigate} variant="secondary" key={project.slug} />)}
         </div>
       </section>
-      <section className="music-release-section other-release-section" data-testid="music-production-scoring">
-        <h2>PRODUCTION / SCORING</h2>
+      <section className="music-release-section other-release-section" data-testid="music-scoring-commissioned">
+        <h2>SCORING / COMMISSIONED MUSIC</h2>
         <div className="production-scoring-grid">
-          {productionProjects.map((project) => <MusicIndexItem project={project} navigate={navigate} variant="archive" key={project.slug} />)}
+          {musicScoringProjects.map((project) => <MusicIndexItem project={project} navigate={navigate} variant="archive" key={project.slug} />)}
         </div>
       </section>
-      <section className="music-platform-row" aria-label="Music platforms">
-        {musicPlatformLinks.map((link) => (
-          <ExternalLink key={link.url} href={link.url} className="music-platform-link">{link.label}</ExternalLink>
-        ))}
+      <section className="music-release-section music-more-commissioned-section" data-testid="music-more-commissioned">
+        <h2>ADDITIONAL COMMISSIONED WORK</h2>
+        <div className="more-commissioned-grid" data-testid="music-more-commissioned-images">
+          {moreCommissionedImageProjects.map((project) => <MusicIndexItem project={project} navigate={navigate} variant="commissioned-archive-image" key={project.slug} />)}
+        </div>
+        <div className="more-commissioned-text-list" data-testid="music-more-commissioned-text">
+          {moreCommissionedTextProjects.map((project) => <MusicIndexItem project={project} navigate={navigate} variant="commissioned-archive-text" key={project.slug} />)}
+        </div>
       </section>
     </main>
   );
 }
 
-function MusicIndexItem({ project, navigate, variant }: { project: Project; navigate: (path: string) => void; variant: "featured" | "secondary" | "archive" }) {
+function MusicIndexItem({ project, navigate, variant }: { project: Project; navigate: (path: string) => void; variant: "featured" | "secondary" | "archive" | "commissioned-archive-image" | "commissioned-archive-text" }) {
   const title = (project.displayTitle ?? project.title).toUpperCase();
   const watchLink = project.externalLinks?.find((link) => isWatchLink(link));
   const listenLink = project.externalLinks?.find((link) => !isWatchLink(link) && isListenLink(link));
-  const infoLink = project.externalLinks?.find((link) => !isWatchLink(link) && !isListenLink(link) && !isNetEaseLink(link));
-  const hasMedia = hasProjectMedia(project) || variant !== "archive";
+  const projectLink = project.externalLinks?.find((link) => isProjectLink(link));
+  const isArchiveOnly = variant === "commissioned-archive-image" || variant === "commissioned-archive-text";
+  const showArtwork = variant !== "commissioned-archive-text";
+  const usesInternalInfo = variant === "archive";
+  const infoLink = usesInternalInfo
+    ? undefined
+    : project.externalLinks?.find((link) => !isWatchLink(link) && !isListenLink(link) && !isProjectLink(link) && !isNetEaseLink(link));
+  const hasMedia = hasProjectMedia(project) || !["archive", "commissioned-archive-image", "commissioned-archive-text"].includes(variant);
   return (
-    <article className={`music-index-item music-index-item-${variant} music-release-${project.slug} ${hasMedia ? "has-media" : "no-media"}`}>
-      <ReleaseArtwork project={project} showPlaceholder={variant !== "archive"} />
+    <article className={`music-index-item music-index-item-${variant} music-release-${project.slug} ${hasMedia ? "has-media" : "no-media"}`} data-testid={`music-index-item-${project.slug}`}>
+      {showArtwork && <ReleaseArtwork project={project} showPlaceholder={false} />}
       <div className="music-release-copy">
         <h3>{title}</h3>
         <MetaLines lines={[project.year, project.subtype, project.workRoleLabel, project.role?.join(" / "), project.label]} />
-        <div className="link-row">
-          {watchLink && <ExternalLink href={watchLink.url}>WATCH ↗</ExternalLink>}
-          {listenLink && <ExternalLink href={listenLink.url}>LISTEN ↗</ExternalLink>}
-          {infoLink && <ExternalLink href={infoLink.url}>INFO ↗</ExternalLink>}
-          {!infoLink && <button className="text-arrow" onClick={() => navigate(releaseDetailPath(project))}>INFO</button>}
-        </div>
+        {!isArchiveOnly && (
+          <div className="link-row">
+            {watchLink && <ExternalLink href={watchLink.url}>WATCH ↗</ExternalLink>}
+            {listenLink && <ExternalLink href={listenLink.url}>LISTEN ↗</ExternalLink>}
+            {projectLink && <ExternalLink href={projectLink.url}>PROJECT ↗</ExternalLink>}
+            {infoLink && <ExternalLink href={infoLink.url}>INFO ↗</ExternalLink>}
+            {(usesInternalInfo || !infoLink) && <button className="text-arrow" onClick={() => navigate(releaseDetailPath(project))}>INFO</button>}
+          </div>
+        )}
       </div>
     </article>
   );
@@ -324,6 +335,10 @@ function isWatchLink(link: ProjectLink) {
 
 function isListenLink(link: ProjectLink) {
   return /bandcamp|soundcloud|soundtrack/i.test(`${link.label} ${link.url}`);
+}
+
+function isProjectLink(link: ProjectLink) {
+  return /project|press/i.test(`${link.label} ${link.url}`);
 }
 
 function isNetEaseLink(link: ProjectLink) {
@@ -1116,11 +1131,14 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
 
   const isPractice = project.slug === "no-idea" || project.slug === "openband-openscore";
   const [heroSlot, ...gallerySlots] = project.detailMedia ?? [];
+  const [heroImage, ...galleryImages] = project.showImagesOnDetail ? (project.images ?? []) : [];
   return (
     <ProjectShell kicker={`PROJECT / ${project.category.toUpperCase()}`} title={project.title.toUpperCase()} project={project}>
       <div className={`project-layout project-layout-loose ${isPractice ? "practice-detail-layout" : "structured-detail-layout"}`}>
         {project.artwork ? (
           <img className="project-art album-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />
+        ) : heroImage ? (
+          <img className="project-detail-image project-detail-hero-image" src={assetUrl(heroImage.src)} alt={heroImage.alt} />
         ) : (
           <MediaPlaceholder
             title={project.title.toUpperCase()}
@@ -1132,7 +1150,12 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
           {project.intro ? <p>{project.intro}</p> : project.description && <p>{project.description}</p>}
           <MetaLines lines={[project.year, project.subtype, project.role?.join(" / "), project.label, project.location]} />
           <div className="link-row">
-            {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+            {project.externalLinks?.filter((link) => !link.hideFromEnglishUi).map((link) => link.englishNote ? (
+              <span className="project-link-with-note" key={link.url}>
+                <ExternalLink href={link.url}>{link.label}</ExternalLink>
+                <small>{link.englishNote}</small>
+              </span>
+            ) : <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
           </div>
         </div>
       </div>
@@ -1148,17 +1171,30 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
           <p>{project.slug === "no-idea" ? "Events, radio, programming, budgeting, technical production and coordination around immersive live experiences." : "Open, non-hierarchical approaches to sound-making with musicians, artists, visual practitioners and local collaborators."}</p>
         </section>
       )}
-      {gallerySlots.length > 0 ? (
+      {galleryImages.length > 0 ? (
+        <section className={`placeholder-sequence detail-media-grid detail-media-${project.slug}`} aria-label={`${project.title} image gallery`}>
+          {galleryImages.map((image) => (
+            <img className="project-detail-image" src={assetUrl(image.src)} alt={image.alt} key={image.src} />
+          ))}
+        </section>
+      ) : gallerySlots.length > 0 ? (
         <section className={`placeholder-sequence detail-media-grid detail-media-${project.slug}`}>
           {gallerySlots.map((slot, index) => (
             <MediaPlaceholder key={`${slot.label}-${index}`} title={project.title.toUpperCase()} label={slot.label} variant={slot.variant} />
           ))}
         </section>
-      ) : (
+      ) : !project.showImagesOnDetail && (
         <PlaceholderSequence labels={project.category === "Music" ? ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"] : ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]} />
       )}
-      {project.selectedCases && <SelectedCases cases={project.selectedCases} />}
-      {project.relatedTitles && <ArchiveList titles={project.relatedTitles} />}
+      {project.selectedCases && <SelectedCases cases={project.selectedCases} accessNote={project.externalAccessNote} />}
+      {project.archiveGallery ? (
+        <ArchiveGallery items={project.archiveGallery} />
+      ) : (
+        <>
+          {project.externalAccessNote && <p className="project-access-note">{project.externalAccessNote}</p>}
+          {project.relatedTitles && <ArchiveList titles={project.relatedTitles} />}
+        </>
+      )}
       {project.relatedWorks && <RelatedWorks works={project.relatedWorks} />}
       {project.press && <KnownPress press={project.press} />}
       <NextProject title={nextProjectFor(project.slug).title} onClick={() => navigate(nextProjectFor(project.slug).path)} />
@@ -1316,21 +1352,27 @@ function KnownPress({ press }: { press: NonNullable<Project["press"]> }) {
   );
 }
 
-function SelectedCases({ cases }: { cases: NonNullable<Project["selectedCases"]> }) {
+function SelectedCases({ cases, accessNote }: { cases: NonNullable<Project["selectedCases"]>; accessNote?: string }) {
   return (
     <section className="selected-cases">
       <h2>SELECTED BROADCAST WORK</h2>
       <div className="selected-case-grid">
         {cases.map((item) => (
-          <article className="selected-case" key={item.url}>
-            {item.media && <MediaPlaceholder title="CCTV-13" label={item.media.label} variant={item.media.variant} />}
+          <article className="selected-case" data-testid="selected-case" key={item.url}>
+            {item.media?.src ? (
+              <img className="selected-case-image" src={assetUrl(item.media.src)} alt={item.media.alt ?? item.title} />
+            ) : item.media && (
+              <MediaPlaceholder title="CCTV-13" label={item.media.label} variant={item.media.variant} />
+            )}
             <div>
-              <ExternalLink href={item.url}>{item.title} ↗</ExternalLink>
+              <h3>{item.title}</h3>
               {item.description && <p>{item.description}</p>}
+              <ExternalLink href={item.url}>WATCH ↗</ExternalLink>
             </div>
           </article>
         ))}
       </div>
+      {accessNote && <p className="project-access-note selected-cases-note">{accessNote}</p>}
     </section>
   );
 }
@@ -1344,13 +1386,44 @@ function ArchiveList({ titles }: { titles: string[] }) {
   );
 }
 
+function ArchiveGallery({ items }: { items: NonNullable<Project["archiveGallery"]> }) {
+  return (
+    <section className="archive-gallery-section" aria-label="CCTV archive gallery">
+      <div className="section-kicker">ARCHIVE / MORE WORK</div>
+      <div className="archive-gallery-grid">
+        {items.map((item) => {
+          const content = (
+            <>
+              <img src={assetUrl(item.src)} alt={item.alt} />
+              <span>{item.title}</span>
+            </>
+          );
+          return item.url ? (
+            <a className="archive-gallery-item" href={item.url} target="_blank" rel="noreferrer" data-testid="archive-gallery-item" key={item.src}>
+              {content}
+            </a>
+          ) : (
+            <figure className="archive-gallery-item" data-testid="archive-gallery-item" key={item.src}>
+              {content}
+            </figure>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function RelatedWorks({ works }: { works: NonNullable<Project["relatedWorks"]> }) {
   return (
     <section className="related-work-section">
       <div className="section-kicker">RELATED WORK</div>
       {works.map((work) => (
         <article className="related-work-entry" key={work.title}>
-          {work.media && <MediaPlaceholder title="MEDIA" label={work.media.label} variant={work.media.variant} />}
+          {work.media?.src ? (
+            <img className="related-work-image" src={assetUrl(work.media.src)} alt={work.media.alt ?? work.title} />
+          ) : work.media && (
+            <MediaPlaceholder title="MEDIA" label={work.media.label} variant={work.media.variant} />
+          )}
           <div>
             <h2>{work.title}</h2>
             <MetaLines lines={[work.year, work.role]} />
@@ -1535,7 +1608,9 @@ function nextProjectFor(slug: string) {
   const requestedNext = getProject(slug)?.nextProjectSlug;
   const next = (requestedNext && getProject(requestedNext))
     || visibleProjects[index >= 0 ? (index + 1) % visibleProjects.length : 0];
-  const title = next.slug === "cyberspace" || next.slug === "bug-party"
+  const title = next.slug === "cctv-selected-broadcast-work"
+    ? "CCTV / SELECTED BROADCAST WORK"
+    : next.slug === "cyberspace" || next.slug === "bug-party"
     ? "CYBERSPACE / BUG PARTY"
     : next.title.toUpperCase();
   return { title, path: releaseDetailPath(next) };

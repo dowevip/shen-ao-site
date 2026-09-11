@@ -1354,7 +1354,7 @@ button.text-arrow::after,
 
 .site-footer {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto;
   gap: 28px;
   align-items: start;
   border-top: 1px solid var(--rule);
@@ -1366,7 +1366,7 @@ button.text-arrow::after,
   display: flex;
   flex-wrap: wrap;
   gap: 14px 24px;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .footer-credit {
@@ -5396,8 +5396,6 @@ button.text-arrow::after,
   }
 
   .footer-platforms {
-    grid-column: 1 / -1;
-    grid-row: 2;
     justify-content: flex-start;
   }
 

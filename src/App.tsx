@@ -1540,7 +1540,6 @@ function Collaboration() {
 function Footer() {
   return (
     <footer className="site-footer">
-      <span className="footer-brand">SHEN AO</span>
       <div className="footer-platforms" aria-label="Music platforms">
         <a href="https://shenao.bandcamp.com/">BANDCAMP</a>
         <a href="https://soundcloud.com/shen-ao">SOUNDCLOUD</a>

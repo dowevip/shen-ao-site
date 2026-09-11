@@ -214,8 +214,8 @@ describe("SHEN AO site IA", () => {
     render(<App initialPath="/music" />);
 
     const footer = within(screen.getByRole("contentinfo"));
-    expect(footer.getByText("SHEN AO")).toBeInTheDocument();
     expect(footer.getByText("© 2026 SHEN AO · LONDON")).toBeInTheDocument();
+    expect(footer.queryByText("SHEN AO")).not.toBeInTheDocument();
     expect(footer.getByRole("link", { name: "BANDCAMP" })).toHaveAttribute("href", "https://shenao.bandcamp.com/");
     expect(footer.getByRole("link", { name: "SOUNDCLOUD" })).toHaveAttribute("href", "https://soundcloud.com/shen-ao");
     expect(footer.getByRole("link", { name: "MIXCLOUD" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");

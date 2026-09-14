@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import {
   archiveFilters,
   archiveProjects,
@@ -16,12 +16,30 @@ import {
   type Project
 } from "./content/projects";
 import { getNoIdeaEvent, latestNoIdeaEvent, noIdeaEvents, type NoIdeaEvent } from "./content/noIdeaEvents";
-import { earlierPerformances, livePlatformLinks, selectedLiveEvents, type DjPosterArchiveItem, type LiveEvent, type LiveEventLink, type LiveMedia } from "./content/liveEvents";
-import { noIdeaProject, openbandProject, practiceProjects, type PracticeProject, type PosterArchiveSlot, type RadioArchiveSlot, type WorkshopEntry } from "./content/practiceProjects";
+import { earlierPerformances, livePlatformLinks, pianoKeyboardGroups, selectedLiveEvents, teendrumImages, type LiveEvent, type LiveMedia } from "./content/liveEvents";
+import { noIdeaProject, openbandProject, practiceProjects, type DocumentationGroup, type EventPosterGroup, type PracticeProject, type PosterArchiveSlot } from "./content/practiceProjects";
 import { aboutPressItems, epkPressItems, homePressItems, verifiedPressItems, type PressItem } from "./content/press";
 import "./styles.css";
 
 const navItems = ["HOME", "MUSIC", "LIVE", "ABOUT"];
+const accentColors = ["var(--pink)", "var(--green)", "var(--blue)", "var(--yellow)"] as const;
+const accentTopBands = [13, 24, 38, 53, 68, 82, 91];
+const mobileAccentTopBands = [12, 28, 49, 69, 88];
+
+type PageAccent = {
+  color: (typeof accentColors)[number];
+  width: number;
+  height: number;
+  top: string;
+  left: string;
+  right: string;
+  rotation: number;
+  mobileTop: string;
+  mobileLeft: string;
+  mobileRight: string;
+};
+
+type AccentStyle = CSSProperties & Record<`--accent-${string}`, string>;
 
 type AppProps = {
   initialPath?: string;
@@ -88,7 +106,7 @@ export default function App({ initialPath }: AppProps) {
   ) : path.startsWith("/music") ? (
     <MusicPage navigate={navigate} />
   ) : path.startsWith("/live") ? (
-    <LivePage />
+    <LivePage navigate={navigate} />
   ) : path.startsWith("/practice") ? (
     <PracticePage navigate={navigate} />
   ) : path.startsWith("/press-radio") ? (
@@ -104,6 +122,7 @@ export default function App({ initialPath }: AppProps) {
   return (
     <div className="site-shell">
       <Header active={activeNav(path)} navigate={navigate} />
+      <PageAccents pathname={path} />
       {page}
       <Footer />
     </div>
@@ -138,6 +157,71 @@ function Header({ active, navigate }: { active: string; navigate: (path: string)
       </nav>
     </header>
   );
+}
+
+function PageAccents({ pathname }: { pathname: string }) {
+  const accents = useMemo(() => makePageAccents(pathname), [pathname]);
+
+  return (
+    <div className="page-accents" aria-hidden="true">
+      {accents.map((accent, index) => (
+        <span
+          className="page-accent-mark"
+          key={`${pathname}-${index}`}
+          style={{
+            "--accent-color": accent.color,
+            "--accent-width": `${accent.width}px`,
+            "--accent-height": `${accent.height}px`,
+            "--accent-top": accent.top,
+            "--accent-left": accent.left,
+            "--accent-right": accent.right,
+            "--accent-rotation": `${accent.rotation}deg`,
+            "--accent-mobile-top": accent.mobileTop,
+            "--accent-mobile-left": accent.mobileLeft,
+            "--accent-mobile-right": accent.mobileRight
+          } as AccentStyle}
+        />
+      ))}
+    </div>
+  );
+}
+
+function makePageAccents(pathname: string): PageAccent[] {
+  const seed = hashString(pathname || "/");
+  const count = 3 + (seed % 2);
+
+  return Array.from({ length: count }, (_, index) => {
+    const value = hashString(`${pathname}:${index}`);
+    const side = (value + index) % 2 === 0 ? "left" : "right";
+    const mobileSide = (value + index + 1) % 2 === 0 ? "left" : "right";
+    const width = index === 1 && value % 3 === 0 ? 12 + (value % 5) : 24 + (value % 39);
+    const heightOptions = width < 20 ? [10, 12, 14] : [3, 5, 7, 8];
+    const height = heightOptions[(value >> 3) % heightOptions.length];
+    const edge = `${1 + ((value >> 6) % 6)}%`;
+    const mobileEdge = `${1 + ((value >> 8) % 5)}%`;
+
+    return {
+      color: accentColors[(value + index) % accentColors.length],
+      width,
+      height,
+      top: `${accentTopBands[(value + index * 2) % accentTopBands.length]}%`,
+      left: side === "left" ? edge : "auto",
+      right: side === "right" ? edge : "auto",
+      rotation: ((value >> 10) % 15) - 7,
+      mobileTop: `${mobileAccentTopBands[(value + index * 2) % mobileAccentTopBands.length]}%`,
+      mobileLeft: mobileSide === "left" ? mobileEdge : "auto",
+      mobileRight: mobileSide === "right" ? mobileEdge : "auto"
+    };
+  });
+}
+
+function hashString(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }
 
 function HomePage({ navigate }: { navigate: (path: string) => void }) {
@@ -221,7 +305,6 @@ function WorkPage({ navigate }: { navigate: (path: string) => void }) {
 
   return (
     <main className="work-page">
-      <PageAccentMarks variant="work" />
       <section className="work-intro">
         <div className="section-kicker">WORK / INDEX</div>
         <h1>WORK</h1>
@@ -381,79 +464,115 @@ function ReleaseArtwork({ project, showPlaceholder = true }: { project: Project;
   return showPlaceholder ? <MediaPlaceholder title={title} label="ALBUM ARTWORK" variant="square" /> : null;
 }
 
-function LivePage() {
-  const rows = getLiveArchiveRows();
+function LivePage({ navigate }: { navigate: (path: string) => void }) {
+  const originalMusicEvents = [...selectedLiveEvents].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const soloConcert = earlierPerformances.find((event) => event.id === "solo-concert-2018");
+
   return (
     <main className="route-page live-page">
       <PageIntro title="LIVE" />
-      <section className="live-archive-section">
-        <h2>ARCHIVE</h2>
-        <div className="live-archive-list">
-          {rows.map((row) => (
-            <article className="live-archive-row" data-testid={`live-archive-row-${row.id}`} key={row.id}>
-              {row.media && <img className="live-archive-media" src={assetUrl(row.media.path)} alt={row.media.alt} />}
-              <div className="live-archive-copy">
-                <span data-testid="live-date">{row.dateLabel}</span>
-                <strong>{row.location}</strong>
-                <span>{row.activity}</span>
-                <span>{row.role}</span>
-                {row.link && <ExternalLink href={row.link.url}>{row.link.label}</ExternalLink>}
+
+      <section className="live-section curation-community-section" data-testid="live-curation-community">
+        <h2>CURATION / COMMUNITY</h2>
+        <div className="curation-project-list">
+          {[noIdeaProject, openbandProject].map((project) => (
+            <LivePracticeProjectEntry project={project} navigate={navigate} key={project.slug} />
+          ))}
+        </div>
+      </section>
+
+      <section className="live-section original-live-section" data-testid="live-original-music">
+        <h2>ORIGINAL MUSIC LIVE</h2>
+        <div className="original-live-list">
+          {originalMusicEvents.map((event) => (
+            <OriginalLiveRow event={event} key={event.id} />
+          ))}
+        </div>
+      </section>
+
+      <section className="live-section teendrum-live-section" data-testid="live-teendrum">
+        <h2>DJ / TEENDRUM</h2>
+        <div className="teendrum-live-layout">
+          <div className="teendrum-live-copy">
+            <strong>TEENDRUM</strong>
+            <span>DJ</span>
+            <span>ELECTRO / AMBIENT / IDM / BREAKS / LEFT-FIELD</span>
+            <div className="link-row">
+              {livePlatformLinks.map((link) => <ExternalLink className="text-arrow text-arrow-explicit" key={link.url} href={link.url}>{link.label} ↗</ExternalLink>)}
+            </div>
+          </div>
+          <div className="teendrum-visual-archive">
+            {teendrumImages.map((image) => (
+              <img src={assetUrl(image.path)} alt={image.alt} data-testid="teendrum-archive-image" key={image.id} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="live-section piano-keyboard-section" data-testid="live-piano-keyboard">
+        <h2>PIANO / KEYBOARD</h2>
+        <div className="piano-keyboard-layout">
+          {soloConcert && (
+            <article className="piano-history-entry" data-testid="live-solo-concert-2018">
+              <h3>2018 SOLO CONCERT</h3>
+              <div className="piano-solo-gallery">
+                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-poster-no-black-border.jpeg")} alt="2018 Solo Concert poster." data-testid="piano-solo-concert-image" />
+                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-stage-wide-no-black-border.jpeg")} alt="2018 Solo Concert live performance." data-testid="piano-solo-concert-image" />
+                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-keyboard-performance-no-black-border.jpeg")} alt="2018 Solo Concert live performance." data-testid="piano-solo-concert-image" />
+              </div>
+              <div className="piano-history-meta">
+                <span>{soloConcert.year}</span>
+                <strong>{soloConcert.venue.toUpperCase()}</strong>
+                <span>{(soloConcert.title ?? soloConcert.type).toUpperCase()}</span>
+                {soloConcert.externalLinks?.[0] && <ExternalLink className="text-arrow text-arrow-explicit" href={soloConcert.externalLinks[0].url}>WATCH ↗</ExternalLink>}
               </div>
             </article>
-          ))}
+          )}
+          <div className="piano-keyboard-groups">
+            {pianoKeyboardGroups.map((group) => (
+              <section className="piano-keyboard-group" data-testid={`piano-group-${group.id}`} key={group.id}>
+                <h3>{group.title}</h3>
+                <div className="piano-keyboard-gallery">
+                  {group.images.map((image) => (
+                    <img src={assetUrl(image.path)} alt={image.alt} data-testid="piano-archive-image" key={image.id} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
       </section>
     </main>
   );
 }
 
-type LiveArchiveRow = {
-  id: string;
-  sortDate: string;
-  dateLabel: string;
-  location: string;
-  activity: string;
-  role: string;
-  link?: LiveEventLink;
-  media?: { path: string; alt: string };
-};
+function OriginalLiveRow({ event }: { event: LiveEvent }) {
+  const media = getLiveArchiveMedia(event);
+  const link = event.externalLinks?.[0];
 
-function getLiveArchiveRows(): LiveArchiveRow[] {
-  const selectedRows = selectedLiveEvents.map((event) => ({
-    id: event.id,
-    sortDate: event.date ?? event.year ?? "",
-    dateLabel: event.displayDate ?? event.year ?? "",
-    location: formatVenue(event),
-    activity: event.billing?.toUpperCase() ?? event.type.toUpperCase(),
-    role: event.type.toUpperCase(),
-    link: event.externalLinks?.[0],
-    media: getLiveArchiveMedia(event)
-  }));
-  const noIdeaRow = {
-    id: `no-idea-${latestNoIdeaEvent.slug}`,
-    sortDate: "2026-05-23",
-    dateLabel: latestNoIdeaEvent.displayDate,
-    location: `${latestNoIdeaEvent.venue} / ${latestNoIdeaEvent.city}`.toUpperCase(),
-    activity: latestNoIdeaEvent.edition.toUpperCase(),
-    role: latestNoIdeaEvent.roles.join(" + ").toUpperCase(),
-    link: { label: "INFO ↗", url: latestNoIdeaEvent.externalLinks.residentAdvisor },
-    media: {
-      path: latestNoIdeaEvent.heroImage,
-      alt: "Shen Ao performing at Live With No Idea at Shai Space, London."
-    }
-  };
-  const earlierRows = earlierPerformances.map((event) => ({
-    id: event.id,
-    sortDate: event.date ?? event.year ?? "",
-    dateLabel: event.displayDate ?? event.year ?? "",
-    location: formatVenue(event),
-    activity: (event.title ?? event.type).toUpperCase(),
-    role: event.type.toUpperCase(),
-    link: event.externalLinks?.[0] ? { label: `${event.externalLinks[0].label.toUpperCase()} ↗`, url: event.externalLinks[0].url } : undefined,
-    media: getLiveArchiveMedia(event)
-  }));
+  return (
+    <article className="original-live-row" data-testid={`original-live-row-${event.id}`}>
+      {media && <img className="original-live-media" src={assetUrl(media.path)} alt={media.alt} />}
+      <span data-testid="live-date">{event.displayDate}</span>
+      <strong>{formatVenue(event)}</strong>
+      <span>{event.billing?.toUpperCase()}</span>
+      {link && <ExternalLink className="text-arrow text-arrow-explicit" href={link.url}>{link.label}</ExternalLink>}
+    </article>
+  );
+}
 
-  return [...selectedRows, noIdeaRow, ...earlierRows].sort((a, b) => b.sortDate.localeCompare(a.sortDate));
+function LivePracticeProjectEntry({ project, navigate }: { project: PracticeProject; navigate: (path: string) => void }) {
+  return (
+    <article className={`live-practice-project live-practice-project-${project.slug}`} data-testid={`live-practice-project-${project.slug}`}>
+      {project.previewImage && <img src={assetUrl(project.previewImage)} alt={`${project.title} project preview.`} />}
+      <div>
+        <h3>{project.title}</h3>
+        <MetaLines lines={[project.year, project.heading, project.location]} uppercase={false} />
+        <p>{project.summary}</p>
+        <button className="text-arrow" aria-label={`VIEW PROJECT → ${project.title}`} onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
+      </div>
+    </article>
+  );
 }
 
 function getLiveArchiveMedia(event: LiveEvent) {
@@ -493,20 +612,9 @@ function LiveMediaSlot({ media, label, title, kind }: { media?: LiveMedia; label
   );
 }
 
-function DjPosterSlot({ poster }: { poster: DjPosterArchiveItem }) {
-  return poster.path ? (
-    <img className="live-media live-media-poster" src={assetUrl(poster.path)} alt={`${poster.title} poster`} />
-  ) : (
-    <div className="live-media-slot live-media-slot-poster">
-      <MediaPlaceholder title={poster.title} label="EVENT POSTER" variant="portrait" />
-    </div>
-  );
-}
-
 function PracticePage({ navigate }: { navigate: (path: string) => void }) {
   return (
     <main className="route-page practice-page">
-      <PageAccentMarks variant="practice" />
       <PageIntro kicker="PRACTICE / EVENTS + COMMUNITY" title="PRACTICE">
         Music-making and event-making occupy different roles in Shen Ao's practice. One grows from accumulated learning; the other from lived experience, listening and making things together.
       </PageIntro>
@@ -522,57 +630,63 @@ function PracticePage({ navigate }: { navigate: (path: string) => void }) {
 function AboutPage() {
   return (
     <main className="route-page about-page">
-      <PageIntro title="ABOUT" testId="about-bio">
-        MUSIC PRODUCER / COMPOSER & ARRANGER / EVENT ORGANISER
-      </PageIntro>
-      <section className="about-profile-layout" data-testid="about-profile">
-        <div className="about-copy">
-          <h2>PROFILE</h2>
-          <div className="about-copy-group">
-            <p>Shen Ao is a music producer, composer, arranger and pianist born in Tianjin, China and based in London. He also performs live DJ sets under the alias Teendrum.</p>
-            <p>Shen Ao specialises in brightly coloured electronic music with intricate structures and a strongly postmodern style. His works draw on progressive rock, free jazz, Baroque, glitch pop and chiptune, shaping a fragmented contemporary texture that moves between fluid delicacy and rough fury. His songwriting often uses irregular metres and polyrhythms, combining retro computer timbres with strongly narrative processing to depict a restless inner otherworld.</p>
-          </div>
-          <div className="about-copy-group">
-            <p>In 2026, his work was released by Kit Records, a representative independent avant-garde label in London, alongside a limited double-sided cassette. In July of the same year, the work was covered by The Quietus, a noted European electronic music magazine, and by Muito in Buenos Aires. With this album, he has performed alongside international musicians including Vic Bang, k means, Visit Me, Barreleye, YOTO and 4 Channels Club.</p>
-            <p>He often collaborates with artists from other fields on cross-media works, including music for film and television, exhibitions, theatre, games and advertising. Since 2020, he has produced music for more than 50 promotional packaging projects for China Central Television programmes, including Long Teng Hu Yue Zhong Guo Nian, Rui Tu Cheng Xiang Zhong Guo Nian, the Convention on Biological Diversity and Da Mei Bian Jiang Xing. In 2024, he worked with London's ENF Theatre on the soundtrack for Fancy A BITE?, which was performed at Camden People's Theatre.</p>
-          </div>
-          <div className="about-copy-group">
-            <p>Shen Ao is also a DJ and music-event curator, performing under the alias Teendrum. He has performed at music venues in China and London, including Zhao Dai, wigwam, Mo Xu You Factory and Taikang Art Museum in China, and Spanners, Shai Space, LOOSE.fm and helm in the UK. In 2024, he launched no idea, an ambient-music online radio and offline event series. The series quickly attracted attention within the field and invited musicians including Kirk Barley, Stella Z, Li Song, Pentu, Xi Chenchen, Louis Gardner and Sseq to perform.</p>
-            <p>Shen Ao continues to focus on the healthy development of music communities and founded OPENBAND, an improvisational music workshop. Based at fRUITYSPACE in Beijing, the workshop aims to promote communication and shared growth among local music practitioners. It has held around 20 monthly sessions, attracting about 500 music practitioners, and has promoted its workflow and underlying logic through offline presentations at City, University of London and Hypha HQ in London.</p>
-          </div>
-          <div className="about-copy-group">
-            <p>Through these interrelated projects, Shen Ao's work both inherits its own logic and attends to real society and community development, showing his understanding of musical structure, timbral design and shifts in a broader artistic environment.</p>
-          </div>
-        </div>
-        <img className="artist-portrait artist-portrait-about" src={assetUrl("/assets/portrait/shen-ao-childhood.avif")} alt="Childhood portrait of Shen Ao." />
+      <PageIntro title="ABOUT" testId="about-bio" />
+      <section className="about-hero" data-testid="about-hero">
+        <span className="about-hero-identity">MUSIC PRODUCER / COMPOSER & ARRANGER / EVENT ORGANISER</span>
+        <img className="about-hero-image" src={assetUrl("/assets/about/shen-ao-hero.jpg")} alt="Shen Ao performing at a microphone." />
+        <p>Shen Ao is a music producer, composer, arranger and pianist born in Tianjin, China and based in London. He also performs live DJ sets under the alias Teendrum.</p>
       </section>
-      <section className="cv-grid about-portfolio-lists" data-testid="about-project-links">
-        <div>
+
+      <section className="about-section about-profile-section" data-testid="about-profile">
+        <p>Shen Ao specialises in brightly coloured electronic music with intricate structures and a strongly postmodern style. His works draw on progressive rock, free jazz, Baroque, glitch pop and chiptune, shaping a fragmented contemporary texture that moves between fluid delicacy and rough fury. His songwriting often uses irregular metres and polyrhythms, combining retro computer timbres with strongly narrative processing to depict a restless inner otherworld.</p>
+      </section>
+
+      <section className="about-section about-music-section" data-testid="about-music">
+        <div className="about-section-copy">
           <h2>MUSIC</h2>
-          <p><span>2026</span>Cyberspace / Bug Party</p>
-          <p><span>2024</span>Two Dreadful Children / Unipre</p>
+          <p>In 2026, his work was released by Kit Records, a representative independent avant-garde label in London, alongside a limited double-sided cassette. In July of the same year, the work was covered by The Quietus, a noted European electronic music magazine, and by Muito in Buenos Aires. With this album, he has performed alongside international musicians including Vic Bang, k means, Visit Me, Barreleye, YOTO and 4 Channels Club.</p>
         </div>
-        <div>
-          <h2>SCORING</h2>
-          <p><span>2024</span>Fancy A BITE? / Theatre music</p>
-          <p><span>2024</span>Role Model / Short film</p>
-          <p><span>2022</span>Nostopia Playable NFT / Game music</p>
-          <p><span>2021-2022</span>China Central Television programme promotional packaging / Short films</p>
-          <p><span>2022</span>Untitled Land / Short film</p>
-          <p><span>2021</span>Clouds from Underground / Short film</p>
-          <p><span>2018</span>Paradise Dream 2 / Exhibition score</p>
-        </div>
-        <div>
-          <h2>EVENT PROJECTS</h2>
-          <p><span>2024-</span>no idea</p>
-          <p><span>2024-</span>OPENBAND</p>
+        <div className="about-image-pair about-music-images">
+          <img className="about-image about-image-cassette" src={assetUrl("/assets/about/cyberspace-bug-party-cassette.jpeg")} alt="Cyberspace / Bug Party double-sided cassette photograph." />
+          <img className="about-image about-image-live" src={assetUrl("/assets/live/portfolio/george-tavern-2026.jpeg")} alt="Shen Ao live performance at The George Tavern, London." />
         </div>
       </section>
-      <section className="music-platform-row about-contact-links" aria-label="About links">
-        <ExternalLink href="https://shenao.bandcamp.com/" className="music-platform-link">BANDCAMP</ExternalLink>
-        <ExternalLink href="https://music.163.com/#/artist?id=46923018" className="music-platform-link">NETEASE</ExternalLink>
-        <ExternalLink href="https://soundcloud.com/shen-ao/" className="music-platform-link">SOUNDCLOUD</ExternalLink>
-        <ExternalLink href="https://www.mixcloud.com/teendrum/" className="music-platform-link">MIXCLOUD</ExternalLink>
+
+      <section className="about-section about-scoring-section" data-testid="about-scoring">
+        <img className="about-image about-image-fancy" src={assetUrl("/assets/portfolio-projects/fancy-a-bite-stage-projection.jpeg")} alt="Fancy A BITE? stage performance with blue projection." />
+        <div className="about-section-copy">
+          <h2>SCORING / CROSS-MEDIA</h2>
+          <p>He often collaborates with artists from other fields on cross-media works, including music for film and television, exhibitions, theatre, games and advertising. Since 2020, he has produced music for more than 50 promotional packaging projects for China Central Television programmes, including Long Teng Hu Yue Zhong Guo Nian, Rui Tu Cheng Xiang Zhong Guo Nian, the Convention on Biological Diversity and Da Mei Bian Jiang Xing. In 2024, he worked with London's ENF Theatre on the soundtrack for Fancy A BITE?, which was performed at Camden People's Theatre.</p>
+        </div>
+        <img className="about-image about-image-role-model" src={assetUrl("/assets/role-model/DSC0944_1600px_sRGB.jpg")} alt="Role Model moving-image projection in a dark exhibition room." />
+      </section>
+
+      <section className="about-section about-dj-section" data-testid="about-dj-curation">
+        <div className="about-section-copy">
+          <h2>DJ / CURATION</h2>
+          <p>Shen Ao is also a DJ and music-event curator, performing under the alias Teendrum. He has performed at music venues in China and London, including Zhao Dai, wigwam, Mo Xu You Factory and Taikang Art Museum in China, and Spanners, Shai Space, LOOSE.fm and helm in the UK. In 2024, he launched no idea, an ambient-music online radio and offline event series. The series quickly attracted attention within the field and invited musicians including Kirk Barley, Stella Z, Li Song, Pentu, Xi Chenchen, Louis Gardner and Sseq to perform.</p>
+        </div>
+        <div className="about-image-pair about-dj-images">
+          <img className="about-image about-image-teendrum" src={assetUrl("/assets/live/teendrum/teendrum-baihui-live.jpeg")} alt="Baihui poster for DJ Teendrum." />
+          <img className="about-image about-image-no-idea" src={assetUrl("/assets/practice/no-idea/no-idea-live-with-no-idea-poster.jpeg")} alt="Live With No Idea grey and white poster." />
+        </div>
+      </section>
+
+      <section className="about-section about-community-section" data-testid="about-community-openband">
+        <div className="about-section-copy">
+          <h2>COMMUNITY / OPENBAND</h2>
+          <p>Shen Ao continues to focus on the healthy development of music communities and founded OPENBAND, an improvisational music workshop. Based at fRUITYSPACE in Beijing, the workshop aims to promote communication and shared growth among local music practitioners. It has held around 20 monthly sessions, attracting about 500 music practitioners, and has promoted its workflow and underlying logic through offline presentations at City St George’s, University of London and Hypha HQ in London.</p>
+        </div>
+        <img className="about-image about-image-openband" src={assetUrl("/assets/practice/openband/openband-monthly-posters.jpeg")} alt="OPENBAND monthly offline activity poster grid." />
+      </section>
+
+      <section className="about-section about-closing-section" data-testid="about-closing">
+        <h2>CLOSING STATEMENT</h2>
+        <p>Through these interrelated projects, Shen Ao's work both inherits its own logic and attends to real society and community development, showing his understanding of musical structure, timbral design and shifts in a broader artistic environment.</p>
+      </section>
+
+      <section className="about-section about-contact-section" aria-label="About contact" data-testid="about-contact">
+        <h2>CONTACT</h2>
         <a className="music-platform-link" href="mailto:lerezero@gmail.com">lerezero@gmail.com</a>
       </section>
     </main>
@@ -585,7 +699,6 @@ function PressRadioPage() {
 
   return (
     <main className="route-page press-radio-page">
-      <PageAccentMarks variant="press" />
       <section className="press-radio-intro">
         <div className="section-kicker">EXTERNAL RECEPTION ARCHIVE</div>
         <h1><span>PRESS /</span><span>RADIO</span></h1>
@@ -610,7 +723,7 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
   const contactLinks = [
     musicPlatformLinks.find((link) => link.label === "BANDCAMP")!,
     musicPlatformLinks.find((link) => link.label === "SOUNDCLOUD")!,
-    livePlatformLinks.find((link) => link.label === "MIXCLOUD")!
+    livePlatformLinks.find((link) => link.url === "https://www.mixcloud.com/teendrum/")!
   ];
   const selectedWork = [
     ["CYBERSPACE", "KIT RECORDS / RELEASE", "/work/cyberspace"],
@@ -623,7 +736,6 @@ function EpkPage({ navigate }: { navigate: (path: string) => void }) {
 
   return (
     <main className="route-page epk-page">
-      <PageAccentMarks variant="epk" />
       <section className="epk-hero" data-testid="epk-hero">
         <div>
           <h1>SHEN AO</h1>
@@ -855,46 +967,101 @@ function FancyABitePage({ navigate }: { navigate: (path: string) => void }) {
 function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("no-idea")!;
   const event = latestNoIdeaEvent;
+  const nextProject = nextProjectFor(project.slug);
+  const featuredImages = [event.heroImage, ...event.galleryImages.filter((_, index) => [0, 1, 3, 6].includes(index)).map((image) => image.src)];
   return (
-    <ProjectShell kicker="PRACTICE / EVENTS + RADIO" title={noIdeaProject.title} project={project}>
-      <section className="practice-project-intro no-idea-project-intro">
-        <div>
-          <MetaLines lines={[noIdeaProject.year, noIdeaProject.heading]} />
+    <ProjectShell kicker="PROJECT / CURATION" title={noIdeaProject.title} project={project}>
+      <section className="no-idea-project-intro">
+        <figure className="no-idea-hero-figure">
+          <img src={assetUrl(noIdeaProject.previewImage!)} alt="Live With No Idea project poster." />
+        </figure>
+        <div className="no-idea-hero-copy">
+          <MetaLines lines={[noIdeaProject.year, noIdeaProject.heading, noIdeaProject.location]} uppercase={false} />
           <p>{noIdeaProject.summary}</p>
-          {noIdeaProject.detail && <p className="practice-detail-copy">{noIdeaProject.detail}</p>}
           <div className="link-row">
             {noIdeaProject.links.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
           </div>
-          {noIdeaProject.instagramHandle && <p className="practice-social">{noIdeaProject.instagramHandle}</p>}
-        </div>
-        <figure className="no-idea-hero-figure">
-          <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
-        </figure>
-      </section>
-
-      <section className="practice-poster-archive no-idea-events">
-        <div className="section-kicker">LIVE EVENT ARCHIVE</div>
-        <div className="practice-poster-grid">
-          {noIdeaProject.posterArchive?.map((slot) => <NoIdeaPosterSlot slot={slot} navigate={navigate} key={slot.id} />)}
+          {noIdeaProject.instagramHandle && (
+            <p className="practice-social">
+              <a className="text-arrow no-idea-hero-social-link" href="https://www.instagram.com/noidea.radio/" target="_blank" rel="noreferrer">{noIdeaProject.instagramHandle}</a>
+            </p>
+          )}
         </div>
       </section>
 
-      <section className="practice-radio-archive">
-        <div className="section-kicker">RADIO ARCHIVE</div>
-        <div className="practice-radio-grid">
-          {noIdeaProject.radioArchive?.map((slot) => <RadioArtworkSlot slot={slot} key={slot.id} />)}
+      <section className="no-idea-radio-section">
+        <h2>RADIO</h2>
+        <p>{noIdeaProject.detail}</p>
+        <div className="no-idea-radio-archive">
+          {noIdeaProject.radioArchive?.map((slot) => (
+            <article className="no-idea-radio-entry" key={slot.id}>
+              <img src={assetUrl(slot.image)} alt={`${slot.title} artwork.`} />
+              <h3 className="no-idea-radio-title-small">
+                <a href={slot.url} target="_blank" rel="noreferrer">{slot.title}</a>
+              </h3>
+              <p>{slot.city} {slot.date}</p>
+              <div>
+                {slot.tags.map((tag) => <span key={tag}>[{tag}]</span>)}
+              </div>
+            </article>
+          ))}
         </div>
-        <ExternalLink href={event.externalLinks.noIdeaRadio}>LISTEN ON BAIHUI ↗</ExternalLink>
+        <ExternalLink href={event.externalLinks.noIdeaRadio}>BAIHUI RADIO ↗</ExternalLink>
       </section>
 
-      <section className="no-idea-event-gallery" aria-label="Live With No Idea image gallery">
-        {event.galleryImages.map((image, index) => (
-          <figure className={`no-idea-gallery-item no-idea-gallery-item-${index + 1}`} key={image.src}>
-            <img src={assetUrl(image.src)} alt={image.alt} />
-          </figure>
-        ))}
+      <section className="no-idea-live-events">
+        <h2>LIVE EVENTS</h2>
+        <div className="no-idea-live-event-grid">
+          {noIdeaProject.posterArchive?.filter((slot) => slot.image).map((slot) => (
+            <article className="no-idea-live-event" key={slot.id}>
+              <img src={assetUrl(slot.image!)} alt={`${slot.title} poster.`} />
+              <div>
+                <h3>{slot.title}</h3>
+                <p>{slot.label}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
-      <NextProject title="OPENBAND" onClick={() => navigate("/work/openband-openscore")} />
+
+      <section className="no-idea-featured-event no-idea-featured-event-stacked">
+        <div className="no-idea-featured-copy">
+          <h2>FEATURED EVENT</h2>
+          <div className="no-idea-featured-meta">
+            {[event.displayDate, event.edition.toUpperCase()].map((line) => (
+              <span className="no-idea-featured-meta-primary" key={line}>{line}</span>
+            ))}
+            {[
+              event.venue.toUpperCase(),
+              event.room.toUpperCase(),
+              event.address.toUpperCase(),
+              event.city.toUpperCase(),
+              event.postcode.toUpperCase(),
+              event.genres.map((genre) => genre.toUpperCase()).join(" / "),
+              event.roles.map((role) => role.toUpperCase()).join(" / ")
+            ].map((line) => (
+              <span className="no-idea-featured-meta-secondary" key={line}>{line}</span>
+            ))}
+          </div>
+          <div className="event-lineup">
+            <h3>LINEUP</h3>
+            {event.lineup.map((artist) => <p key={artist}>{artist}</p>)}
+          </div>
+          <div className="link-row">
+            <ExternalLink href={event.externalLinks.residentAdvisor}>RESIDENT ADVISOR EVENT ↗</ExternalLink>
+            <ExternalLink href={event.externalLinks.shaiSpace}>SHAI SPACE ↗</ExternalLink>
+          </div>
+        </div>
+        <div className="no-idea-featured-gallery" aria-label="Live With No Idea image gallery">
+          {featuredImages.map((src, index) => (
+            <figure className={`no-idea-featured-image ${index === 0 ? "no-idea-featured-image-large" : "no-idea-featured-image-supporting"} no-idea-featured-image-${index + 1}`} key={src}>
+              <img src={assetUrl(src)} alt={index === 0 ? "Shen Ao performing at Live With No Idea at Shai Space, London." : event.galleryImages.find((image) => image.src === src)?.alt ?? "Live With No Idea event documentation."} />
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
     </ProjectShell>
   );
 }
@@ -902,38 +1069,64 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
 function OpenbandPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("openband-openscore")!;
   return (
-    <ProjectShell kicker="PRACTICE / WORKSHOPS" title={openbandProject.title} project={project}>
-      <section className="practice-project-intro openband-project-intro">
-        <div>
-          <MetaLines lines={[openbandProject.year, openbandProject.heading, openbandProject.location]} />
+    <ProjectShell
+      kicker="PROJECT / COMMUNITY"
+      title={openbandProject.title}
+      project={project}
+      heroAside={(
+        <div className="openband-hero-copy">
+          <MetaLines lines={[openbandProject.year, openbandProject.heading, openbandProject.location]} uppercase={false} />
           <p>{openbandProject.summary}</p>
           <div className="link-row">
-            {openbandProject.links.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
+            {openbandProject.links.map((link) => <ExternalLink className="text-arrow-explicit" key={link.url} href={link.url}>{link.label}</ExternalLink>)}
           </div>
         </div>
-        <div className="openband-lead-poster">
-          <MediaPlaceholder title="OPENBAND" label="WORKSHOP POSTER" variant="portrait" />
+      )}
+    >
+
+      <section className="openband-section openband-event-posters-section">
+        <h2>EVENT POSTERS</h2>
+        <div className="openband-event-poster-groups">
+          {openbandProject.eventPosterGroups?.map((group) => <OpenbandPosterGroup group={group} key={group.city} />)}
         </div>
       </section>
 
-      <section className="practice-poster-archive openband-poster-archive">
-        <div className="section-kicker">MONTHLY WORKSHOP POSTERS</div>
-        <div className="practice-poster-grid">
-          {openbandProject.posterArchive?.map((slot) => <PosterPlaceholderSlot slot={slot} key={slot.id} />)}
+      <section className="openband-section openband-documentation-section">
+        <h2>BEIJING / LONDON</h2>
+        <div className="openband-documentation-list">
+          {openbandProject.documentationGroups?.map((group) => <OpenbandDocumentationGroup group={group} key={group.city} />)}
         </div>
       </section>
 
-      <section className="openband-workshop-list">
-        <div className="section-kicker">LONDON WORKSHOP / ARCHIVE</div>
-        {openbandProject.workshopEntries?.map((entry) => <WorkshopDocumentationEntry entry={entry} key={entry.venue} />)}
+      <section className="openband-section openband-resource-section">
+        <h2>RECORDINGS / ARCHIVE</h2>
+        <div className="openband-resource-grid">
+          <div className="openband-resource-item">
+            <span>MIXCLOUD</span>
+            <ExternalLink className="text-arrow-explicit" href={openbandProject.links[1].url}>{openbandProject.links[1].label}</ExternalLink>
+          </div>
+          <div className="openband-resource-item">
+            <span>OPENBAND ARCHIVE</span>
+            <ExternalLink className="text-arrow-explicit" href={openbandProject.links[0].url}>{openbandProject.links[0].label}</ExternalLink>
+          </div>
+        </div>
       </section>
 
-      <section className="openband-gallery-grid" aria-label="Openband workshop gallery placeholders">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <MediaPlaceholder title="OPENBAND" label="DOCUMENTATION IMAGE" variant="landscape" key={index} />
-        ))}
+      <section className="openband-section openband-credits-section">
+        <h2>CREDITS</h2>
+        <div className="openband-credits-list">
+          <div className="openband-credit-group">
+            <span className="openband-credit-label">HOSTS</span>
+            {openbandProject.credits?.hosts.map((host) => <p className="openband-credit-value" key={host}>{host}</p>)}
+          </div>
+          <div className="openband-credit-group">
+            <span className="openband-credit-label">VENUE</span>
+            {openbandProject.credits?.venues.map((venue) => <p className="openband-credit-value" key={venue}>{venue}</p>)}
+          </div>
+        </div>
       </section>
-      <NextProject title="NO IDEA" onClick={() => navigate("/work/no-idea")} />
+
+      <NextProject title="BACK TO LIVE" onClick={() => navigate("/live")} label={null} />
     </ProjectShell>
   );
 }
@@ -950,7 +1143,6 @@ function NoIdeaEventPage({ slug, navigate }: { slug: string; navigate: (path: st
 
   return (
     <main className="project-page no-idea-event-page">
-      <PageAccentMarks variant="project" />
       <section className="project-hero no-idea-event-hero">
         <div className="section-kicker">NO IDEA / EVENT</div>
         <h1>{event.edition.toUpperCase()}</h1>
@@ -999,30 +1191,19 @@ function NoIdeaEventPage({ slug, navigate }: { slug: string; navigate: (path: st
   );
 }
 
-function ProjectShell({ kicker, title, project, children }: { kicker: string; title: ReactNode; project: Project; children: ReactNode }) {
+function ProjectShell({ kicker, title, project, heroAside, children }: { kicker: string; title: ReactNode; project: Project; heroAside?: ReactNode; children: ReactNode }) {
   return (
     <main className={`project-page project-page-${project.slug}`}>
-      <PageAccentMarks variant="project" />
       <section className="project-hero">
-        <div className="section-kicker">{kicker}</div>
-        <h1>{title}</h1>
-        <p className="identity">{project.category.toUpperCase()} {project.subtype ? `/ ${project.subtype.toUpperCase()}` : ""}</p>
+        <div className="openband-hero-title">
+          <div className="section-kicker">{kicker}</div>
+          <h1>{title}</h1>
+          <p className="identity">{project.category.toUpperCase()} {project.subtype ? `/ ${project.subtype.toUpperCase()}` : ""}</p>
+        </div>
+        {heroAside}
       </section>
       {children}
     </main>
-  );
-}
-
-function PageAccentMarks({ variant }: { variant: string }) {
-  return (
-    <div className={`page-accent-marks page-accent-${variant}`} aria-hidden="true">
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
-    </div>
   );
 }
 
@@ -1218,7 +1399,11 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
       )}
       {project.relatedWorks && <RelatedWorks works={project.relatedWorks} />}
       {project.press && <KnownPress press={project.press} />}
-      <NextProject title={nextProjectFor(project.slug).title} onClick={() => navigate(nextProjectFor(project.slug).path)} />
+      {project.slug === "cctv-selected-broadcast-work" ? (
+        <NextProject title="BACK TO MUSIC" onClick={() => navigate("/music")} label={null} />
+      ) : (
+        <NextProject title={nextProjectFor(project.slug).title} onClick={() => navigate(nextProjectFor(project.slug).path)} />
+      )}
     </ProjectShell>
   );
 }
@@ -1265,23 +1450,6 @@ function PracticeEditorialEntry({ project, onOpen }: { project: PracticeProject;
   );
 }
 
-function NoIdeaPosterSlot({ slot, navigate }: { slot: PosterArchiveSlot; navigate: (path: string) => void }) {
-  if (slot.image && slot.eventSlug) {
-    return (
-      <article className="practice-poster-slot practice-poster-slot-confirmed">
-        <img src={assetUrl(slot.image)} alt="Live With No Idea event poster." />
-        <div>
-          <h2>{slot.title}</h2>
-          <MetaLines lines={[slot.label, latestNoIdeaEvent.roles.join(" + ")]} />
-          <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${slot.eventSlug}`)}>VIEW EVENT</button>
-        </div>
-      </article>
-    );
-  }
-
-  return <PosterPlaceholderSlot slot={slot} />;
-}
-
 function PosterPlaceholderSlot({ slot }: { slot: PosterArchiveSlot }) {
   return (
     <article className="practice-poster-slot">
@@ -1290,22 +1458,34 @@ function PosterPlaceholderSlot({ slot }: { slot: PosterArchiveSlot }) {
   );
 }
 
-function RadioArtworkSlot({ slot }: { slot: RadioArchiveSlot }) {
+function OpenbandDocumentationGroup({ group }: { group: DocumentationGroup }) {
   return (
-    <article className="practice-radio-slot">
-      <MediaPlaceholder title={slot.title} label={slot.label} variant="square" />
+    <article className="openband-documentation-group" data-documentation-city={group.city}>
+      <h3>{group.city}</h3>
+      <div className="openband-documentation-grid">
+        {group.images.map((image, index) => (
+          <img className="openband-documentation-image openband-image-contain" src={assetUrl(image)} alt={`OPENBAND ${group.city === "BEIJING" ? "Beijing" : "London"} documentation ${index + 1}.`} key={image} />
+        ))}
+      </div>
     </article>
   );
 }
 
-function WorkshopDocumentationEntry({ entry }: { entry: WorkshopEntry }) {
+function OpenbandPosterGroup({ group }: { group: EventPosterGroup }) {
   return (
-    <article className="openband-workshop-entry">
-      <div>
-        <h2>{entry.venue}</h2>
-        <MetaLines lines={[entry.label]} />
+    <article className="openband-event-poster-group" data-poster-city={group.city}>
+      <h3>{group.city}</h3>
+      <div className="openband-event-poster-list">
+        {group.posters.map((poster, index) => (
+          <figure className="openband-event-poster-item" key={poster.image}>
+            <img className="openband-event-poster openband-image-contain" src={assetUrl(poster.image)} alt={`OPENBAND ${group.city === "BEIJING" ? "Beijing" : "London"} event poster ${index + 1}.`} />
+            <figcaption className="openband-event-poster-caption">
+              <span>{poster.venue}</span>
+              <span>{group.city}</span>
+            </figcaption>
+          </figure>
+        ))}
       </div>
-      <MediaPlaceholder title="OPENBAND" label="DOCUMENTATION IMAGE" variant="landscape" />
     </article>
   );
 }
@@ -1553,6 +1733,7 @@ function Footer() {
         <a href="https://shenao.bandcamp.com/">BANDCAMP</a>
         <a href="https://soundcloud.com/shen-ao">SOUNDCLOUD</a>
         <a href="https://www.mixcloud.com/teendrum/">MIXCLOUD</a>
+        <a href="https://www.instagram.com/shenaoooooo/" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
       </div>
       <span className="footer-credit">© 2026 SHEN AO · LONDON</span>
     </footer>
@@ -1575,8 +1756,8 @@ function MediaVisual({ project }: { project: Project }) {
   return <MediaPlaceholder title={project.title.toUpperCase()} label={project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER"} variant={project.category === "Music" ? "square" : "landscape"} />;
 }
 
-function MetaLines({ lines }: { lines: Array<string | undefined> }) {
-  return <div className="meta-lines">{lines.filter(Boolean).map((line) => <span key={line}>{line!.toUpperCase()}</span>)}</div>;
+function MetaLines({ lines, uppercase = true }: { lines: Array<string | undefined>; uppercase?: boolean }) {
+  return <div className="meta-lines">{lines.filter(Boolean).map((line) => <span key={line}>{uppercase ? line!.toUpperCase() : line}</span>)}</div>;
 }
 
 function ExternalLink({ href, children, className = "text-arrow", ariaLabel }: { href: string; children: React.ReactNode; className?: string; ariaLabel?: string }) {

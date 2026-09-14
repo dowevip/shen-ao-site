@@ -36,6 +36,18 @@ export type DjPosterArchiveItem = {
   path?: string;
 };
 
+export type LiveImage = {
+  id: string;
+  path: string;
+  alt: string;
+};
+
+export type PianoKeyboardGroup = {
+  id: string;
+  title: string;
+  images: LiveImage[];
+};
+
 export const selectedLiveEvents: LiveEvent[] = [
   {
     id: "loose-fm-2026-08-08",
@@ -93,8 +105,68 @@ export const selectedLiveEvents: LiveEvent[] = [
 ];
 
 export const livePlatformLinks: LiveEventLink[] = [
-  { label: "MIXCLOUD", url: "https://www.mixcloud.com/teendrum/" },
-  { label: "RESIDENT ADVISOR", url: "https://ra.co/dj/teendrum" }
+  { label: "PROFILE / RESIDENT ADVISOR", url: "https://ra.co/dj/teendrum" },
+  { label: "LISTEN / MIXCLOUD", url: "https://www.mixcloud.com/teendrum/" }
+];
+
+const pianoArchiveImage = (id: string, filename: string): LiveImage => ({
+  id,
+  path: `/assets/live/piano-keyboard/${filename}`,
+  alt: "Piano and keyboard live archive."
+});
+
+export const pianoKeyboardGroups: PianoKeyboardGroup[] = [
+  {
+    id: "contemporary-classical-cross-media-experimental",
+    title: "CONTEMPORARY CLASSICAL / CROSS-MEDIA / EXPERIMENTAL",
+    images: [
+      pianoArchiveImage("contemporary-classical-01", "contemporary-classical-01.jpeg"),
+      pianoArchiveImage("puregolds-ao-evan-nicolls", "puregolds-ao-evan-nicolls.jpeg"),
+      pianoArchiveImage("contemporary-classical-03", "contemporary-classical-03.jpeg"),
+      pianoArchiveImage("contemporary-classical-04", "contemporary-classical-04.jpeg"),
+      pianoArchiveImage("daylight-music-2024-poster", "daylight-music-2024-poster.jpeg")
+    ]
+  },
+  {
+    id: "improvisation-rock-electronic",
+    title: "IMPROVISATION / ROCK / ELECTRONIC",
+    images: [
+      pianoArchiveImage("improvisation-rock-electronic-01", "improvisation-rock-electronic-01.jpeg"),
+      pianoArchiveImage("improvisation-rock-electronic-02", "improvisation-rock-electronic-02.jpeg"),
+      pianoArchiveImage("improvisation-rock-electronic-03", "improvisation-rock-electronic-03.jpeg"),
+      pianoArchiveImage("improvisation-rock-electronic-04", "improvisation-rock-electronic-04.jpeg"),
+      pianoArchiveImage("improvisation-rock-electronic-05", "improvisation-rock-electronic-05.jpeg")
+    ]
+  },
+  {
+    id: "band-jazz-soul",
+    title: "BAND / JAZZ / SOUL",
+    images: [
+      pianoArchiveImage("band-jazz-soul-01", "band-jazz-soul-01.jpeg"),
+      pianoArchiveImage("band-jazz-soul-02", "band-jazz-soul-02.jpeg"),
+      pianoArchiveImage("band-jazz-soul-03", "band-jazz-soul-03.jpeg"),
+      pianoArchiveImage("honeydew-live-poster-red", "honeydew-live-poster-red.jpeg"),
+      pianoArchiveImage("honeydew-live-poster-blue", "honeydew-live-poster-blue.jpeg")
+    ]
+  }
+];
+
+export const teendrumImages: LiveImage[] = [
+  {
+    id: "teendrum-baihui-live",
+    path: "/assets/live/teendrum/teendrum-baihui-live.jpeg",
+    alt: "Teendrum Baihui live visual archive."
+  },
+  {
+    id: "teendrum-eerawai-ambient-series",
+    path: "/assets/live/teendrum/teendrum-eerawai-ambient-series.jpeg",
+    alt: "Teendrum Eerawai Ambient Series visual archive."
+  },
+  {
+    id: "teendrum-mclab-poster",
+    path: "/assets/live/teendrum/teendrum-mclab-poster.jpeg",
+    alt: "Teendrum visual archive."
+  }
 ];
 
 export const djPosterArchive: DjPosterArchiveItem[] = [

@@ -245,7 +245,7 @@ export const projects: Project[] = [
       { label: "No Idea Radio", url: "https://baihui.live/hosts/no-idea/en/" },
       { label: "Resident Advisor", url: "https://ra.co/promoters/183279" }
     ],
-    artwork: "/assets/no-idea/2026-05-23/poster.webp",
+    artwork: "/assets/no-idea/ppt-source/live-with-no-idea-shai-space-poster.jpeg",
     images: [
       {
         src: "/assets/no-idea/2026-05-23/hero.webp",
@@ -256,6 +256,7 @@ export const projects: Project[] = [
     selectedOrder: 5,
     workSection: "selected",
     workRoleLabel: "RADIO / LIVE EVENTS",
+    nextProjectSlug: "openband-openscore",
     verificationStatus: "confirmed",
     mediaStatus: "confirmed"
   },

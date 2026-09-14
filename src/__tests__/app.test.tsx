@@ -20,6 +20,43 @@ function expectOnlyPrimaryNavItems(labels: string[]) {
 }
 
 describe("SHEN AO site IA", () => {
+  it("renders deterministic shared page accents for public routes", () => {
+    const routes = [
+      "/",
+      "/music",
+      "/live",
+      "/about",
+      "/work/cyberspace-bug-party",
+      "/work/role-model",
+      "/work/fancy-a-bite",
+      "/work/untitled-land",
+      "/work/clouds-from-underground",
+      "/work/no-idea",
+      "/work/openband-openscore"
+    ];
+
+    const signatures = routes.map((route) => {
+      const { unmount } = render(<App initialPath={route} />);
+      const container = document.querySelector(".page-accents");
+      const marks = Array.from(document.querySelectorAll<HTMLElement>(".page-accent-mark"));
+
+      expect(container).toHaveAttribute("aria-hidden", "true");
+      expect(marks.length).toBeGreaterThanOrEqual(3);
+      expect(marks.length).toBeLessThanOrEqual(4);
+
+      const firstSignature = marks.map((mark) => mark.getAttribute("style")).join("|");
+      unmount();
+
+      render(<App initialPath={route} />);
+      expect(Array.from(document.querySelectorAll<HTMLElement>(".page-accent-mark")).map((mark) => mark.getAttribute("style")).join("|")).toBe(firstSignature);
+      cleanup();
+
+      return firstSignature;
+    });
+
+    expect(new Set(signatures).size).toBeGreaterThan(routes.length - 3);
+  });
+
   it("keeps the primary navigation to HOME, MUSIC, LIVE, and ABOUT", () => {
     render(<App initialPath="/" />);
 
@@ -222,7 +259,35 @@ describe("SHEN AO site IA", () => {
     expect(footer.getByRole("link", { name: "BANDCAMP" })).toHaveAttribute("href", "https://shenao.bandcamp.com/");
     expect(footer.getByRole("link", { name: "SOUNDCLOUD" })).toHaveAttribute("href", "https://soundcloud.com/shen-ao");
     expect(footer.getByRole("link", { name: "MIXCLOUD" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");
+    expect(footer.getByRole("link", { name: "INSTAGRAM" })).toHaveAttribute("href", "https://www.instagram.com/shenaoooooo/");
+    expect(footer.getByRole("link", { name: "INSTAGRAM" })).toHaveAttribute("target", "_blank");
+    expect(footer.getByRole("link", { name: "INSTAGRAM" })).toHaveAttribute("rel", "noopener noreferrer");
     expect(footer.queryByText("LONDON")).not.toBeInTheDocument();
+  });
+
+  it("shows the shared footer Instagram link across primary and project routes", () => {
+    [
+      "/",
+      "/music",
+      "/live",
+      "/about",
+      "/work/cyberspace-bug-party",
+      "/work/role-model",
+      "/work/fancy-a-bite",
+      "/work/untitled-land",
+      "/work/clouds-from-underground",
+      "/work/cctv-selected-broadcast-work",
+      "/work/no-idea",
+      "/work/openband-openscore"
+    ].forEach((route) => {
+      cleanup();
+      render(<App initialPath={route} />);
+      const footer = within(screen.getByRole("contentinfo"));
+      expect(footer.getByRole("link", { name: "BANDCAMP" })).toHaveAttribute("href", "https://shenao.bandcamp.com/");
+      expect(footer.getByRole("link", { name: "SOUNDCLOUD" })).toHaveAttribute("href", "https://soundcloud.com/shen-ao");
+      expect(footer.getByRole("link", { name: "MIXCLOUD" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");
+      expect(footer.getByRole("link", { name: "INSTAGRAM" })).toHaveAttribute("href", "https://www.instagram.com/shenaoooooo/");
+    });
   });
 
   it("routes each primary commissioned MUSIC INFO button to its internal detail page", () => {
@@ -243,65 +308,161 @@ describe("SHEN AO site IA", () => {
     }
   });
 
-  it("renders LIVE as one reverse-chronological archive", () => {
-    render(<App initialPath="/live" />);
+  it("renders LIVE as four scoped performance practice sections", () => {
+    window.history.replaceState({}, "", "/live");
+    render(<App />);
 
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "LIVE" })).toBeInTheDocument();
-    expect(screen.queryByText("LIVE / ARCHIVE")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "ARCHIVE" })).toBeInTheDocument();
-    expect(screen.queryByText("LOCATION / VENUE")).not.toBeInTheDocument();
-    expect(screen.queryByText("EVENT / ACTIVITY")).not.toBeInTheDocument();
+    const main = within(screen.getByRole("main"));
+    expect(main.getByRole("heading", { level: 1, name: "LIVE" })).toBeInTheDocument();
+    expect(main.queryByRole("heading", { level: 2, name: "ARCHIVE" })).not.toBeInTheDocument();
 
-    const rows = screen.getAllByTestId(/live-archive-row-/);
-    expect(rows.map((row) => within(row).getByTestId("live-date").textContent)).toEqual([
-      "08 AUG 2026",
-      "23 JUL 2026",
-      "17 JUL 2026",
-      "17 JUN 2026",
-      "23 MAY 2026",
-      "2018"
+    expect([...screen.getByRole("main").querySelectorAll("section.live-section > h2")].map((heading) => heading.textContent)).toEqual([
+      "CURATION / COMMUNITY",
+      "ORIGINAL MUSIC LIVE",
+      "DJ / TEENDRUM",
+      "PIANO / KEYBOARD"
     ]);
-    expect(rows[0]).toHaveTextContent("LOOSE.FM / LONDON");
-    expect(rows[0]).toHaveTextContent("DUO WITH AVIN NOORBAKHSH");
-    expect(rows[0]).toHaveTextContent("LIVE PERFORMANCE");
-    expect(rows[4]).toHaveTextContent("SHAI SPACE / LONDON");
-    expect(rows[4]).toHaveTextContent("LIVE WITH NO IDEA");
-    expect(rows[4]).toHaveTextContent("ORGANISER + PERFORMER");
-    expect(rows[5]).toHaveTextContent("TIANJIN CONCERT HALL / RUXI ART GALLERY");
-    expect(rows[5]).toHaveTextContent("SOLO CONCERT");
-    expect(within(rows[0]).getByRole("img")).toHaveAttribute("src", "/assets/live/portfolio/loose-fm-2026.jpeg");
-    expect(within(rows[1]).getByRole("img")).toHaveAttribute("src", "/assets/live/portfolio/spanners-2026.jpeg");
-    expect(within(rows[2]).getByRole("img")).toHaveAttribute("src", "/assets/live/portfolio/yuanliao-space-2026.jpeg");
-    expect(within(rows[3]).getByRole("img")).toHaveAttribute("src", "/assets/live/portfolio/george-tavern-2026.jpeg");
-    expect(within(rows[4]).getByRole("img")).toHaveAttribute("src", "/assets/no-idea/2026-05-23/hero.webp");
-    expect(within(rows[5]).getByRole("img")).toHaveAttribute("src", "/assets/live/portfolio/solo-concert-2018.jpeg");
 
-    expect(screen.queryByRole("heading", { name: "SELECTED PERFORMANCES / 2026" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "DJ / TEENDRUM" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "EARLIER PERFORMANCE" })).not.toBeInTheDocument();
+    const originalRows = screen.getAllByTestId(/original-live-row-/);
+    expect(originalRows.map((row) => within(row).getByTestId("live-date").textContent)).toEqual([
+      "17 JUN 2026",
+      "17 JUL 2026",
+      "23 JUL 2026",
+      "08 AUG 2026"
+    ]);
+    expect(originalRows[0]).toHaveTextContent("THE GEORGE TAVERN / LONDON");
+    expect(originalRows[0]).toHaveTextContent("WITH VISIT ME / BARRELEYE / GUTHLAC");
+    expect(originalRows[1]).toHaveTextContent("YUANLIAO SPACE / BEIJING");
+    expect(originalRows[1]).toHaveTextContent("WITH 4CHANNELCLUB / CLOUD CHOIR");
+    expect(originalRows[2]).toHaveTextContent("SPANNERS / LONDON");
+    expect(originalRows[2]).toHaveTextContent("WITH VIC BANG / YOTO / K MEANS");
+    expect(originalRows[3]).toHaveTextContent("LOOSE.FM / LONDON");
+    expect(originalRows[3]).toHaveTextContent("DUO WITH AVIN NOORBAKHSH");
+    expect(screen.queryByText("23 MAY 2026")).not.toBeInTheDocument();
+    expect(screen.queryByText("SHAI SPACE / LONDON")).not.toBeInTheDocument();
+
+    const pianoSection = within(screen.getByTestId("live-piano-keyboard"));
+    const soloConcertBlock = screen.getByTestId("live-solo-concert-2018");
+    expect(within(soloConcertBlock).getByRole("heading", { level: 3, name: "2018 SOLO CONCERT" })).toBeInTheDocument();
+    expect(within(soloConcertBlock).getByText("2018")).toBeInTheDocument();
+    expect(within(soloConcertBlock).getByText("TIANJIN CONCERT HALL / RUXI ART GALLERY")).toBeInTheDocument();
+    expect(within(soloConcertBlock).getByText("SOLO CONCERT")).toBeInTheDocument();
+    expect(within(soloConcertBlock).getByRole("link", { name: "WATCH ↗" })).toHaveAttribute("href", "https://www.youtube.com/watch?v=T8jVsSjHzhA");
+    expect(within(soloConcertBlock).getAllByTestId("piano-solo-concert-image").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/live/piano-keyboard/solo-concert-2018-poster-no-black-border.jpeg",
+      "/assets/live/piano-keyboard/solo-concert-2018-stage-wide-no-black-border.jpeg",
+      "/assets/live/piano-keyboard/solo-concert-2018-keyboard-performance-no-black-border.jpeg"
+    ]);
+    expect(pianoSection.getAllByTestId("piano-solo-concert-image")).toHaveLength(3);
+    expect(pianoSection.getAllByTestId("piano-archive-image")).toHaveLength(15);
+    expect(pianoSection.getAllByTestId("piano-archive-image").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/live/piano-keyboard/contemporary-classical-01.jpeg",
+      "/assets/live/piano-keyboard/puregolds-ao-evan-nicolls.jpeg",
+      "/assets/live/piano-keyboard/contemporary-classical-03.jpeg",
+      "/assets/live/piano-keyboard/contemporary-classical-04.jpeg",
+      "/assets/live/piano-keyboard/daylight-music-2024-poster.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-01.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-02.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-03.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-04.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-05.jpeg",
+      "/assets/live/piano-keyboard/band-jazz-soul-01.jpeg",
+      "/assets/live/piano-keyboard/band-jazz-soul-02.jpeg",
+      "/assets/live/piano-keyboard/band-jazz-soul-03.jpeg",
+      "/assets/live/piano-keyboard/honeydew-live-poster-red.jpeg",
+      "/assets/live/piano-keyboard/honeydew-live-poster-blue.jpeg"
+    ]);
+    expect([...screen.getByTestId("live-piano-keyboard").querySelectorAll(".piano-keyboard-group > h3")].map((heading) => heading.textContent)).toEqual([
+      "CONTEMPORARY CLASSICAL / CROSS-MEDIA / EXPERIMENTAL",
+      "IMPROVISATION / ROCK / ELECTRONIC",
+      "BAND / JAZZ / SOUL"
+    ]);
+
+    const teendrumSection = within(screen.getByTestId("live-teendrum"));
+    expect(teendrumSection.getByText("TEENDRUM")).toBeInTheDocument();
+    expect(teendrumSection.getByText("DJ")).toBeInTheDocument();
+    expect(teendrumSection.getByText("ELECTRO / AMBIENT / IDM / BREAKS / LEFT-FIELD")).toBeInTheDocument();
+    expect(teendrumSection.getByRole("link", { name: "PROFILE / RESIDENT ADVISOR ↗" })).toHaveAttribute("href", "https://ra.co/dj/teendrum");
+    expect(teendrumSection.getByRole("link", { name: "LISTEN / MIXCLOUD ↗" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");
+    expect(teendrumSection.getAllByTestId("teendrum-archive-image").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/live/teendrum/teendrum-baihui-live.jpeg",
+      "/assets/live/teendrum/teendrum-eerawai-ambient-series.jpeg",
+      "/assets/live/teendrum/teendrum-mclab-poster.jpeg"
+    ]);
+
+    const curationSection = within(screen.getByTestId("live-curation-community"));
+    expect(curationSection.getByText("NO IDEA")).toBeInTheDocument();
+    expect(curationSection.getByText("RADIO / LIVE EVENTS")).toBeInTheDocument();
+    expect(screen.queryByText(/MEDIA SLOT/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/placeholder/i)).not.toBeInTheDocument();
+    fireEvent.click(curationSection.getByRole("button", { name: "VIEW PROJECT → NO IDEA" }));
+    expect(window.location.pathname).toBe("/work/no-idea");
+
+    cleanup();
+    window.history.replaceState({}, "", "/live");
+    render(<App />);
+    const refreshedCurationSection = within(screen.getByTestId("live-curation-community"));
+
+    expect(refreshedCurationSection.getByText("NO IDEA")).toBeInTheDocument();
+    expect(refreshedCurationSection.getByText("RADIO / LIVE EVENTS")).toBeInTheDocument();
+    expect(refreshedCurationSection.getByText("OPENBAND")).toBeInTheDocument();
+    expect(refreshedCurationSection.getByText("IMPROVISATION WORKSHOPS")).toBeInTheDocument();
+    expect(refreshedCurationSection.getByText("BEIJING / LONDON")).toBeInTheDocument();
+    fireEvent.click(refreshedCurationSection.getByRole("button", { name: "VIEW PROJECT → OPENBAND" }));
+    expect(window.location.pathname).toBe("/work/openband-openscore");
   });
 
-  it("renders ABOUT from Portfolio pages 1-3 without the previous artist statement", () => {
+  it("renders ABOUT as an editorial profile from the portfolio biography", () => {
     render(<App initialPath="/about" />);
 
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "ABOUT" })).toBeInTheDocument();
+    const mainElement = screen.getByRole("main");
+    const main = within(mainElement);
+    expect(main.getByRole("heading", { level: 1, name: "ABOUT" })).toBeInTheDocument();
     expect(screen.queryByText("ABOUT / PORTFOLIO")).not.toBeInTheDocument();
-    expect(screen.getByText("MUSIC PRODUCER / COMPOSER & ARRANGER / EVENT ORGANISER")).toBeInTheDocument();
+    const aboutHero = within(screen.getByTestId("about-hero"));
+    expect(aboutHero.getByText("MUSIC PRODUCER / COMPOSER & ARRANGER / EVENT ORGANISER")).toHaveClass("about-hero-identity");
+    expect(aboutHero.getByAltText("Shen Ao performing at a microphone.")).toHaveAttribute("src", "/assets/about/shen-ao-hero.jpg");
+    expect(aboutHero.getByAltText("Shen Ao performing at a microphone.")).toHaveClass("about-hero-image");
+    expect(aboutHero.getByText(/Shen Ao is a music producer, composer, arranger and pianist born in Tianjin, China and based in London/i)).toBeInTheDocument();
     expect(screen.getByText(/Shen Ao is a music producer, composer, arranger and pianist born in Tianjin, China and based in London/i)).toBeInTheDocument();
     expect(screen.getByText(/His works draw on progressive rock, free jazz, Baroque, glitch pop and chiptune/i)).toBeInTheDocument();
     expect(screen.getByText(/In 2026, his work was released by Kit Records/i)).toBeInTheDocument();
     expect(screen.getByText(/Since 2020, he has produced music for more than 50 promotional packaging projects/i)).toBeInTheDocument();
     expect(screen.getByText(/In 2024, he launched no idea/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/OPENBAND/).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByRole("heading", { name: "MUSIC" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "SCORING" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "EVENT PROJECTS" })).toBeInTheDocument();
-    const aboutLinks = within(screen.getByLabelText("About links"));
-    expect(aboutLinks.getByRole("link", { name: "BANDCAMP" })).toHaveAttribute("href", "https://shenao.bandcamp.com/");
-    expect(aboutLinks.getByRole("link", { name: "NETEASE" })).toHaveAttribute("href", "https://music.163.com/#/artist?id=46923018");
-    expect(aboutLinks.getByRole("link", { name: "SOUNDCLOUD" })).toHaveAttribute("href", "https://soundcloud.com/shen-ao/");
-    expect(aboutLinks.getByRole("link", { name: "MIXCLOUD" })).toHaveAttribute("href", "https://www.mixcloud.com/teendrum/");
-    expect(aboutLinks.getByRole("link", { name: "lerezero@gmail.com" })).toHaveAttribute("href", "mailto:lerezero@gmail.com");
+    expect(screen.getByText(/City St George’s, University of London and Hypha HQ/i)).toBeInTheDocument();
+    expect(screen.getByText(/Through these interrelated projects/i)).toBeInTheDocument();
+
+    expect(Array.from(mainElement.querySelectorAll("section h2")).map((heading) => heading.textContent)).toEqual([
+      "MUSIC",
+      "SCORING / CROSS-MEDIA",
+      "DJ / CURATION",
+      "COMMUNITY / OPENBAND",
+      "CLOSING STATEMENT",
+      "CONTACT"
+    ]);
+    expect(main.queryByRole("heading", { name: "PROFILE" })).not.toBeInTheDocument();
+
+    expect(mainElement.querySelectorAll("img")).toHaveLength(8);
+    expect(Array.from(mainElement.querySelectorAll("img")).map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/about/shen-ao-hero.jpg",
+      "/assets/about/cyberspace-bug-party-cassette.jpeg",
+      "/assets/live/portfolio/george-tavern-2026.jpeg",
+      "/assets/portfolio-projects/fancy-a-bite-stage-projection.jpeg",
+      "/assets/role-model/DSC0944_1600px_sRGB.jpg",
+      "/assets/live/teendrum/teendrum-baihui-live.jpeg",
+      "/assets/practice/no-idea/no-idea-live-with-no-idea-poster.jpeg",
+      "/assets/practice/openband/openband-monthly-posters.jpeg"
+    ]);
+    expect(mainElement.querySelector(".media-placeholder")).not.toBeInTheDocument();
+    expect(main.queryByAltText("Childhood portrait of Shen Ao.")).not.toBeInTheDocument();
+    expect(main.queryByRole("heading", { name: "EVENT PROJECTS" })).not.toBeInTheDocument();
+    expect(main.queryByText("Selected Works")).not.toBeInTheDocument();
+    expect(main.queryByText("Selected Projects")).not.toBeInTheDocument();
+    expect(main.queryByText("Timeline")).not.toBeInTheDocument();
+    expect(main.queryByText("CV")).not.toBeInTheDocument();
+    expect(main.queryByText("NETEASE")).not.toBeInTheDocument();
+    expect(main.queryByText("City, University of London")).not.toBeInTheDocument();
+    expect(within(screen.getByLabelText("About contact")).getByRole("link", { name: "lerezero@gmail.com" })).toHaveAttribute("href", "mailto:lerezero@gmail.com");
 
     expect(screen.queryByRole("heading", { name: "ARTIST STATEMENT" })).not.toBeInTheDocument();
     expect(screen.queryByText(/Keyboard improvisation is central/i)).not.toBeInTheDocument();
@@ -342,6 +503,180 @@ describe("SHEN AO site IA", () => {
     cleanup();
     render(<App initialPath="/practice/no-idea/2026-05-23" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "LIVE WITH NO IDEA" })).toBeInTheDocument();
+  });
+
+  it("renders No Idea as a project page with radio, live events, featured event, and Openband next project", () => {
+    window.history.replaceState({}, "", "/work/no-idea");
+    render(<App />);
+
+    const main = within(screen.getByRole("main"));
+    expect(main.getByRole("heading", { level: 1, name: "NO IDEA" })).toBeInTheDocument();
+    expect(main.getByText("PROJECT / CURATION")).toBeInTheDocument();
+    expect(main.getByText("2024 —")).toBeInTheDocument();
+    expect(main.getByText("RADIO / LIVE EVENTS")).toBeInTheDocument();
+    expect(main.getByText("London")).toBeInTheDocument();
+
+    expect(main.getByRole("heading", { name: "RADIO" })).toBeInTheDocument();
+    expect(main.getByRole("heading", { name: "LIVE EVENTS" })).toBeInTheDocument();
+    expect(main.getByRole("link", { name: "no idea radio ep.09 - transcribe 转译 w/ AL" })).toHaveAttribute("href", "https://baihui.live/shows/no-idea-w-al-schaffer-26-04-06/en/");
+    expect(main.getByRole("link", { name: "no idea radio ep.08 tracing 勾勒 w/ AL" })).toHaveAttribute("href", "https://baihui.live/shows/no-idea-w-al-schaffer-26-01-12/en/");
+    expect(main.getByRole("link", { name: "no idea ep.01 abandon 遗弃 w/ AL SCHAFFER" })).toHaveAttribute("href", "https://baihui.live/shows/no-idea-w-al-schaffer-24-07-04/en/");
+    for (const titleLink of main.getAllByRole("link").filter((link) => link.closest(".no-idea-radio-entry"))) {
+      expect(titleLink.closest("h3")).toHaveClass("no-idea-radio-title-small");
+    }
+    expect(main.getByText("Beijing 26.04.06")).toBeInTheDocument();
+    expect(main.getByText("Beijing 26.01.12")).toBeInTheDocument();
+    expect(main.getByText("London 24.07.04")).toBeInTheDocument();
+    expect(main.getByAltText("no idea radio ep.09 - transcribe 转译 w/ AL artwork.")).toHaveAttribute("src", "/assets/no-idea/radio/no-idea-radio-ep-09-transcribe.jpg");
+    expect(main.getByAltText("no idea ep.01 abandon 遗弃 w/ AL SCHAFFER artwork.")).toHaveAttribute("src", "/assets/no-idea/radio/no-idea-radio-ep-01-abandon.jpg");
+    expect(main.getAllByRole("link", { name: "BAIHUI RADIO ↗" })[0]).toHaveAttribute("href", "https://baihui.live/hosts/no-idea/en/");
+    expect(main.getAllByRole("link", { name: "RESIDENT ADVISOR ↗" })[0]).toHaveAttribute("href", "https://ra.co/promoters/183279");
+
+    expect(main.getByRole("heading", { name: "FEATURED EVENT" })).toBeInTheDocument();
+    const featuredEvent = document.querySelector(".no-idea-featured-event") as HTMLElement;
+    expect(featuredEvent).toHaveClass("no-idea-featured-event-stacked");
+    expect(featuredEvent.children[0]).toHaveClass("no-idea-featured-copy");
+    expect(featuredEvent.children[1]).toHaveClass("no-idea-featured-gallery");
+    const featuredCopy = featuredEvent.children[0] as HTMLElement;
+    expect(featuredCopy.querySelector(".no-idea-featured-meta")).toBeInTheDocument();
+    expect(featuredCopy.querySelectorAll(".no-idea-featured-meta-primary")).toHaveLength(2);
+    expect(featuredCopy.querySelectorAll(".no-idea-featured-meta-secondary")).toHaveLength(7);
+    const featuredImages = Array.from(featuredEvent.querySelectorAll(".no-idea-featured-image"));
+    expect(featuredImages).toHaveLength(5);
+    expect(featuredImages[0]).toHaveClass("no-idea-featured-image-large");
+    for (const image of featuredImages.slice(1)) {
+      expect(image).toHaveClass("no-idea-featured-image-supporting");
+    }
+    expect(main.getByText("23 MAY 2026")).toBeInTheDocument();
+    expect(main.getAllByText("LIVE WITH NO IDEA").length).toBeGreaterThan(0);
+    expect(main.getAllByText("SHAI SPACE").length).toBeGreaterThan(0);
+    expect(main.getByText("STUDIO 4")).toBeInTheDocument();
+    expect(main.getByText("17 LATONA RD")).toBeInTheDocument();
+    expect(main.getAllByText("LONDON").length).toBeGreaterThan(0);
+    expect(main.getByText("SE15 6RX")).toBeInTheDocument();
+    expect(main.getByText("AMBIENT / EXPERIMENTAL")).toBeInTheDocument();
+    expect(main.getByText("ORGANISER / PERFORMER")).toBeInTheDocument();
+    for (const artist of ["Stella Z", "Kirk Barley", "Li Song", "James Creed", "Francis Moore", "Teendrum"]) {
+      expect(main.getByText(artist)).toBeInTheDocument();
+    }
+    expect(main.getByRole("link", { name: "RESIDENT ADVISOR EVENT ↗" })).toHaveAttribute("href", "https://ra.co/events/2432167");
+    expect(main.getByRole("link", { name: "SHAI SPACE ↗" })).toHaveAttribute("href", "https://www.instagram.com/shai.space/");
+    const heroIntro = within(document.querySelector(".no-idea-project-intro") as HTMLElement);
+    expect(heroIntro.getByRole("link", { name: "@noidearadio" })).toHaveAttribute("href", "https://www.instagram.com/noidea.radio/");
+    expect(heroIntro.getByRole("link", { name: "@noidearadio" })).toHaveClass("no-idea-hero-social-link");
+    expect(document.querySelector(".no-idea-project-links")).not.toBeInTheDocument();
+
+    fireEvent.click(main.getByRole("button", { name: /NEXT PROJECT OPENBAND/ }));
+    expect(window.location.pathname).toBe("/work/openband-openscore");
+
+    for (const removedText of ["MEDIA SLOT", "DETAILS PENDING", "RADIO EPISODE ARTWORK", "placeholder", "北京", "伦敦"]) {
+      expect(main.queryByText(removedText)).not.toBeInTheDocument();
+    }
+  });
+
+  it("renders Openband with a text hero and city-grouped documentation", () => {
+    window.history.replaceState({}, "", "/work/openband-openscore");
+    render(<App />);
+
+    const mainElement = screen.getByRole("main");
+    const main = within(mainElement);
+    expect(main.getByRole("heading", { level: 1, name: "OPENBAND" })).toBeInTheDocument();
+    expect(main.getByText("PROJECT / COMMUNITY")).toBeInTheDocument();
+    expect(main.getByText("2024 —")).toBeInTheDocument();
+    expect(main.getByText("IMPROVISATION WORKSHOPS")).toBeInTheDocument();
+    expect(within(mainElement.querySelector(".project-hero") as HTMLElement).getByText("BEIJING / LONDON")).toBeInTheDocument();
+    expect(main.getByText("A Shen Ao-led improvisation workshop series developed at fRUITYSPACE in Beijing. The project creates an open setting for collective improvisation and collaborative music-making.")).toBeInTheDocument();
+
+    const sectionHeadings = Array.from(mainElement.querySelectorAll("section h2")).map((heading) => heading.textContent);
+    expect(sectionHeadings).toEqual([
+      "EVENT POSTERS",
+      "BEIJING / LONDON",
+      "RECORDINGS / ARCHIVE",
+      "CREDITS"
+    ]);
+
+    expect(mainElement.querySelector(".openband-hero-figure")).not.toBeInTheDocument();
+    expect(mainElement.querySelector(".openband-monthly-section")).not.toBeInTheDocument();
+    expect(mainElement.querySelector(".openband-one-year-section")).not.toBeInTheDocument();
+    expect(main.queryByText("MONTHLY SESSIONS")).not.toBeInTheDocument();
+    expect(main.queryByText("ONE YEAR")).not.toBeInTheDocument();
+    const beijingPosters = within(mainElement.querySelector('[data-poster-city="BEIJING"]') as HTMLElement);
+    const londonPosters = within(mainElement.querySelector('[data-poster-city="LONDON"]') as HTMLElement);
+    expect(beijingPosters.getByRole("heading", { name: "BEIJING" })).toBeInTheDocument();
+    expect(londonPosters.getByRole("heading", { name: "LONDON" })).toBeInTheDocument();
+    expect(beijingPosters.getAllByRole("img").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/openband/event-posters/beijing/openband-fruityspace-posters.jpg",
+      "/assets/openband/event-posters/beijing/openband-small-group-workshop.jpg",
+      "/assets/openband/event-posters/beijing/openband-ren-zhi-yuan-liao-workspace.jpg"
+    ]);
+    expect(londonPosters.getAllByRole("img").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/openband/event-posters/london/openband-city-university-workshop.jpg",
+      "/assets/openband/event-posters/london/openband-hypha-hq-workshop.jpg"
+    ]);
+    expect(mainElement.querySelectorAll(".openband-event-poster")).toHaveLength(5);
+    const posterCaptions = Array.from(mainElement.querySelectorAll(".openband-event-poster-caption"));
+    expect(posterCaptions).toHaveLength(5);
+    [
+      ["fRUITYSPACE / 水果空间", "BEIJING"],
+      ["Small Group Workshop / 小组工作坊", "BEIJING"],
+      ["Ren Zhi Yuan Liao Workspace / 人之原料工作空间", "BEIJING"],
+      ["City St George’s, University of London", "LONDON"],
+      ["Hypha HQ", "LONDON"]
+    ].forEach(([venue, city], index) => {
+      expect(posterCaptions[index]).toHaveTextContent(venue);
+      expect(posterCaptions[index]).toHaveTextContent(city);
+    });
+    const beijingGroup = mainElement.querySelector('[data-documentation-city="BEIJING"]') as HTMLElement;
+    const londonGroup = mainElement.querySelector('[data-documentation-city="LONDON"]') as HTMLElement;
+    expect(beijingGroup).toBeInTheDocument();
+    expect(londonGroup).toBeInTheDocument();
+    expect(within(beijingGroup).getByRole("heading", { name: "BEIJING" })).toBeInTheDocument();
+    expect(within(beijingGroup).getAllByAltText(/OPENBAND Beijing documentation/)).toHaveLength(5);
+    expect(within(londonGroup).getByRole("heading", { name: "LONDON" })).toBeInTheDocument();
+    expect(within(londonGroup).getAllByAltText(/OPENBAND London documentation/)).toHaveLength(4);
+    expect(within(beijingGroup).getAllByRole("img").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/openband/documentation/beijing/openband-beijing-01.jpg",
+      "/assets/openband/documentation/beijing/openband-beijing-02.jpg",
+      "/assets/openband/documentation/beijing/openband-beijing-03.jpg",
+      "/assets/openband/documentation/beijing/openband-beijing-04.jpg",
+      "/assets/openband/documentation/beijing/openband-beijing-05.jpg"
+    ]);
+    expect(within(londonGroup).getAllByRole("img").map((image) => image.getAttribute("src"))).toEqual([
+      "/assets/openband/documentation/london/openband-london-01.jpg",
+      "/assets/openband/documentation/london/openband-london-02.jpg",
+      "/assets/openband/documentation/london/openband-london-03.jpg",
+      "/assets/openband/documentation/london/openband-london-04.jpg"
+    ]);
+
+    expect(main.getByText("MIXCLOUD")).toBeInTheDocument();
+    expect(main.getByText("OPENBAND ARCHIVE")).toBeInTheDocument();
+    expect(main.getAllByRole("link", { name: "LISTEN TO RECORDINGS ↗" }).every((link) => link.getAttribute("href") === "https://www.mixcloud.com/al_schaffer/playlists/open-band/")).toBe(true);
+    expect(main.getAllByRole("link", { name: "ACTIVITY ARCHIVE ↗" }).every((link) => link.getAttribute("href") === "https://alschaffer.blogspot.com/search/label/OPEN%20BAND")).toBe(true);
+
+    const creditsSection = within(mainElement.querySelector(".openband-credits-section") as HTMLElement);
+    for (const credit of [
+      "Chu Xia / 初夏",
+      "Tong Ge / 桐歌",
+      "Jiang Yan / 姜闫",
+      "Shen Ao / 申奡",
+      "fRUITYSPACE / 水果空间",
+      "Small Group Workshop / 小组工作坊",
+      "Ren Zhi Yuan Liao Workspace / 人之原料工作空间",
+      "City St George’s, University of London",
+      "Hypha HQ / London"
+    ]) {
+      expect(creditsSection.getByText(credit)).toBeInTheDocument();
+    }
+
+    for (const removedText of ["MEDIA SLOT", "WORKSHOP POSTER", "DOCUMENTATION IMAGE", "DETAILS PENDING", "placeholder", "NEXT PROJECT", "FRUITYSPACE"]) {
+      expect(main.queryByText(removedText)).not.toBeInTheDocument();
+    }
+    expect(main.queryByRole("button", { name: /NEXT PROJECT NO IDEA/ })).not.toBeInTheDocument();
+    const backToLive = main.getByRole("button", { name: "BACK TO LIVE" });
+    expect(backToLive.querySelector("span")).not.toBeInTheDocument();
+    expect(backToLive.querySelector("strong")).toHaveTextContent("BACK TO LIVE");
+    fireEvent.click(backToLive);
+    expect(window.location.pathname).toBe("/live");
   });
 
   it("renders Cyberspace and Bug Party as one combined release detail page", () => {
@@ -510,6 +845,20 @@ describe("SHEN AO site IA", () => {
     for (const placeholderText of ["REPRESENTATIVE HERO", "SELECTED WORK THUMBNAIL", "CCTV-13", "大美边疆行", "高端访谈"]) {
       expect(main.queryByText(placeholderText)).not.toBeInTheDocument();
     }
+  });
+
+  it("sends CCTV back to MUSIC instead of the shared next-project sequence", () => {
+    window.history.replaceState({}, "", "/work/cctv-selected-broadcast-work");
+    render(<App />);
+
+    const main = within(screen.getByRole("main"));
+    expect(main.queryByText("NEXT PROJECT")).not.toBeInTheDocument();
+    const backToMusic = main.getByRole("button", { name: "BACK TO MUSIC" });
+    expect(backToMusic.querySelector("span")).not.toBeInTheDocument();
+    expect(backToMusic.querySelector("strong")).toHaveTextContent("BACK TO MUSIC");
+    fireEvent.click(backToMusic);
+    expect(window.location.pathname).toBe("/music");
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "MUSIC" })).toBeInTheDocument();
   });
 
   it("keeps each selected CCTV watch link separate from the card content", () => {

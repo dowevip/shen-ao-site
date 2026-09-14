@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { archiveFilters, archiveProjects, featuredMusicReleases, moreCommissionedProjects, musicPlatformLinks, musicScoringProjects, otherMusicReleases, projects, scoringMovingImageProjects, selectedWorks } from "../content/projects";
 import { noIdeaEvents } from "../content/noIdeaEvents";
-import { djPosterArchive, earlierPerformances, livePlatformLinks, selectedLiveEvents } from "../content/liveEvents";
+import { djPosterArchive, earlierPerformances, livePlatformLinks, pianoKeyboardGroups, selectedLiveEvents, teendrumImages } from "../content/liveEvents";
 import { noIdeaProject, openbandProject, practiceProjects } from "../content/practiceProjects";
 
 describe("structured project content", () => {
@@ -383,8 +383,41 @@ describe("structured project content", () => {
       billing: "With 4ChannelClub / Cloud Choir"
     });
     expect(livePlatformLinks).toEqual([
-      { label: "MIXCLOUD", url: "https://www.mixcloud.com/teendrum/" },
-      { label: "RESIDENT ADVISOR", url: "https://ra.co/dj/teendrum" }
+      { label: "PROFILE / RESIDENT ADVISOR", url: "https://ra.co/dj/teendrum" },
+      { label: "LISTEN / MIXCLOUD", url: "https://www.mixcloud.com/teendrum/" }
+    ]);
+    expect(pianoKeyboardGroups.map((group) => group.title)).toEqual([
+      "CONTEMPORARY CLASSICAL / CROSS-MEDIA / EXPERIMENTAL",
+      "IMPROVISATION / ROCK / ELECTRONIC",
+      "BAND / JAZZ / SOUL"
+    ]);
+    expect(pianoKeyboardGroups.map((group) => group.images)).toHaveLength(3);
+    expect(pianoKeyboardGroups.map((group) => group.images.length)).toEqual([5, 5, 5]);
+    expect(pianoKeyboardGroups.every((group) => group.images)).toBe(true);
+    expect(pianoKeyboardGroups.flatMap((group) => group.images)).toHaveLength(15);
+    expect(pianoKeyboardGroups.flatMap((group) => group.images)).toHaveLength(18 - 3);
+    expect(pianoKeyboardGroups.flatMap((group) => group.images).map((image) => image.path)).toEqual([
+      "/assets/live/piano-keyboard/contemporary-classical-01.jpeg",
+      "/assets/live/piano-keyboard/puregolds-ao-evan-nicolls.jpeg",
+      "/assets/live/piano-keyboard/contemporary-classical-03.jpeg",
+      "/assets/live/piano-keyboard/contemporary-classical-04.jpeg",
+      "/assets/live/piano-keyboard/daylight-music-2024-poster.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-01.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-02.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-03.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-04.jpeg",
+      "/assets/live/piano-keyboard/improvisation-rock-electronic-05.jpeg",
+      "/assets/live/piano-keyboard/band-jazz-soul-01.jpeg",
+      "/assets/live/piano-keyboard/band-jazz-soul-02.jpeg",
+      "/assets/live/piano-keyboard/band-jazz-soul-03.jpeg",
+      "/assets/live/piano-keyboard/honeydew-live-poster-red.jpeg",
+      "/assets/live/piano-keyboard/honeydew-live-poster-blue.jpeg"
+    ]);
+    expect(teendrumImages).toHaveLength(3);
+    expect(teendrumImages.map((image) => image.path)).toEqual([
+      "/assets/live/teendrum/teendrum-baihui-live.jpeg",
+      "/assets/live/teendrum/teendrum-eerawai-ambient-series.jpeg",
+      "/assets/live/teendrum/teendrum-mclab-poster.jpeg"
     ]);
     expect(djPosterArchive.every((poster) => poster.status === "placeholder")).toBe(true);
     expect(earlierPerformances).toEqual([
@@ -411,6 +444,8 @@ describe("structured project content", () => {
       year: "2024 —",
       heading: "RADIO / LIVE EVENTS",
       instagramHandle: "@noidearadio",
+      location: "London",
+      previewImage: "/assets/no-idea/ppt-source/live-with-no-idea-shai-space-poster.jpeg",
       summary: "A radio programme and live event series run by Shen Ao, focused on ambient and experimental music. Three live events have been presented in London to date."
     });
     expect(noIdeaProject.links).toEqual([
@@ -418,24 +453,87 @@ describe("structured project content", () => {
       { label: "RESIDENT ADVISOR ↗", url: "https://ra.co/promoters/183279" }
     ]);
     expect(noIdeaProject.posterArchive!).toHaveLength(3);
-    expect(noIdeaProject.posterArchive![0]).toMatchObject({ status: "confirmed", eventSlug: "2026-05-23" });
-    expect(noIdeaProject.posterArchive!.slice(1).every((slot) => slot.status === "placeholder")).toBe(true);
-    expect(noIdeaProject.radioArchive!.every((slot) => slot.status === "placeholder")).toBe(true);
+    expect(noIdeaProject.posterArchive!.map((slot) => [slot.status, slot.label, slot.image])).toEqual([
+      ["confirmed", "23 MAY 2026 / SHAI SPACE", "/assets/no-idea/ppt-source/live-with-no-idea-shai-space-poster.jpeg"],
+      ["confirmed", "09 APR 2026 / ETSDTS_", "/assets/no-idea/ppt-source/live-with-no-idea-etsdts-poster.jpeg"],
+      ["confirmed", "29 AUG 2026 / HELM", "/assets/no-idea/ppt-source/live-with-no-idea-helm-poster.jpeg"]
+    ]);
+    expect(noIdeaProject.posterArchive![0]).toMatchObject({ eventSlug: "2026-05-23" });
+    expect(noIdeaProject.radioArchive!.map((slot) => [slot.status, slot.title, slot.city, slot.date, slot.url])).toEqual([
+      ["confirmed", "no idea radio w/ PENTU", "London", "26.05.18", "https://baihui.live/shows/no-idea-w-al-pentu-26-05-18/en/"],
+      ["confirmed", "no idea radio ep.09 - transcribe 转译 w/ AL", "Beijing", "26.04.06", "https://baihui.live/shows/no-idea-w-al-schaffer-26-04-06/en/"],
+      ["confirmed", "no idea radio ep.08 tracing 勾勒 w/ AL", "Beijing", "26.01.12", "https://baihui.live/shows/no-idea-w-al-schaffer-26-01-12/en/"],
+      ["confirmed", "no idea radio ep.07 companions 陪伴 w/ AL", "London", "25.10.13", "https://baihui.live/shows/no-idea-w-al-schaffer-25-10-13/en/"],
+      ["confirmed", "no idea radio ep.06 tele miscommunications 远程", "London", "25.08.09", "https://baihui.live/shows/no-idea-w-al-schaffer-25-08-09/en/"],
+      ["confirmed", "no idea radio ep.05 spineless 无脊椎 w/ AL", "London", "25.06.23", "https://baihui.live/shows/no-idea-w-al-schaffer-25-06-23/en/"],
+      ["confirmed", "no idea ep.04 consciousness w/ AL", "London", "25.04.11", "https://baihui.live/shows/no-idea-w-al-schaffer-25-04-11/en/"],
+      ["confirmed", "no idea ep.03 belief 信念感 w/ AL SCHAFFER", "London", "25.01.25", "https://baihui.live/shows/no-idea-w-al-schaffer-25-01-25/en/"],
+      ["confirmed", "no idea ep.02 vulnerability 脆弱 w/ AL", "London", "24.09.17", "https://baihui.live/shows/no-idea-w-al-schaffer-24-09-17/en/"],
+      ["confirmed", "no idea ep.01 abandon 遗弃 w/ AL SCHAFFER", "London", "24.07.04", "https://baihui.live/shows/no-idea-w-al-schaffer-24-07-04/en/"]
+    ]);
+    expect(noIdeaProject.radioArchive!.some((slot) => "titleScale" in slot)).toBe(false);
+    expect(noIdeaProject.radioArchive!.map((slot) => slot.image)).toContain("/assets/no-idea/radio/no-idea-radio-ep-09-transcribe.jpg");
+    expect(noIdeaProject.radioArchive!.map((slot) => slot.image)).toContain("/assets/no-idea/radio/no-idea-radio-ep-01-abandon.jpg");
 
     expect(openbandProject).toMatchObject({
       title: "OPENBAND",
       year: "2024 —",
       heading: "IMPROVISATION WORKSHOPS",
       location: "BEIJING / LONDON",
+      previewImage: "/assets/practice/openband/openband-monthly-posters.jpeg",
       summary: "A Shen Ao-led improvisation workshop series developed at fRUITYSPACE in Beijing. The project creates an open setting for collective improvisation and collaborative music-making."
     });
-    expect(openbandProject.workshopEntries).toEqual([
-      { venue: "CITY, UNIVERSITY OF LONDON", label: "WORKSHOP", mediaStatus: "placeholder" },
-      { venue: "HYPHA HQ / LONDON", label: "WORKSHOP / OPENSCORE", mediaStatus: "placeholder" }
+    expect(openbandProject.eventPosterGroups).toEqual([
+      {
+        city: "BEIJING",
+        posters: [
+          { image: "/assets/openband/event-posters/beijing/openband-fruityspace-posters.jpg", venue: "fRUITYSPACE / 水果空间" },
+          { image: "/assets/openband/event-posters/beijing/openband-small-group-workshop.jpg", venue: "Small Group Workshop / 小组工作坊" },
+          { image: "/assets/openband/event-posters/beijing/openband-ren-zhi-yuan-liao-workspace.jpg", venue: "Ren Zhi Yuan Liao Workspace / 人之原料工作空间" }
+        ]
+      },
+      {
+        city: "LONDON",
+        posters: [
+          { image: "/assets/openband/event-posters/london/openband-city-university-workshop.jpg", venue: "City St George’s, University of London" },
+          { image: "/assets/openband/event-posters/london/openband-hypha-hq-workshop.jpg", venue: "Hypha HQ" }
+        ]
+      }
+    ]);
+    expect(openbandProject.documentationGroups).toEqual([
+      {
+        city: "BEIJING",
+        images: [
+          "/assets/openband/documentation/beijing/openband-beijing-01.jpg",
+          "/assets/openband/documentation/beijing/openband-beijing-02.jpg",
+          "/assets/openband/documentation/beijing/openband-beijing-03.jpg",
+          "/assets/openband/documentation/beijing/openband-beijing-04.jpg",
+          "/assets/openband/documentation/beijing/openband-beijing-05.jpg"
+        ]
+      },
+      {
+        city: "LONDON",
+        images: [
+          "/assets/openband/documentation/london/openband-london-01.jpg",
+          "/assets/openband/documentation/london/openband-london-02.jpg",
+          "/assets/openband/documentation/london/openband-london-03.jpg",
+          "/assets/openband/documentation/london/openband-london-04.jpg"
+        ]
+      }
     ]);
     expect(openbandProject.links).toEqual([
-      { label: "WORKSHOP ARCHIVE ↗", url: "https://alschaffer.blogspot.com/search/label/OPEN%20BAND" },
+      { label: "ACTIVITY ARCHIVE ↗", url: "https://alschaffer.blogspot.com/search/label/OPEN%20BAND" },
       { label: "LISTEN TO RECORDINGS ↗", url: "https://www.mixcloud.com/al_schaffer/playlists/open-band/" }
     ]);
+    expect(openbandProject.credits).toEqual({
+      hosts: ["Chu Xia / 初夏", "Tong Ge / 桐歌", "Jiang Yan / 姜闫", "Shen Ao / 申奡"],
+      venues: [
+        "fRUITYSPACE / 水果空间",
+        "Small Group Workshop / 小组工作坊",
+        "Ren Zhi Yuan Liao Workspace / 人之原料工作空间",
+        "City St George’s, University of London",
+        "Hypha HQ / London"
+      ]
+    });
   });
 });

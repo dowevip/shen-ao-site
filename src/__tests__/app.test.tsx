@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../App";
 
@@ -469,26 +469,35 @@ describe("SHEN AO site IA", () => {
     expect(screen.queryByText(/experimentation is a working method/i)).not.toBeInTheDocument();
   });
 
-  it("keeps old routes and detail pages reachable outside the primary navigation", () => {
-    render(<App initialPath="/work" />);
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "WORK" })).toBeInTheDocument();
-    expectOnlyPrimaryNavItems(["HOME", "MUSIC", "LIVE", "ABOUT"]);
+  it("replaces old public routes with the current formal routes", async () => {
+    const redirects = [
+      ["/work", "/music", "MUSIC", ["WORK"]],
+      ["/practice", "/live", "LIVE", ["PRACTICE"]],
+      ["/press-radio", "/", "CYBERSPACE", ["PRESS / RADIO"]],
+      ["/epk", "/about", "ABOUT", ["SHEN AO"]],
+      ["/work/cyberspace", "/work/cyberspace-bug-party", "CYBERSPACE / BUG PARTY", ["CYBERSPACE"]],
+      ["/work/bug-party", "/work/cyberspace-bug-party", "CYBERSPACE / BUG PARTY", ["BUG PARTY"]],
+      ["/practice/no-idea/2026-05-23", "/work/no-idea", "NO IDEA", ["LIVE WITH NO IDEA"]]
+    ] as const;
 
-    cleanup();
-    render(<App initialPath="/practice" />);
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "PRACTICE" })).toBeInTheDocument();
-    expectOnlyPrimaryNavItems(["HOME", "MUSIC", "LIVE", "ABOUT"]);
+    for (const [from, to, expectedHeading, oldHeadings] of redirects) {
+      cleanup();
+      window.history.replaceState({}, "", "/before-redirect");
+      window.history.pushState({}, "", from);
+      render(<App />);
 
-    cleanup();
-    render(<App initialPath="/press-radio" />);
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "PRESS / RADIO" })).toBeInTheDocument();
+      expect(window.location.pathname).toBe(to);
+      expect(within(screen.getByRole("main")).getByRole("heading", { name: expectedHeading })).toBeInTheDocument();
+      for (const oldHeading of oldHeadings) {
+        expect(within(screen.getByRole("main")).queryByRole("heading", { level: 1, name: oldHeading })).not.toBeInTheDocument();
+      }
 
-    cleanup();
-    render(<App initialPath="/epk" />);
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "SHEN AO" })).toBeInTheDocument();
+      window.history.back();
+      await waitFor(() => expect(window.location.pathname).toBe("/before-redirect"));
+    }
   });
 
-  it("keeps legacy detail routes reachable after removing them from the primary IA", () => {
+  it("keeps formal detail routes reachable outside the primary navigation", () => {
     render(<App initialPath="/work/role-model" />);
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "ROLE MODEL" })).toBeInTheDocument();
 
@@ -501,8 +510,8 @@ describe("SHEN AO site IA", () => {
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "OPENBAND" })).toBeInTheDocument();
 
     cleanup();
-    render(<App initialPath="/practice/no-idea/2026-05-23" />);
-    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "LIVE WITH NO IDEA" })).toBeInTheDocument();
+    render(<App initialPath="/work/cyberspace-bug-party" />);
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "CYBERSPACE / BUG PARTY" })).toBeInTheDocument();
   });
 
   it("renders No Idea as a project page with radio, live events, featured event, and Openband next project", () => {

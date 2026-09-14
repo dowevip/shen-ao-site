@@ -13,6 +13,7 @@ const routes = [
   "epk",
   "work/cyberspace",
   "work/bug-party",
+  "work/cyberspace-bug-party",
   "work/role-model",
   "work/fancy-a-bite",
   "work/two-dreadful-children-unipre",

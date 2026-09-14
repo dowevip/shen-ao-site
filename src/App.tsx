@@ -1,24 +1,19 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  archiveFilters,
-  archiveProjects,
   featuredMusicReleases,
   getProject,
   moreCommissionedProjects,
-  musicPlatformLinks,
   musicScoringProjects,
   otherMusicReleases,
-  projects,
   type ProjectLink,
-  scoringMovingImageProjects,
   selectedWorks,
   kitRecordsReleaseNote,
   type Project
 } from "./content/projects";
-import { getNoIdeaEvent, latestNoIdeaEvent, noIdeaEvents, type NoIdeaEvent } from "./content/noIdeaEvents";
-import { earlierPerformances, livePlatformLinks, pianoKeyboardGroups, selectedLiveEvents, teendrumImages, type LiveEvent, type LiveMedia } from "./content/liveEvents";
-import { noIdeaProject, openbandProject, practiceProjects, type DocumentationGroup, type EventPosterGroup, type PracticeProject, type PosterArchiveSlot } from "./content/practiceProjects";
-import { aboutPressItems, epkPressItems, homePressItems, verifiedPressItems, type PressItem } from "./content/press";
+import { latestNoIdeaEvent } from "./content/noIdeaEvents";
+import { earlierPerformances, livePlatformLinks, pianoKeyboardGroups, selectedLiveEvents, teendrumImages, type LiveEvent } from "./content/liveEvents";
+import { noIdeaProject, openbandProject, type DocumentationGroup, type EventPosterGroup, type PracticeProject } from "./content/practiceProjects";
+import { homePressItems, verifiedPressItems, type PressItem } from "./content/press";
 import "./styles.css";
 
 const navItems = ["HOME", "MUSIC", "LIVE", "ABOUT"];
@@ -60,8 +55,27 @@ const toAppPath = (path: string) => {
 const toBrowserPath = (path: string) => `${basePath}${path === "/" ? "/" : path}`;
 const assetUrl = (path: string) => `${basePath}/${path.replace(/^\//, "")}`;
 
+const legacyRedirects = [
+  { from: "/work", to: "/music", exact: true },
+  { from: "/practice", to: "/live", exact: true },
+  { from: "/press-radio", to: "/", exact: true },
+  { from: "/epk", to: "/about", exact: true },
+  { from: "/work/cyberspace", to: "/work/cyberspace-bug-party", exact: true },
+  { from: "/work/bug-party", to: "/work/cyberspace-bug-party", exact: true },
+  { from: "/practice/no-idea", to: "/work/no-idea", exact: false }
+] as const;
+
+function redirectFor(path: string) {
+  return legacyRedirects.find((redirect) => redirect.exact ? path === redirect.from : path === redirect.from || path.startsWith(`${redirect.from}/`))?.to;
+}
+
 function usePath(initialPath?: string) {
-  const [path, setPath] = useState(toAppPath(initialPath ?? window.location.pathname));
+  const initialAppPath = toAppPath(initialPath ?? window.location.pathname);
+  const initialRedirect = redirectFor(initialAppPath);
+  if (!initialPath && initialRedirect && window.location.pathname !== toBrowserPath(initialRedirect)) {
+    window.history.replaceState({}, "", toBrowserPath(initialRedirect));
+  }
+  const [path, setPath] = useState(initialRedirect ?? initialAppPath);
 
   useEffect(() => {
     if (initialPath) {
@@ -74,10 +88,12 @@ function usePath(initialPath?: string) {
   }, [initialPath]);
 
   const navigate = (nextPath: string) => {
+    const redirectedPath = redirectFor(toAppPath(nextPath));
+    const targetPath = redirectedPath ?? nextPath;
     if (!initialPath) {
-      window.history.pushState({}, "", toBrowserPath(nextPath));
+      window.history[redirectedPath ? "replaceState" : "pushState"]({}, "", toBrowserPath(targetPath));
     }
-    setPath(nextPath);
+    setPath(targetPath);
     window.scrollTo({ top: 0, behavior: "instant" });
   };
 
@@ -97,24 +113,14 @@ export default function App({ initialPath }: AppProps) {
     <NoIdeaPage navigate={navigate} />
   ) : path.startsWith("/work/openband-openscore") ? (
     <OpenbandPage navigate={navigate} />
-  ) : path.startsWith("/practice/no-idea/") ? (
-    <NoIdeaEventPage slug={path.replace(/^\/practice\/no-idea\//, "").split("/")[0]} navigate={navigate} />
   ) : path.startsWith("/work/") ? (
     <ProjectDetailPage slug={path.replace(/^\/work\//, "").split("/")[0]} navigate={navigate} />
-  ) : path.startsWith("/work") ? (
-    <WorkPage navigate={navigate} />
   ) : path.startsWith("/music") ? (
     <MusicPage navigate={navigate} />
   ) : path.startsWith("/live") ? (
     <LivePage navigate={navigate} />
-  ) : path.startsWith("/practice") ? (
-    <PracticePage navigate={navigate} />
-  ) : path.startsWith("/press-radio") ? (
-    <PressRadioPage />
   ) : path.startsWith("/about") ? (
     <AboutPage />
-  ) : path.startsWith("/epk") ? (
-    <EpkPage navigate={navigate} />
   ) : (
     <HomePage navigate={navigate} />
   );
@@ -289,62 +295,11 @@ function homeListenLink(project: Project) {
 }
 
 function isKitRecordsReleaseRoute(path: string) {
-  return ["/work/cyberspace-bug-party", "/work/cyberspace", "/work/bug-party"].some((route) => path.startsWith(route));
+  return path.startsWith("/work/cyberspace-bug-party");
 }
 
 function releaseDetailPath(project: Project) {
   return project.slug === "cyberspace" || project.slug === "bug-party" ? "/work/cyberspace-bug-party" : `/work/${project.slug}`;
-}
-
-function WorkPage({ navigate }: { navigate: (path: string) => void }) {
-  const [filter, setFilter] = useState<(typeof archiveFilters)[number]>("ALL");
-  const rows = useMemo(
-    () => archiveProjects.filter((project) => project.visibleInArchive !== false && (filter === "ALL" || toFilter(project) === filter)),
-    [filter]
-  );
-
-  return (
-    <main className="work-page">
-      <section className="work-intro">
-        <div className="section-kicker">WORK / INDEX</div>
-        <h1>WORK</h1>
-        <p>Selected works and professional projects across releases, moving image, theatre, broadcast and practice.</p>
-      </section>
-      <section className="work-selected-section">
-        <div className="section-kicker">PRIMARY PROJECTS</div>
-        <h2>SELECTED WORK</h2>
-        <div className="selected-grid editorial-works" data-testid="selected-works">
-          {selectedWorks.map((project, index) => (
-            <article className={`selected-work selected-work-${index + 1} selected-work-${project.slug} ${selectedLayout(project.slug)}`} data-testid={`selected-work-${project.slug}`} key={project.slug}>
-              <MediaVisual project={project} />
-              <div>
-                <h3>{project.title}</h3>
-                <MetaLines lines={[project.year, project.workRoleLabel, project.label, project.category, project.subtype]} />
-                <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="scoring-section">
-        <div className="section-kicker">SCREEN / STAGE / BROADCAST</div>
-        <h2>SCORING / MOVING IMAGE</h2>
-        <div className="scoring-grid scoring-editorial-grid" data-testid="scoring-moving-image">
-          {scoringMovingImageProjects.map((project) => (
-            <article className="scoring-work" data-testid={`scoring-work-${project.slug}`} key={project.slug}>
-              <MediaVisual project={project} />
-              <div>
-                <h3>{project.title}</h3>
-                <MetaLines lines={[project.year, project.workRoleLabel]} />
-                <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-      <ArchiveTable filter={filter} setFilter={setFilter} rows={rows} />
-    </main>
-  );
 }
 
 function MusicPage({ navigate }: { navigate: (path: string) => void }) {
@@ -584,49 +539,6 @@ function formatVenue(event: Pick<LiveEvent, "venue" | "city">) {
   return [event.venue, event.city].filter(Boolean).join(" / ").toUpperCase();
 }
 
-function SelectedLiveEvent({ event }: { event: LiveEvent }) {
-  return (
-    <article className="selected-live-event">
-      <div className="selected-live-copy">
-        <p className="live-date">{event.displayDate}</p>
-        <MetaLines lines={[`${event.venue} / ${event.city}`, event.billing]} />
-        {event.localVenueName && <p className="secondary-language">{event.localVenueName}</p>}
-      </div>
-      <div className="selected-live-media">
-        <LiveMediaSlot media={event.livePhoto} label="LIVE PHOTO" title={event.displayDate ?? event.venue} kind="photo" />
-        <LiveMediaSlot media={event.poster} label="EVENT POSTER" title={event.displayDate ?? event.venue} kind="poster" />
-      </div>
-    </article>
-  );
-}
-
-function LiveMediaSlot({ media, label, title, kind }: { media?: LiveMedia; label: string; title: string; kind: "photo" | "poster" }) {
-  if (media?.path) {
-    return <img className={`live-media live-media-${kind}`} src={assetUrl(media.path)} alt={`${title} ${label.toLowerCase()}`} />;
-  }
-
-  return (
-    <div className={`live-media-slot live-media-slot-${kind}`}>
-      <MediaPlaceholder title={title} label={label} variant={kind === "photo" ? "landscape" : "portrait"} />
-    </div>
-  );
-}
-
-function PracticePage({ navigate }: { navigate: (path: string) => void }) {
-  return (
-    <main className="route-page practice-page">
-      <PageIntro kicker="PRACTICE / EVENTS + COMMUNITY" title="PRACTICE">
-        Music-making and event-making occupy different roles in Shen Ao's practice. One grows from accumulated learning; the other from lived experience, listening and making things together.
-      </PageIntro>
-      <section className="practice-editorial-list">
-        {practiceProjects.map((project) => (
-          <PracticeEditorialEntry project={project} onOpen={() => navigate(`/work/${project.slug}`)} key={project.slug} />
-        ))}
-      </section>
-    </main>
-  );
-}
-
 function AboutPage() {
   return (
     <main className="route-page about-page">
@@ -688,123 +600,6 @@ function AboutPage() {
       <section className="about-section about-contact-section" aria-label="About contact" data-testid="about-contact">
         <h2>CONTACT</h2>
         <a className="music-platform-link" href="mailto:lerezero@gmail.com">lerezero@gmail.com</a>
-      </section>
-    </main>
-  );
-}
-
-function PressRadioPage() {
-  const featured = verifiedPressItems.filter((item) => item.type !== "radio");
-  const radio = verifiedPressItems.filter((item) => item.type === "radio");
-
-  return (
-    <main className="route-page press-radio-page">
-      <section className="press-radio-intro">
-        <div className="section-kicker">EXTERNAL RECEPTION ARCHIVE</div>
-        <h1><span>PRESS /</span><span>RADIO</span></h1>
-        <p>Selected reviews, features, recommendations and radio appearances around Shen Ao's music and practice.</p>
-      </section>
-      <section className="press-feature-list" aria-label="Reviews and recommendations">
-        <div className="section-kicker">FEATURES / REVIEWS</div>
-        {featured.map((item, index) => <PressFeatureRow item={item} index={index} key={item.id} />)}
-      </section>
-      <section className="radio-log" aria-label="Radio airplay">
-        <div className="section-kicker">RADIO / AIRPLAY</div>
-        <div>
-          <div className="radio-row radio-head"><p>DATE</p><h2>STATION / PROGRAMME</h2><p>TRACK</p><span>LINK</span></div>
-          {radio.map((item, index) => <RadioLogRow item={item} index={index} key={item.id} />)}
-        </div>
-      </section>
-    </main>
-  );
-}
-
-function EpkPage({ navigate }: { navigate: (path: string) => void }) {
-  const contactLinks = [
-    musicPlatformLinks.find((link) => link.label === "BANDCAMP")!,
-    musicPlatformLinks.find((link) => link.label === "SOUNDCLOUD")!,
-    livePlatformLinks.find((link) => link.url === "https://www.mixcloud.com/teendrum/")!
-  ];
-  const selectedWork = [
-    ["CYBERSPACE", "KIT RECORDS / RELEASE", "/work/cyberspace"],
-    ["BUG PARTY", "KIT RECORDS / RELEASE", "/work/bug-party"],
-    ["ROLE MODEL", "MOVING IMAGE / 2024", "/work/role-model"],
-    ["FANCY A BITE?", "THEATRE / 2024", "/work/fancy-a-bite"],
-    ["NO IDEA", "EVENTS / RADIO", "/work/no-idea"],
-    ["OPENBAND", "INTERDISCIPLINARY IMPROVISATION", "/work/openband-openscore"]
-  ];
-
-  return (
-    <main className="route-page epk-page">
-      <section className="epk-hero" data-testid="epk-hero">
-        <div>
-          <h1>SHEN AO</h1>
-          <p>COMPOSER / PRODUCER / SOUND ARTIST</p>
-          <p>LONDON</p>
-        </div>
-        <img className="artist-portrait artist-portrait-epk" src={assetUrl("/assets/portrait/shen-ao-childhood.avif")} alt="Childhood portrait of Shen Ao." />
-      </section>
-
-      <section className="epk-dossier">
-        <article className="epk-main-copy" data-testid="epk-short-bio">
-          <h2>SHORT BIO</h2>
-          <p>Shen Ao is a London-based composer, producer and sound artist working across electronic music, moving image, live performance and event-making. His practice includes independent releases, film and theatre composition, live electronics, improvisation, DJ performance and collaborative projects.</p>
-          <p className="epk-statement-brief">His work uses keyboard improvisation, unconventional harmony and electronic/minimalist language as practical methods for shaping sound. In live and collaborative settings, fixed structures are allowed to become unstable and responsive to the room.</p>
-        </article>
-
-        <aside className="epk-facts" aria-label="Quick facts" data-testid="epk-quick-facts">
-          <h2>QUICK FACTS</h2>
-          <InfoItem label="BASED IN" value="London" />
-          <InfoItem label="PRACTICE" value="Music / Moving Image / Live / Event-making" />
-          <InfoItem label="WORKING ACROSS" value="Composition / Production / Improvisation / Performance" />
-          <InfoItem label="CONTACT" value="lerezero@gmail.com" />
-          <div className="epk-listen">
-            <h2>LISTEN</h2>
-            {contactLinks.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
-          </div>
-        </aside>
-      </section>
-
-      <section className="epk-selected-work" data-testid="epk-selected-work">
-        <h2>SELECTED WORK</h2>
-        <div>
-          {selectedWork.map(([title, meta, path]) => (
-            <button className="epk-work-row" key={title} onClick={() => navigate(path)}>
-              <strong>{title}</strong>
-              <em>{meta}</em>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="epk-lower-grid" data-testid="epk-press-radio">
-        <article className="epk-press">
-          <h2>SELECTED PRESS / RADIO</h2>
-          {epkPressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
-        </article>
-      </section>
-
-      <section className="epk-cv-grid" data-testid="epk-education-experience">
-        <div className="section-kicker">EDUCATION / PROFESSIONAL EXPERIENCE</div>
-        <article>
-          <h2>EDUCATION</h2>
-          <p><span>2023-2025</span>Goldsmiths, University of London<br />MMus Creative Practice</p>
-          <p><span>2018-2022</span>Jazz piano studies with Kong Hongwei</p>
-          <p><span>2014-2018</span>Tianjin Conservatory of Music</p>
-        </article>
-        <article>
-          <h2>PROFESSIONAL EXPERIENCE</h2>
-          <p><span>2021.09-2023.04</span>China Television Media / 中视前卫影视传媒<br />Audio Editing / Music Production</p>
-          <p>Participated in audio and music production for more than 50 short-form promotional projects for CCTV-13.</p>
-        </article>
-      </section>
-
-      <section className="epk-contact" data-testid="epk-contact">
-        <h2>CONTACT / BOOKINGS / COLLABORATION</h2>
-        <a href="mailto:lerezero@gmail.com">lerezero@gmail.com</a>
-        <div>
-          {contactLinks.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
-        </div>
       </section>
     </main>
   );
@@ -1131,66 +926,6 @@ function OpenbandPage({ navigate }: { navigate: (path: string) => void }) {
   );
 }
 
-function NoIdeaEventPage({ slug, navigate }: { slug: string; navigate: (path: string) => void }) {
-  const event = getNoIdeaEvent(slug);
-  if (!event) {
-    return (
-      <main className="project-page project-page-no-idea-event">
-        <PageIntro kicker="NO IDEA / EVENT" title="EVENT NOT FOUND">The requested No Idea event route is not available.</PageIntro>
-      </main>
-    );
-  }
-
-  return (
-    <main className="project-page no-idea-event-page">
-      <section className="project-hero no-idea-event-hero">
-        <div className="section-kicker">NO IDEA / EVENT</div>
-        <h1>{event.edition.toUpperCase()}</h1>
-        <div className="event-hero-meta">
-          <MetaLines lines={[
-            event.displayDate,
-            event.venue,
-            event.room,
-            event.address,
-            `${event.city} ${event.postcode}`,
-            "ROLE",
-            event.roles.join(" + "),
-            event.genres.join(" / ")
-          ]} />
-          <ExternalLink href={event.externalLinks.residentAdvisor}>VIEW ON RESIDENT ADVISOR</ExternalLink>
-        </div>
-      </section>
-
-      <figure className="event-main-photo">
-        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
-      </figure>
-
-      <section className="event-poster-section">
-        <figure>
-          <img src={assetUrl(event.posterImage)} alt="Live With No Idea event poster." />
-        </figure>
-        <div>
-          <div className="section-kicker">EVENT POSTER</div>
-          <div className="event-lineup">
-            <h2>LINEUP</h2>
-            {event.lineup.map((artist) => <p key={artist}>{artist}</p>)}
-          </div>
-          <MetaLines lines={[event.displayDate, `${event.venue} / ${event.room}`, event.city]} />
-        </div>
-      </section>
-
-      <section className="no-idea-event-gallery" aria-label="Live With No Idea image gallery">
-        {event.galleryImages.map((image, index) => (
-          <figure className={`no-idea-gallery-item no-idea-gallery-item-${index + 1}`} key={image.src}>
-            <img src={assetUrl(image.src)} alt={image.alt} />
-          </figure>
-        ))}
-      </section>
-      <NextProject title="BACK TO NO IDEA" onClick={() => navigate("/work/no-idea")} label={null} />
-    </main>
-  );
-}
-
 function ProjectShell({ kicker, title, project, heroAside, children }: { kicker: string; title: ReactNode; project: Project; heroAside?: ReactNode; children: ReactNode }) {
   return (
     <main className={`project-page project-page-${project.slug}`}>
@@ -1204,120 +939,6 @@ function ProjectShell({ kicker, title, project, heroAside, children }: { kicker:
       </section>
       {children}
     </main>
-  );
-}
-
-function ArchiveTable({ filter, setFilter, rows }: { filter: (typeof archiveFilters)[number]; setFilter: (filter: (typeof archiveFilters)[number]) => void; rows: Project[] }) {
-  return (
-    <section className="archive">
-      <div className="section-kicker">WORK / ARCHIVE</div>
-      <div className="filters" aria-label="Archive filters">
-        {archiveFilters.map((item) => (
-          <button key={item} className={filter === item ? "selected" : ""} onClick={() => setFilter(item)}>{item}</button>
-        ))}
-      </div>
-      <div className="archive-table">
-        <div className="archive-row archive-head"><span>TITLE</span><span>YEAR</span><span>CATEGORY</span><span>FORMAT</span><span>CONTEXT</span></div>
-        {rows.map((project) => (
-          <div className="archive-row" data-testid={`archive-row-${project.slug}`} key={project.slug}>
-            <span>{project.title.toUpperCase()}</span>
-            <span>{project.year ?? ""}</span>
-            <span>{project.category.toUpperCase()}</span>
-            <span>{project.subtype?.toUpperCase() ?? ""}</span>
-            <span>{project.label?.toUpperCase() ?? ""}</span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function AboutPractice({ navigate }: { navigate: (path: string) => void }) {
-  return (
-    <section className="about-practice">
-      <div className="about-block">
-        <div className="section-kicker">ABOUT / PREVIEW</div>
-        <h2>SOUND AS PROCESS</h2>
-        <p>Keyboard improvisation is central to Shen Ao's way of processing sound. Different musical languages and surrounding environments are absorbed, tested and reorganised through playing, production and collaboration.</p>
-        <button className="text-arrow" onClick={() => navigate("/about")}>ABOUT</button>
-      </div>
-      <div className="practice-columns">
-        {[
-          ["MUSIC WORK", "Composition", "Electronic music", "Production", "Improvisation", "Moving image"],
-          ["EVENT WORK", "Events", "Radio", "Workshops", "Collective improvisation", "Cross-disciplinary collaboration"]
-        ].map(([heading, ...items]) => (
-          <div key={heading}>
-            <h3>{heading}</h3>
-            {items.map((item) => <p key={item}>{item}</p>)}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function LivePreview({ navigate }: { navigate: (path: string) => void }) {
-  const event = latestNoIdeaEvent;
-  return (
-    <section className="live-preview flow-section">
-      <div>
-        <div className="section-kicker">LIVE / PREVIEW</div>
-        <h2>LIVE</h2>
-        <p>A recording captures only one aspect of a performance. The live work is different every time.</p>
-      </div>
-      <MetaLines lines={["LIVE ELECTRONICS", "IMPROVISATION", "PERFORMANCE", "DJ SETS"]} />
-      <article className="home-live-event">
-        <img src={assetUrl(event.heroImage)} alt="Shen Ao performing at Live With No Idea at Shai Space, London." />
-        <div>
-          <h3>NO IDEA — SHAI SPACE</h3>
-          <MetaLines lines={[event.displayDate, `${event.venue} / ${event.city}`, event.roles.join(" + ")]} />
-          <button className="text-arrow" onClick={() => navigate(`/practice/no-idea/${event.slug}`)}>VIEW EVENT</button>
-        </div>
-      </article>
-      <button className="text-arrow" onClick={() => navigate("/live")}>EXPLORE LIVE</button>
-    </section>
-  );
-}
-
-function PracticeProjects({ navigate }: { navigate: (path: string) => void }) {
-  const practice = projects.filter((project) => project.featured === "practice");
-  return (
-    <section className="practice-projects">
-      {practice.map((project) => (
-        <article key={project.slug}>
-          {project.slug === "no-idea" ? (
-            <img className="practice-poster-preview" src={assetUrl(latestNoIdeaEvent.posterImage)} alt="Live With No Idea event poster." />
-          ) : (
-            <MediaPlaceholder title={project.title.toUpperCase()} label="WORKSHOP MATERIAL" variant="landscape" />
-          )}
-          <h2>{project.title.toUpperCase()}</h2>
-          <p>{project.description}</p>
-          {project.slug === "no-idea" && (
-            <div className="latest-event-note">
-              <span>LATEST DOCUMENTED EVENT</span>
-              <strong>{latestNoIdeaEvent.edition.toUpperCase()} / {latestNoIdeaEvent.displayDate}</strong>
-            </div>
-          )}
-          <div className="link-row">
-            {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
-            <button className="text-arrow" onClick={() => navigate(`/work/${project.slug}`)}>VIEW PROJECT</button>
-          </div>
-        </article>
-      ))}
-    </section>
-  );
-}
-
-function PressRadioPreview({ navigate }: { navigate: (path: string) => void }) {
-  return (
-    <section className="press-radio-preview">
-      <div className="section-kicker">PRESS / RADIO</div>
-      <h2>PRESS / RADIO</h2>
-      <div className="home-press-index">
-        {homePressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
-      </div>
-      <button className="text-arrow" onClick={() => navigate("/press-radio")}>VIEW PRESS / RADIO</button>
-    </section>
   );
 }
 
@@ -1428,36 +1049,6 @@ function MediaPlaceholder({ title, label, variant = "landscape" }: { title: stri
   );
 }
 
-function PracticeEditorialEntry({ project, onOpen }: { project: PracticeProject; onOpen: () => void }) {
-  const isNoIdea = project.slug === "no-idea";
-  return (
-    <article className={`practice-editorial-entry practice-editorial-${project.slug}`}>
-      <div className="practice-entry-media">
-        {isNoIdea ? (
-          <img className="practice-feature-poster" src={assetUrl(latestNoIdeaEvent.posterImage)} alt="Live With No Idea event poster." />
-        ) : (
-          <MediaPlaceholder title="OPENBAND" label="WORKSHOP POSTER" variant="portrait" />
-        )}
-      </div>
-      <div className="practice-entry-copy">
-        <MetaLines lines={[project.year]} />
-        <p className="practice-entry-secondary">{project.heading}</p>
-        <h2>{project.title}</h2>
-        <p>{isNoIdea ? project.summary : "A Shen Ao-led improvisation workshop series developed at fRUITYSPACE in Beijing, built around collective music-making and open improvisation."}</p>
-        <button className="text-arrow" onClick={onOpen}>{isNoIdea ? "VIEW NO IDEA →" : "VIEW OPENBAND →"}</button>
-      </div>
-    </article>
-  );
-}
-
-function PosterPlaceholderSlot({ slot }: { slot: PosterArchiveSlot }) {
-  return (
-    <article className="practice-poster-slot">
-      <MediaPlaceholder title={slot.title} label={slot.label} variant="portrait" />
-    </article>
-  );
-}
-
 function OpenbandDocumentationGroup({ group }: { group: DocumentationGroup }) {
   return (
     <article className="openband-documentation-group" data-documentation-city={group.city}>
@@ -1487,60 +1078,6 @@ function OpenbandPosterGroup({ group }: { group: EventPosterGroup }) {
         ))}
       </div>
     </article>
-  );
-}
-
-function PracticeFeature({ project, placeholder, event, onOpen }: { project: Project; placeholder?: string; event?: NoIdeaEvent; onOpen: () => void }) {
-  return (
-    <article className="practice-feature">
-      {event ? (
-        <img className="practice-feature-poster" src={assetUrl(event.posterImage)} alt="Live With No Idea event poster." />
-      ) : (
-        <MediaPlaceholder title={project.title.toUpperCase()} label={placeholder ?? "MEDIA PLACEHOLDER"} variant="landscape" />
-      )}
-      <div>
-        <h2>{project.title}</h2>
-        <p>{event ? "Independent ambient / experimental events and online radio." : project.description}</p>
-        {event && (
-          <div className="latest-event-note">
-            <span>LATEST DOCUMENTED EVENT</span>
-            <strong>{event.edition.toUpperCase()} / {event.displayDate}</strong>
-          </div>
-        )}
-        <div className="link-row">
-          {project.externalLinks?.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}
-          <button className="text-arrow" onClick={onOpen}>{event ? "VIEW NO IDEA" : "VIEW PROJECT"}</button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function CvSections() {
-  return (
-    <section className="cv-grid">
-      <div data-testid="about-education">
-        <h2>EDUCATION</h2>
-        <p><span>2023-2025</span>Goldsmiths, University of London<br />MMus Creative Practice</p>
-        <p><span>2018-2022</span>Jazz piano studies with Kong Hongwei</p>
-        <p><span>2014-2018</span>Tianjin Conservatory of Music</p>
-      </div>
-      <div data-testid="about-experience">
-        <h2>PROFESSIONAL EXPERIENCE</h2>
-        <p><span>2021.09-2023.04</span>China Television Media / 中视前卫影视传媒<br />Audio Editing / Music Production</p>
-        <p>Participated in audio and music production for more than 50 short-form promotional projects for CCTV-13.</p>
-      </div>
-    </section>
-  );
-}
-
-function PressSection({ navigate }: { navigate: (path: string) => void }) {
-  return (
-    <section className="press-section" data-testid="about-press">
-      <h2>SELECTED PRESS</h2>
-      {aboutPressItems.map((item) => <PressMiniLine item={item} key={item.id} />)}
-      <button className="text-arrow" onClick={() => navigate("/press-radio")}>MORE PRESS / RADIO</button>
-    </section>
   );
 }
 
@@ -1636,61 +1173,6 @@ function RelatedWorks({ works }: { works: NonNullable<Project["relatedWorks"]> }
   );
 }
 
-function EpkBlock({ title, children }: { title: string; children: ReactNode }) {
-  return <article><h2>{title}</h2><p>{children}</p></article>;
-}
-
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="info-item">
-      <span>{label}</span>
-      <p>{value}</p>
-    </div>
-  );
-}
-
-function PressFeatureRow({ item, index }: { item: PressItem; index: number }) {
-  const outlet = item.outlet ?? item.station ?? "";
-  return (
-    <article className={`press-feature-row press-feature-row-${index + 1}`}>
-      <div>
-        <p className="press-outlet">{outlet}</p>
-        <h2>{item.title}</h2>
-        <MetaLines lines={[pressTypeLabel(item), displayRelatedProject(item.relatedProject), item.author, item.year]} />
-        <p>{item.context}</p>
-        {item.quote && <blockquote>“{item.quote}”</blockquote>}
-        <ExternalLink href={item.url}>{item.cta}</ExternalLink>
-      </div>
-    </article>
-  );
-}
-
-function RadioLogRow({ item, index }: { item: PressItem; index: number }) {
-  return (
-    <article className={`radio-row radio-row-${index + 1}`}>
-      <p>{item.date}</p>
-      <h2><span>{item.station}</span><strong>{item.programme}</strong></h2>
-      <p className="radio-track">{item.track}</p>
-      <ExternalLink href={item.url}>{item.cta}</ExternalLink>
-    </article>
-  );
-}
-
-function PressMiniLine({ item }: { item: PressItem }) {
-  const source = item.type === "radio"
-    ? [item.station, item.programme].filter(Boolean).join(" — ")
-    : item.outlet;
-  const detail = item.type === "radio" ? item.track : item.title;
-
-  return (
-    <div className="press-mini-line">
-      <strong>{source}</strong>
-      <span>{detail}</span>
-      <ExternalLink href={item.url}>{item.cta}</ExternalLink>
-    </div>
-  );
-}
-
 function HomePressLine({ item }: { item: PressItem }) {
   const source = item.outlet ?? item.station ?? "";
   const cta = item.id === "muito-buy-music-club-27" ? "VIEW" : "READ";
@@ -1704,26 +1186,8 @@ function HomePressLine({ item }: { item: PressItem }) {
   );
 }
 
-function pressTypeLabel(item: PressItem) {
-  return item.type === "radio" ? "RADIO AIRPLAY" : item.type;
-}
-
 function displayRelatedProject(relatedProject?: string) {
   return relatedProject?.replace(" / ", " + ");
-}
-
-function Collaboration() {
-  return (
-    <section className="collaboration">
-      <h2>COMMISSIONS<br />& COLLABORATION</h2>
-      <div>
-        <p>Available for moving image, film, theatre, performance and interdisciplinary projects.</p>
-        <p>Composition, sound production and collaborative development.</p>
-        <a className="text-arrow" href="mailto:lerezero@gmail.com">START A CONVERSATION</a>
-        <p className="email">lerezero@gmail.com</p>
-      </div>
-    </section>
-  );
 }
 
 function Footer() {
@@ -1740,22 +1204,6 @@ function Footer() {
   );
 }
 
-function SignalArtwork() {
-  return <div className="signal-artwork">{Array.from({ length: 34 }).map((_, i) => <i key={i} />)}</div>;
-}
-
-function MediaVisual({ project }: { project: Project }) {
-  if (project.images?.[0]) {
-    return <img className="work-media work-project-image" src={assetUrl(project.images[0].src)} alt={project.images[0].alt} />;
-  }
-
-  if (project.artwork) {
-    return <img className="work-media work-artwork" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />;
-  }
-
-  return <MediaPlaceholder title={project.title.toUpperCase()} label={project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER"} variant={project.category === "Music" ? "square" : "landscape"} />;
-}
-
 function MetaLines({ lines, uppercase = true }: { lines: Array<string | undefined>; uppercase?: boolean }) {
   return <div className="meta-lines">{lines.filter(Boolean).map((line) => <span key={line}>{uppercase ? line!.toUpperCase() : line}</span>)}</div>;
 }
@@ -1764,44 +1212,12 @@ function ExternalLink({ href, children, className = "text-arrow", ariaLabel }: {
   return <a className={className} href={href} target="_blank" rel="noreferrer" aria-label={ariaLabel}>{children}</a>;
 }
 
-function LinkList({ heading, links }: { heading: string; links: { label: string; url: string }[] }) {
-  return <section className="detail-band"><h2>{heading}</h2>{links.map((link) => <ExternalLink key={link.url} href={link.url}>{link.label}</ExternalLink>)}</section>;
-}
-
 function PlaceholderSequence({ labels }: { labels: string[] }) {
   return <section className="placeholder-sequence">{labels.map((label, index) => <MediaPlaceholder key={label} title="MEDIA" label={label} variant={index === 0 ? "landscape" : "square"} />)}</section>;
 }
 
 function NextProject({ title, onClick, label = "NEXT PROJECT" }: { title: string; onClick: () => void; label?: string | null }) {
   return <button className="next-project" onClick={onClick}>{label && <span>{label}</span>}<strong>{title}</strong></button>;
-}
-
-function toFilter(project: Project) {
-  if (project.category === "Moving Image") return "MOVING IMAGE";
-  if (project.category === "Cross-media" || project.category === "Exhibition") return "CROSS-MEDIA";
-  if (project.category === "Curation") return "CURATION";
-  if (project.category === "Music" || project.category === "Theatre") return "MUSIC";
-  if (project.category === "Live") return "LIVE";
-  return "CROSS-MEDIA";
-}
-
-function selectedLayout(slug: string) {
-  const layouts: Record<string, string> = {
-    "cyberspace": "layout-square-lead",
-    "bug-party": "layout-bug-release",
-    "role-model": "layout-wide-image",
-    "fancy-a-bite": "layout-text-compact",
-    "two-dreadful-children-unipre": "layout-release-offset",
-    "no-idea": "layout-practice-text",
-    "openband-openscore": "layout-open-title",
-    "untitled-land": "layout-small-image",
-    "paradise-dream-2": "layout-quiet-index"
-  };
-  return layouts[slug] ?? "layout-small-image";
-}
-
-function showSelectedMedia(slug: string) {
-  return !["fancy-a-bite", "no-idea", "paradise-dream-2"].includes(slug);
 }
 
 function nextProjectFor(slug: string) {

@@ -1,5 +1,7 @@
+/// <reference types="vite/client" />
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import indexHtml from "../../index.html?raw";
 import App from "../App";
 import { projects } from "../content/projects";
 
@@ -33,6 +35,31 @@ function canonicalHref() {
 }
 
 describe("SHEN AO site IA", () => {
+  it("adds one valid Person JSON-LD schema in the document head without runtime duplication", () => {
+    const template = document.createElement("template");
+    template.innerHTML = indexHtml;
+
+    const scripts = template.content.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]');
+    expect(scripts).toHaveLength(1);
+    expect(JSON.parse(scripts[0].textContent ?? "")).toEqual({
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: "Shen Ao",
+      url: "https://shenaomusic.com/",
+      jobTitle: ["Music Producer", "Composer", "Arranger", "Pianist"],
+      sameAs: [
+        "https://shenao.bandcamp.com/",
+        "https://soundcloud.com/shen-ao",
+        "https://www.mixcloud.com/teendrum/",
+        "https://www.instagram.com/shenaoooooo/"
+      ]
+    });
+
+    document.head.append(scripts[0].cloneNode(true));
+    render(<App initialPath="/music" />);
+    expect(document.head.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(1);
+  });
+
   it("updates the canonical URL from the current formal route without changing other metadata", async () => {
     seedSeoMetadata();
     window.history.replaceState({}, "", "/music");

@@ -509,9 +509,9 @@ function LivePage({ navigate }: { navigate: (path: string) => void }) {
             <article className="piano-history-entry" data-testid="live-solo-concert-2018">
               <h3>2018 SOLO CONCERT</h3>
               <div className="piano-solo-gallery">
-                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-poster-no-black-border.jpeg")} alt="2018 Solo Concert poster." data-testid="piano-solo-concert-image" />
-                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-stage-wide-no-black-border.jpeg")} alt="2018 Solo Concert live performance." data-testid="piano-solo-concert-image" />
-                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-keyboard-performance-no-black-border.jpeg")} alt="2018 Solo Concert live performance." data-testid="piano-solo-concert-image" />
+                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-poster-no-black-border.jpeg")} alt="Poster for Shen Ao's 2018 Solo Concert." data-testid="piano-solo-concert-image" />
+                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-stage-wide-no-black-border.jpeg")} alt="Wide stage view from Shen Ao's 2018 Solo Concert." data-testid="piano-solo-concert-image" />
+                <img src={assetUrl("/assets/live/piano-keyboard/solo-concert-2018-keyboard-performance-no-black-border.jpeg")} alt="Shen Ao performing at a keyboard during the 2018 Solo Concert." data-testid="piano-solo-concert-image" />
               </div>
               <div className="piano-history-meta">
                 <span>{soloConcert.year}</span>
@@ -557,7 +557,7 @@ function OriginalLiveRow({ event }: { event: LiveEvent }) {
 function LivePracticeProjectEntry({ project, navigate }: { project: PracticeProject; navigate: (path: string) => void }) {
   const detailPath = liveDetailProjectEntries().find((entry) => entry.slug === project.slug)?.path;
   const previewImage = project.previewImage
-    ? <img src={assetUrl(project.previewImage)} alt={`${project.title} project preview.`} />
+    ? <img src={assetUrl(project.previewImage)} alt={practicePreviewAlt(project)} />
     : null;
 
   return (
@@ -577,7 +577,13 @@ function LivePracticeProjectEntry({ project, navigate }: { project: PracticeProj
 
 function getLiveArchiveMedia(event: LiveEvent) {
   const media = event.livePhoto?.path ? event.livePhoto : event.poster?.path ? event.poster : undefined;
-  return media?.path ? { path: media.path, alt: `${event.displayDate ?? event.year ?? event.title ?? event.venue} ${event.type.toLowerCase()}` } : undefined;
+  return media?.path ? { path: media.path, alt: media.alt ?? `${event.displayDate ?? event.year ?? event.title ?? event.venue} ${event.type.toLowerCase()}` } : undefined;
+}
+
+function practicePreviewAlt(project: PracticeProject) {
+  return project.slug === "no-idea"
+    ? "Live With No Idea Shai Space event poster."
+    : "OPENBAND monthly offline activity poster grid.";
 }
 
 function formatVenue(event: Pick<LiveEvent, "venue" | "city">) {
@@ -615,7 +621,7 @@ function AboutPage() {
           <h2>SCORING / CROSS-MEDIA</h2>
           <p>He often collaborates with artists from other fields on cross-media works, including music for film and television, exhibitions, theatre, games and advertising. Since 2020, he has produced music for more than 50 promotional packaging projects for China Central Television programmes, including Long Teng Hu Yue Zhong Guo Nian, Rui Tu Cheng Xiang Zhong Guo Nian, the Convention on Biological Diversity and Da Mei Bian Jiang Xing. In 2024, he worked with London's ENF Theatre on the soundtrack for Fancy A BITE?, which was performed at Camden People's Theatre.</p>
         </div>
-        <img className="about-image about-image-role-model" src={assetUrl("/assets/role-model/DSC0944_1600px_sRGB.jpg")} alt="Role Model moving-image projection in a dark exhibition room." />
+        <img className="about-image about-image-role-model" src={assetUrl("/assets/role-model/projected-close-up.jpg")} alt="Role Model moving-image projection in a dark exhibition room." />
       </section>
 
       <section className="about-section about-dj-section" data-testid="about-dj-curation">
@@ -814,7 +820,7 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
     <ProjectShell kicker="PROJECT / CURATION" title={noIdeaProject.title} project={project}>
       <section className="no-idea-project-intro">
         <figure className="no-idea-hero-figure">
-          <img src={assetUrl(noIdeaProject.previewImage!)} alt="Live With No Idea project poster." />
+          <img src={assetUrl(noIdeaProject.previewImage!)} alt={practicePreviewAlt(noIdeaProject)} />
         </figure>
         <div className="no-idea-hero-copy">
           <MetaLines lines={[noIdeaProject.year, noIdeaProject.heading, noIdeaProject.location]} uppercase={false} />
@@ -836,7 +842,7 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
         <div className="no-idea-radio-archive">
           {noIdeaProject.radioArchive?.map((slot) => (
             <article className="no-idea-radio-entry" key={slot.id}>
-              <img src={assetUrl(slot.image)} alt={`${slot.title} artwork.`} />
+              <img src={assetUrl(slot.image)} alt={`Artwork for ${slot.title}.`} />
               <h3 className="no-idea-radio-title-small">
                 <a href={slot.url} target="_blank" rel="noreferrer">{slot.title}</a>
               </h3>
@@ -855,7 +861,7 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
         <div className="no-idea-live-event-grid">
           {noIdeaProject.posterArchive?.filter((slot) => slot.image).map((slot) => (
             <article className="no-idea-live-event" key={slot.id}>
-              <img src={assetUrl(slot.image!)} alt={`${slot.title} poster.`} />
+              <img src={assetUrl(slot.image!)} alt={`Poster for ${slot.title}, ${slot.label}.`} />
               <div>
                 <h3>{slot.title}</h3>
                 <p>{slot.label}</p>
@@ -1099,13 +1105,29 @@ function MediaPlaceholder({ title, label, variant = "landscape" }: { title: stri
   );
 }
 
+const openbandDocumentationAlts: Record<string, string> = {
+  "/assets/openband/documentation/beijing/openband-beijing-01.jpg": "OPENBAND Beijing workshop floor setup with papers and equipment arranged in a circle.",
+  "/assets/openband/documentation/beijing/openband-beijing-02.jpg": "OPENBAND Beijing workshop floor setup with a recorder and handwritten notes.",
+  "/assets/openband/documentation/beijing/openband-beijing-03.jpg": "OPENBAND Beijing table setup with drawn scores, paper and small electronics.",
+  "/assets/openband/documentation/beijing/openband-beijing-04.jpg": "OPENBAND Beijing workshop participants seated in a circle at fRUITYSPACE.",
+  "/assets/openband/documentation/beijing/openband-beijing-05.jpg": "OPENBAND Beijing workshop participants seated around instruments and a fan.",
+  "/assets/openband/documentation/london/openband-london-01.jpg": "OPENBAND London workshop participants seated in a music room.",
+  "/assets/openband/documentation/london/openband-london-02.jpg": "OPENBAND London workshop group gathered in a bright room.",
+  "/assets/openband/documentation/london/openband-london-03.jpg": "OPENBAND London participants standing together after a workshop.",
+  "/assets/openband/documentation/london/openband-london-04.jpg": "OPENBAND London participants working around percussion and electronics."
+};
+
+function openbandDocumentationAlt(image: string) {
+  return openbandDocumentationAlts[image] ?? "OPENBAND workshop documentation.";
+}
+
 function OpenbandDocumentationGroup({ group }: { group: DocumentationGroup }) {
   return (
     <article className="openband-documentation-group" data-documentation-city={group.city}>
       <h3>{group.city}</h3>
       <div className="openband-documentation-grid">
         {group.images.map((image, index) => (
-          <img className="openband-documentation-image openband-image-contain" src={assetUrl(image)} alt={`OPENBAND ${group.city === "BEIJING" ? "Beijing" : "London"} documentation ${index + 1}.`} key={image} />
+          <img className="openband-documentation-image openband-image-contain" src={assetUrl(image)} alt={openbandDocumentationAlt(image)} key={image} />
         ))}
       </div>
     </article>
@@ -1119,7 +1141,7 @@ function OpenbandPosterGroup({ group }: { group: EventPosterGroup }) {
       <div className="openband-event-poster-list">
         {group.posters.map((poster, index) => (
           <figure className="openband-event-poster-item" key={poster.image}>
-            <img className="openband-event-poster openband-image-contain" src={assetUrl(poster.image)} alt={`OPENBAND ${group.city === "BEIJING" ? "Beijing" : "London"} event poster ${index + 1}.`} />
+            <img className="openband-event-poster openband-image-contain" src={assetUrl(poster.image)} alt={`OPENBAND ${group.city === "BEIJING" ? "Beijing" : "London"} event poster for ${poster.venue}.`} />
             <figcaption className="openband-event-poster-caption">
               <span>{poster.venue}</span>
               <span>{group.city}</span>

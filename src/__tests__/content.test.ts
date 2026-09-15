@@ -117,6 +117,13 @@ describe("structured project content", () => {
       workRoleLabel: "FILM / SCORE + MIX",
       photographyCredit: "Photography: Roger Sinek"
     });
+    expect(projects.find((project) => project.slug === "role-model")?.images?.map((image) => image.src)).toEqual([
+      "/assets/role-model/projected-close-up.jpg",
+      "/assets/role-model/filming-scene-projection.jpg",
+      "/assets/role-model/family-portrait-projection.jpg",
+      "/assets/role-model/landscape-projection.jpg"
+    ]);
+    expect(projects.find((project) => project.slug === "role-model")?.images?.some((image) => /(^|\/)DSC\d|1600px|sRGB/i.test(image.src))).toBe(false);
 
     expect(projects.find((project) => project.slug === "fancy-a-bite")).toMatchObject({
       year: "2024",
@@ -429,7 +436,7 @@ describe("structured project content", () => {
         localVenueName: "天津音乐厅 · 儒熙艺术馆",
         type: "Solo concert",
         externalLinks: [{ label: "Watch", url: "https://www.youtube.com/watch?v=T8jVsSjHzhA" }],
-        livePhoto: { path: "/assets/live/portfolio/solo-concert-2018.jpeg", status: "confirmed" },
+        livePhoto: { path: "/assets/live/portfolio/solo-concert-2018.jpeg", alt: "Shen Ao performing during the 2018 Solo Concert.", status: "confirmed" },
         selected: false
       }
     ]);

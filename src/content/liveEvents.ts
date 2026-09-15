@@ -3,6 +3,7 @@ export type LiveEventType = "Live performance" | "DJ" | "Solo concert";
 
 export type LiveMedia = {
   path?: string;
+  alt?: string;
   status: LiveMediaStatus;
 };
 
@@ -59,7 +60,7 @@ export const selectedLiveEvents: LiveEvent[] = [
     collaborators: ["Avin Noorbakhsh"],
     type: "Live performance",
     externalLinks: [{ label: "INFO ↗", url: "https://www.threads.com/%40kitrecs/post/DbxwVOGDahQ/the-kitrecs-radio-show-is-back-on-loose-fm-this-evening-at-pm-uk-summer-time/" }],
-    poster: { path: "/assets/live/portfolio/loose-fm-2026.jpeg", status: "confirmed" },
+    poster: { path: "/assets/live/portfolio/loose-fm-2026.jpeg", alt: "Loose.fm poster for Shen Ao and Avin Noorbakhsh.", status: "confirmed" },
     selected: true
   },
   {
@@ -72,7 +73,7 @@ export const selectedLiveEvents: LiveEvent[] = [
     collaborators: ["Vic Bang", "Yoto", "K Means"],
     type: "Live performance",
     externalLinks: [{ label: "INFO ↗", url: "https://gel.now/events/566" }],
-    poster: { path: "/assets/live/portfolio/spanners-2026.jpeg", status: "confirmed" },
+    poster: { path: "/assets/live/portfolio/spanners-2026.jpeg", alt: "Spanners event poster for Shen Ao with Vic Bang, Yoto and K Means.", status: "confirmed" },
     selected: true
   },
   {
@@ -86,7 +87,7 @@ export const selectedLiveEvents: LiveEvent[] = [
     collaborators: ["4ChannelClub", "Cloud Choir"],
     type: "Live performance",
     externalLinks: [{ label: "INFO ↗", url: "https://www.instagram.com/p/DacdwQTlH1O/?img_index=2" }],
-    poster: { path: "/assets/live/portfolio/yuanliao-space-2026.jpeg", status: "confirmed" },
+    poster: { path: "/assets/live/portfolio/yuanliao-space-2026.jpeg", alt: "Yuanliao Space poster for Shen Ao with 4ChannelClub and Cloud Choir.", status: "confirmed" },
     selected: true
   },
   {
@@ -99,7 +100,7 @@ export const selectedLiveEvents: LiveEvent[] = [
     collaborators: ["Visit Me", "Barreleye", "Guthlac"],
     type: "Live performance",
     externalLinks: [{ label: "INFO ↗", url: "https://ma.to/event/kit-records-album-launch-17-jun-2026" }],
-    livePhoto: { path: "/assets/live/portfolio/george-tavern-2026.jpeg", status: "confirmed" },
+    livePhoto: { path: "/assets/live/portfolio/george-tavern-2026.jpeg", alt: "Shen Ao performing live at The George Tavern, London.", status: "confirmed" },
     selected: true
   }
 ];
@@ -109,10 +110,10 @@ export const livePlatformLinks: LiveEventLink[] = [
   { label: "LISTEN / MIXCLOUD", url: "https://www.mixcloud.com/teendrum/" }
 ];
 
-const pianoArchiveImage = (id: string, filename: string): LiveImage => ({
+const pianoArchiveImage = (id: string, filename: string, alt: string): LiveImage => ({
   id,
   path: `/assets/live/piano-keyboard/${filename}`,
-  alt: "Piano and keyboard live archive."
+  alt
 });
 
 export const pianoKeyboardGroups: PianoKeyboardGroup[] = [
@@ -120,33 +121,33 @@ export const pianoKeyboardGroups: PianoKeyboardGroup[] = [
     id: "contemporary-classical-cross-media-experimental",
     title: "CONTEMPORARY CLASSICAL / CROSS-MEDIA / EXPERIMENTAL",
     images: [
-      pianoArchiveImage("contemporary-classical-01", "contemporary-classical-01.jpeg"),
-      pianoArchiveImage("puregolds-ao-evan-nicolls", "puregolds-ao-evan-nicolls.jpeg"),
-      pianoArchiveImage("contemporary-classical-03", "contemporary-classical-03.jpeg"),
-      pianoArchiveImage("contemporary-classical-04", "contemporary-classical-04.jpeg"),
-      pianoArchiveImage("daylight-music-2024-poster", "daylight-music-2024-poster.jpeg")
+      pianoArchiveImage("contemporary-classical-01", "contemporary-classical-01.jpeg", "External Series poster for an experimental contemporary music concert."),
+      pianoArchiveImage("puregolds-ao-evan-nicolls", "puregolds-ao-evan-nicolls.jpeg", "PureGold poster for Ao Shen and Ensemble Not Found."),
+      pianoArchiveImage("contemporary-classical-03", "contemporary-classical-03.jpeg", "PureGold poster for an evening of music by Terry Riley."),
+      pianoArchiveImage("contemporary-classical-04", "contemporary-classical-04.jpeg", "PureGold masterclass poster with a rehearsal-room photo."),
+      pianoArchiveImage("daylight-music-2024-poster", "daylight-music-2024-poster.jpeg", "Daylight Music poster featuring a black-and-white ensemble photo.")
     ]
   },
   {
     id: "improvisation-rock-electronic",
     title: "IMPROVISATION / ROCK / ELECTRONIC",
     images: [
-      pianoArchiveImage("improvisation-rock-electronic-01", "improvisation-rock-electronic-01.jpeg"),
-      pianoArchiveImage("improvisation-rock-electronic-02", "improvisation-rock-electronic-02.jpeg"),
-      pianoArchiveImage("improvisation-rock-electronic-03", "improvisation-rock-electronic-03.jpeg"),
-      pianoArchiveImage("improvisation-rock-electronic-04", "improvisation-rock-electronic-04.jpeg"),
-      pianoArchiveImage("improvisation-rock-electronic-05", "improvisation-rock-electronic-05.jpeg")
+      pianoArchiveImage("improvisation-rock-electronic-01", "improvisation-rock-electronic-01.jpeg", "Summer Bay poster listing Shen Ao, Vic Bang, Yoto and K Means."),
+      pianoArchiveImage("improvisation-rock-electronic-02", "improvisation-rock-electronic-02.jpeg", "Visit Me show poster from The George Tavern with Shen Ao on the bill."),
+      pianoArchiveImage("improvisation-rock-electronic-03", "improvisation-rock-electronic-03.jpeg", "Yuanliao Space poster listing Shen Ao, 4ChannelClub and Cloud Choir."),
+      pianoArchiveImage("improvisation-rock-electronic-04", "improvisation-rock-electronic-04.jpeg", "Cavern Bar event poster with red lettering over an arched interior."),
+      pianoArchiveImage("improvisation-rock-electronic-05", "improvisation-rock-electronic-05.jpeg", "Colourful Tachyon poster for a London electronic music event.")
     ]
   },
   {
     id: "band-jazz-soul",
     title: "BAND / JAZZ / SOUL",
     images: [
-      pianoArchiveImage("band-jazz-soul-01", "band-jazz-soul-01.jpeg"),
-      pianoArchiveImage("band-jazz-soul-02", "band-jazz-soul-02.jpeg"),
-      pianoArchiveImage("band-jazz-soul-03", "band-jazz-soul-03.jpeg"),
-      pianoArchiveImage("honeydew-live-poster-red", "honeydew-live-poster-red.jpeg"),
-      pianoArchiveImage("honeydew-live-poster-blue", "honeydew-live-poster-blue.jpeg")
+      pianoArchiveImage("band-jazz-soul-01", "band-jazz-soul-01.jpeg", "Honeydew poster with portraits of the band members."),
+      pianoArchiveImage("band-jazz-soul-02", "band-jazz-soul-02.jpeg", "Heydey NeoSoul Band poster with a vinyl-record design."),
+      pianoArchiveImage("band-jazz-soul-03", "band-jazz-soul-03.jpeg", "BRICKS duet poster for Lilith Liu and Liu Xiaoxuan."),
+      pianoArchiveImage("honeydew-live-poster-red", "honeydew-live-poster-red.jpeg", "Red Honeydew live music poster with portraits of the performers."),
+      pianoArchiveImage("honeydew-live-poster-blue", "honeydew-live-poster-blue.jpeg", "Black Honeydew live music poster with portraits of the performers.")
     ]
   }
 ];
@@ -155,17 +156,17 @@ export const teendrumImages: LiveImage[] = [
   {
     id: "teendrum-baihui-live",
     path: "/assets/live/teendrum/teendrum-baihui-live.jpeg",
-    alt: "Teendrum Baihui live visual archive."
+    alt: "Baihui.live poster for a London event with DJ Teendrum."
   },
   {
     id: "teendrum-eerawai-ambient-series",
     path: "/assets/live/teendrum/teendrum-eerawai-ambient-series.jpeg",
-    alt: "Teendrum Eerawai Ambient Series visual archive."
+    alt: "Eerawai Ambient Series poster with Teendrum on Baihui.live."
   },
   {
     id: "teendrum-mclab-poster",
     path: "/assets/live/teendrum/teendrum-mclab-poster.jpeg",
-    alt: "Teendrum visual archive."
+    alt: "MCLAB poster for Teendrum with Amezeng, Dub and Kai F."
   }
 ];
 
@@ -184,7 +185,7 @@ export const earlierPerformances: LiveEvent[] = [
     localVenueName: "天津音乐厅 · 儒熙艺术馆",
     type: "Solo concert",
     externalLinks: [{ label: "Watch", url: "https://www.youtube.com/watch?v=T8jVsSjHzhA" }],
-    livePhoto: { path: "/assets/live/portfolio/solo-concert-2018.jpeg", status: "confirmed" },
+    livePhoto: { path: "/assets/live/portfolio/solo-concert-2018.jpeg", alt: "Shen Ao performing during the 2018 Solo Concert.", status: "confirmed" },
     selected: false
   }
 ];

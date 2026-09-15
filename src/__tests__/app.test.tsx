@@ -260,7 +260,7 @@ describe("SHEN AO site IA", () => {
     ]));
     expect(musicListenHrefs.some((href) => href?.includes("music.163.com"))).toBe(false);
     expect(screen.getAllByRole("button", { name: "INFO" }).length).toBeGreaterThanOrEqual(5);
-    expect(screen.getByAltText("Exhibition view showing a projected close-up from Role Model.")).toHaveAttribute("src", "/assets/role-model/DSC0944_1600px_sRGB.jpg");
+    expect(screen.getByAltText("Exhibition view showing a projected close-up from Role Model.")).toHaveAttribute("src", "/assets/role-model/projected-close-up.jpg");
     expect(screen.queryByText(/Role Model follows the experience/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/comprising ten tracks/i)).not.toBeInTheDocument();
   });
@@ -495,6 +495,12 @@ describe("SHEN AO site IA", () => {
       "/assets/live/piano-keyboard/honeydew-live-poster-red.jpeg",
       "/assets/live/piano-keyboard/honeydew-live-poster-blue.jpeg"
     ]);
+    expect(pianoSection.getByRole("img", { name: "External Series poster for an experimental contemporary music concert." })).toBeInTheDocument();
+    expect(pianoSection.getByRole("img", { name: "Summer Bay poster listing Shen Ao, Vic Bang, Yoto and K Means." })).toBeInTheDocument();
+    expect(pianoSection.getByRole("img", { name: "Black Honeydew live music poster with portraits of the performers." })).toBeInTheDocument();
+    for (const image of pianoSection.getAllByTestId("piano-archive-image")) {
+      expect(image).not.toHaveAttribute("alt", "Piano and keyboard live archive.");
+    }
     expect([...screen.getByTestId("live-piano-keyboard").querySelectorAll(".piano-keyboard-group > h3")].map((heading) => heading.textContent)).toEqual([
       "CONTEMPORARY CLASSICAL / CROSS-MEDIA / EXPERIMENTAL",
       "IMPROVISATION / ROCK / ELECTRONIC",
@@ -512,6 +518,8 @@ describe("SHEN AO site IA", () => {
       "/assets/live/teendrum/teendrum-eerawai-ambient-series.jpeg",
       "/assets/live/teendrum/teendrum-mclab-poster.jpeg"
     ]);
+    expect(teendrumSection.getByRole("img", { name: "Baihui.live poster for a London event with DJ Teendrum." })).toBeInTheDocument();
+    expect(teendrumSection.getByRole("img", { name: "Eerawai Ambient Series poster with Teendrum on Baihui.live." })).toBeInTheDocument();
 
     const curationSection = within(screen.getByTestId("live-curation-community"));
     expect(curationSection.getByText("NO IDEA")).toBeInTheDocument();
@@ -571,7 +579,7 @@ describe("SHEN AO site IA", () => {
       "/assets/about/cyberspace-bug-party-cassette.jpeg",
       "/assets/live/portfolio/george-tavern-2026.jpeg",
       "/assets/portfolio-projects/fancy-a-bite-stage-projection.jpeg",
-      "/assets/role-model/DSC0944_1600px_sRGB.jpg",
+      "/assets/role-model/projected-close-up.jpg",
       "/assets/live/teendrum/teendrum-baihui-live.jpeg",
       "/assets/practice/no-idea/no-idea-live-with-no-idea-poster.jpeg",
       "/assets/practice/openband/openband-monthly-posters.jpeg"
@@ -659,8 +667,8 @@ describe("SHEN AO site IA", () => {
     expect(main.getByText("Beijing 26.04.06")).toBeInTheDocument();
     expect(main.getByText("Beijing 26.01.12")).toBeInTheDocument();
     expect(main.getByText("London 24.07.04")).toBeInTheDocument();
-    expect(main.getByAltText("no idea radio ep.09 - transcribe 转译 w/ AL artwork.")).toHaveAttribute("src", "/assets/no-idea/radio/no-idea-radio-ep-09-transcribe.jpg");
-    expect(main.getByAltText("no idea ep.01 abandon 遗弃 w/ AL SCHAFFER artwork.")).toHaveAttribute("src", "/assets/no-idea/radio/no-idea-radio-ep-01-abandon.jpg");
+    expect(main.getByAltText("Artwork for no idea radio ep.09 - transcribe 转译 w/ AL.")).toHaveAttribute("src", "/assets/no-idea/radio/no-idea-radio-ep-09-transcribe.jpg");
+    expect(main.getByAltText("Artwork for no idea ep.01 abandon 遗弃 w/ AL SCHAFFER.")).toHaveAttribute("src", "/assets/no-idea/radio/no-idea-radio-ep-01-abandon.jpg");
     expect(main.getAllByRole("link", { name: "BAIHUI RADIO ↗" })[0]).toHaveAttribute("href", "https://baihui.live/hosts/no-idea/en/");
     expect(main.getAllByRole("link", { name: "RESIDENT ADVISOR ↗" })[0]).toHaveAttribute("href", "https://ra.co/promoters/183279");
 
@@ -763,9 +771,11 @@ describe("SHEN AO site IA", () => {
     expect(beijingGroup).toBeInTheDocument();
     expect(londonGroup).toBeInTheDocument();
     expect(within(beijingGroup).getByRole("heading", { name: "BEIJING" })).toBeInTheDocument();
-    expect(within(beijingGroup).getAllByAltText(/OPENBAND Beijing documentation/)).toHaveLength(5);
+    expect(within(beijingGroup).getByRole("img", { name: "OPENBAND Beijing workshop floor setup with papers and equipment arranged in a circle." })).toBeInTheDocument();
+    expect(within(beijingGroup).getByRole("img", { name: "OPENBAND Beijing workshop participants seated in a circle at fRUITYSPACE." })).toBeInTheDocument();
     expect(within(londonGroup).getByRole("heading", { name: "LONDON" })).toBeInTheDocument();
-    expect(within(londonGroup).getAllByAltText(/OPENBAND London documentation/)).toHaveLength(4);
+    expect(within(londonGroup).getByRole("img", { name: "OPENBAND London workshop participants seated in a music room." })).toBeInTheDocument();
+    expect(within(londonGroup).getByRole("img", { name: "OPENBAND London participants working around percussion and electronics." })).toBeInTheDocument();
     expect(within(beijingGroup).getAllByRole("img").map((image) => image.getAttribute("src"))).toEqual([
       "/assets/openband/documentation/beijing/openband-beijing-01.jpg",
       "/assets/openband/documentation/beijing/openband-beijing-02.jpg",

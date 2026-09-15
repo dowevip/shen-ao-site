@@ -121,19 +121,19 @@ export const projects: Project[] = [
     ],
     images: [
       {
-        src: "/assets/role-model/DSC0944_1600px_sRGB.jpg",
+        src: "/assets/role-model/projected-close-up.jpg",
         alt: "Exhibition view showing a projected close-up from Role Model."
       },
       {
-        src: "/assets/role-model/DSC0919_1600px_sRGB.jpg",
+        src: "/assets/role-model/filming-scene-projection.jpg",
         alt: "Exhibition view showing a filming scene projected in Role Model."
       },
       {
-        src: "/assets/role-model/DSC0937_1600px_sRGB.jpg",
+        src: "/assets/role-model/family-portrait-projection.jpg",
         alt: "Exhibition view showing a black-and-white family portrait projected in Role Model."
       },
       {
-        src: "/assets/role-model/DSC0946_1600px_sRGB.jpg",
+        src: "/assets/role-model/landscape-projection.jpg",
         alt: "Exhibition view showing a landscape scene projected in Role Model."
       }
     ],

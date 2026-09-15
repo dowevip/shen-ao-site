@@ -4,6 +4,7 @@ import App from "../App";
 import { projects } from "../content/projects";
 
 const originalScrollTo = window.scrollTo;
+const siteUrl = "https://shenaomusic.com";
 
 beforeEach(() => {
   window.scrollTo = vi.fn();
@@ -20,7 +21,45 @@ function expectOnlyPrimaryNavItems(labels: string[]) {
   expect(within(nav).getAllByRole("button").map((button) => button.textContent)).toEqual(labels);
 }
 
+function seedSeoMetadata() {
+  document.head.innerHTML = `
+    <link rel="canonical" href="${siteUrl}/" />
+    <meta property="og:url" content="${siteUrl}/" />
+  `;
+}
+
+function canonicalHref() {
+  return document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href;
+}
+
 describe("SHEN AO site IA", () => {
+  it("updates the canonical URL from the current formal route without changing other metadata", async () => {
+    seedSeoMetadata();
+    window.history.replaceState({}, "", "/music");
+
+    render(<App />);
+
+    await waitFor(() => expect(canonicalHref()).toBe(`${siteUrl}/music`));
+    expect(document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.content).toBe(`${siteUrl}/`);
+
+    fireEvent.click(screen.getByRole("button", { name: "ABOUT" }));
+    await waitFor(() => expect(canonicalHref()).toBe(`${siteUrl}/about`));
+    expect(document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.content).toBe(`${siteUrl}/`);
+
+    fireEvent.click(screen.getByRole("button", { name: "SHEN AO" }));
+    await waitFor(() => expect(canonicalHref()).toBe(`${siteUrl}/`));
+    expect(document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.content).toBe(`${siteUrl}/`);
+
+    cleanup();
+    seedSeoMetadata();
+    window.history.replaceState({}, "", "/work/cyberspace-bug-party");
+
+    render(<App />);
+
+    await waitFor(() => expect(canonicalHref()).toBe(`${siteUrl}/work/cyberspace-bug-party`));
+    expect(document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.content).toBe(`${siteUrl}/`);
+  });
+
   it("renders deterministic shared page accents for public routes", () => {
     const routes = [
       "/",

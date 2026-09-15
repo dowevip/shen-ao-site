@@ -41,6 +41,7 @@ type AppProps = {
 
 const basePath = import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL.replace(/\/$/, "");
 const fallbackBasePaths = ["/shen-ao-site-plan-b", "/shen-ao-site"];
+const canonicalOrigin = "https://shenaomusic.com";
 const toAppPath = (path: string) => {
   const fallbackBasePath = fallbackBasePaths.find((candidate) => path.startsWith(candidate));
   const normalized = basePath && path.startsWith(basePath)
@@ -53,6 +54,7 @@ const toAppPath = (path: string) => {
 };
 const toBrowserPath = (path: string) => `${basePath}${path === "/" ? "/" : path}`;
 const assetUrl = (path: string) => `${basePath}/${path.replace(/^\//, "")}`;
+const canonicalUrl = (path: string) => path === "/" ? `${canonicalOrigin}/` : `${canonicalOrigin}${path}`;
 
 const legacyRedirects = [
   { from: "/work", to: "/music", exact: true },
@@ -101,6 +103,11 @@ function usePath(initialPath?: string) {
 
 export default function App({ initialPath }: AppProps) {
   const { path, navigate } = usePath(initialPath);
+
+  useEffect(() => {
+    const canonicalLink = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    canonicalLink?.setAttribute("href", canonicalUrl(path));
+  }, [path]);
 
   const page = isKitRecordsReleaseRoute(path) ? (
     <MusicReleasePage navigate={navigate} />

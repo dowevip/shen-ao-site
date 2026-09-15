@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../App";
+import { projects } from "../content/projects";
 
 const originalScrollTo = window.scrollTo;
 
@@ -718,7 +719,7 @@ describe("SHEN AO site IA", () => {
       "/assets/live/portfolio/spanners-2026.jpeg",
       "/assets/live/portfolio/loose-fm-2026.jpeg"
     ]));
-    expect(main.getByRole("button", { name: /NEXT PROJECT ROLE MODEL/ })).toBeInTheDocument();
+    expect(main.getByRole("button", { name: /NEXT PROJECT LET ME SPEAK/ })).toBeInTheDocument();
     for (const removedText of ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]) {
       expect(main.queryByText(removedText)).not.toBeInTheDocument();
     }
@@ -739,6 +740,100 @@ describe("SHEN AO site IA", () => {
 
     fireEvent.click(main.getByRole("button", { name: /NEXT PROJECT FANCY A BITE\?/ }));
     expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "FANCY A BITE?" })).toBeInTheDocument();
+  });
+
+  it("uses the current MUSIC page order for release next-project navigation", () => {
+    const cases = [
+      ["/work/cyberspace-bug-party", /NEXT PROJECT LET ME SPEAK/, "/work/let-me-speak", "LET ME SPEAK"],
+      ["/work/let-me-speak", /NEXT PROJECT TWO DREADFUL CHILDREN \/ UNIPRE/, "/work/two-dreadful-children-unipre", "TWO DREADFUL CHILDREN / UNIPRE"],
+      ["/work/two-dreadful-children-unipre", /NEXT PROJECT BAMBOO BLEND/, "/work/bamboo-blend", "BAMBOO BLEND"],
+      ["/work/bamboo-blend", /NEXT PROJECT ROLE MODEL/, "/work/role-model", "ROLE MODEL"]
+    ] as const;
+
+    for (const [route, buttonName, expectedPath, expectedHeading] of cases) {
+      window.history.replaceState({}, "", route);
+      const { unmount } = render(<App />);
+      const main = within(screen.getByRole("main"));
+
+      fireEvent.click(main.getByRole("button", { name: buttonName }));
+      expect(window.location.pathname).toBe(expectedPath);
+      expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: expectedHeading })).toBeInTheDocument();
+
+      unmount();
+      cleanup();
+      window.history.replaceState({}, "", "/");
+    }
+  });
+
+  it("renders release detail notes without media placeholders on the secondary MUSIC releases", () => {
+    for (const route of ["/work/bamboo-blend", "/work/let-me-speak", "/work/two-dreadful-children-unipre"]) {
+      const { unmount } = render(<App initialPath={route} />);
+      const main = within(screen.getByRole("main"));
+
+      for (const templateText of ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE", "MEDIA SLOT"]) {
+        expect(main.queryByText(templateText)).not.toBeInTheDocument();
+      }
+
+      unmount();
+      cleanup();
+    }
+  });
+
+  it("renders the supplied secondary MUSIC release detail information", () => {
+    render(<App initialPath="/work/let-me-speak" />);
+    expect(screen.getByText("Released October 13, 2024")).toBeInTheDocument();
+    expect(screen.getByText("Music & Lyrics by Shen Ao")).toBeInTheDocument();
+    expect(screen.getByText("Vocal by Jovienne")).toBeInTheDocument();
+    expect(screen.getByText("Mixing & Mastering by Gremwave")).toBeInTheDocument();
+    expect(screen.getByText("Graphic Design by Haobin Wang")).toBeInTheDocument();
+    cleanup();
+
+    render(<App initialPath="/work/two-dreadful-children-unipre" />);
+    let releaseFacts = screen.getByText("Tracklist:").closest(".release-detail-facts-content");
+    expect(releaseFacts).not.toBeNull();
+    expect(screen.getByText("Released July 6, 2022")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("Tracklist:")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("1. two dreadful children — 02:18")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("2. unipre — 03:05")).toBeInTheDocument();
+    cleanup();
+
+    render(<App initialPath="/work/bamboo-blend" />);
+    releaseFacts = screen.getByText("Coffee Serving Process:").closest(".release-detail-facts-content");
+    expect(releaseFacts).not.toBeNull();
+    expect(screen.getByText("A Composition for a process of Coffee Presentation by Ru")).toBeInTheDocument();
+    expect(screen.getByText("Sep 2024")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("Coffee Serving Process:")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("Milk Coffee [4mins]")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("Signature Coffee (Gin Tonic Mix) [4mins]")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("Espresso [3mins]")).toBeInTheDocument();
+    expect(within(releaseFacts as HTMLElement).getByText("Q&A [4mins]")).toBeInTheDocument();
+    expect(screen.getByText("Cover Art is an installation of Chun Han")).toBeInTheDocument();
+    expect(screen.getByText("Mixing by Marac")).toBeInTheDocument();
+    expect(screen.getByText("Release Date:")).toBeInTheDocument();
+    expect(screen.getByText("23 October 2024")).toBeInTheDocument();
+  });
+
+  it("keeps every current work detail route free of template media remnants", () => {
+    const routes = Array.from(new Set([
+      "/work/cyberspace-bug-party",
+      ...projects
+        .filter((project) => project.slug !== "cyberspace" && project.slug !== "bug-party")
+        .map((project) => `/work/${project.slug}`)
+    ]));
+
+    for (const route of routes) {
+      const { unmount } = render(<App initialPath={route} />);
+      const mainElement = screen.getByRole("main");
+      const main = within(mainElement);
+
+      expect(mainElement.querySelector(".media-placeholder")).not.toBeInTheDocument();
+      for (const templateText of ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]) {
+        expect(main.queryByText(templateText)).not.toBeInTheDocument();
+      }
+
+      unmount();
+      cleanup();
+    }
   });
 
   it("renders the confirmed Fancy A BITE? hero, stage gallery, and poster without media placeholders", () => {

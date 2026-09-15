@@ -1583,6 +1583,18 @@ button.text-arrow::after,
   text-transform: none;
 }
 
+.release-detail-facts-content {
+  display: grid;
+  gap: 10px;
+  max-width: 860px;
+}
+
+.release-detail-facts-content p {
+  margin: 0;
+  line-height: 1.55;
+  text-transform: none;
+}
+
 .placeholder-sequence {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

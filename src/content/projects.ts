@@ -41,6 +41,7 @@ export type Project = {
   selectedCases?: SelectedCase[];
   archiveGallery?: ArchiveGalleryItem[];
   detailMedia?: MediaSlot[];
+  releaseDetails?: string[];
   artwork?: string;
   images?: { src: string; alt: string }[];
   showImagesOnDetail?: boolean;
@@ -199,6 +200,13 @@ export const projects: Project[] = [
       { label: "Bandcamp", url: "https://shenao.bandcamp.com/album/rang-wo-shuo" },
       { label: "NetEase Music", url: "https://music.163.com/#/album?id=147663057" }
     ],
+    releaseDetails: [
+      "Released October 13, 2024",
+      "Music & Lyrics by Shen Ao",
+      "Vocal by Jovienne",
+      "Mixing & Mastering by Gremwave",
+      "Graphic Design by Haobin Wang"
+    ],
     artwork: "/assets/portfolio-projects/let-me-speak-cover.jpg",
     musicReleaseSection: "other",
     musicReleaseOrder: 1,
@@ -215,6 +223,12 @@ export const projects: Project[] = [
     subtype: "Release",
     label: "Self-released",
     externalLinks: [{ label: "Bandcamp", url: "https://shenao.bandcamp.com/album/two-dreadful-children-unipre" }],
+    releaseDetails: [
+      "Released July 6, 2022",
+      "Tracklist:",
+      "1. two dreadful children — 02:18",
+      "2. unipre — 03:05"
+    ],
     artwork: "/assets/portfolio-projects/two-dreadful-children-unipre-cover.png",
     musicReleaseSection: "other",
     musicReleaseOrder: 2,
@@ -228,6 +242,19 @@ export const projects: Project[] = [
     category: "Music",
     subtype: "Release",
     externalLinks: [{ label: "SoundCloud", url: "https://soundcloud.com/shen-ao/bamboo-blend" }],
+    releaseDetails: [
+      "A Composition for a process of Coffee Presentation by Ru",
+      "Sep 2024",
+      "Coffee Serving Process:",
+      "Milk Coffee [4mins]",
+      "Signature Coffee (Gin Tonic Mix) [4mins]",
+      "Espresso [3mins]",
+      "Q&A [4mins]",
+      "Cover Art is an installation of Chun Han",
+      "Mixing by Marac",
+      "Release Date:",
+      "23 October 2024"
+    ],
     artwork: "/assets/portfolio-projects/bamboo-blend-cover.jpg",
     musicReleaseSection: "other",
     musicReleaseOrder: 3,

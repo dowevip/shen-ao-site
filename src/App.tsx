@@ -6,7 +6,6 @@ import {
   musicScoringProjects,
   otherMusicReleases,
   type ProjectLink,
-  selectedWorks,
   kitRecordsReleaseNote,
   type Project
 } from "./content/projects";
@@ -610,6 +609,7 @@ function MusicReleasePage({ navigate }: { navigate: (path: string) => void }) {
   const project = releases[0];
   const releasePress = verifiedPressItems.filter((item) => item.id === "quietus-spools-out-july" || item.id === "muito-buy-music-club-27");
   const relatedLive = [...selectedLiveEvents].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const nextProject = nextMusicProjectFor("bug-party");
 
   return (
     <ProjectShell kicker="PROJECT / MUSIC" title="CYBERSPACE / BUG PARTY" project={project}>
@@ -636,7 +636,7 @@ function MusicReleasePage({ navigate }: { navigate: (path: string) => void }) {
         </div>
       </section>
 
-      <NextProject title="ROLE MODEL" onClick={() => navigate("/work/role-model")} />
+      {nextProject && <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />}
     </ProjectShell>
   );
 }
@@ -687,7 +687,7 @@ function ReleaseLiveLine({ event }: { event: LiveEvent }) {
 function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("role-model")!;
   const [heroImage, ...galleryImages] = project.images!;
-  const nextProject = nextProjectFor(project.slug);
+  const nextProject = nextMusicProjectFor(project.slug);
   return (
     <ProjectShell kicker="PROJECT / MOVING IMAGE" title="ROLE MODEL" project={project}>
       <div className="project-layout project-layout-loose film-layout">
@@ -719,7 +719,7 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
         <h2>CREDITS</h2>
         <p>DIRECTOR / HONGXUAN WANG</p>
       </section>
-      <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
+      {nextProject && <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />}
     </ProjectShell>
   );
 }
@@ -727,7 +727,7 @@ function RoleModelPage({ navigate }: { navigate: (path: string) => void }) {
 function FancyABitePage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("fancy-a-bite")!;
   const [heroImage, ...galleryImages] = project.images!;
-  const nextProject = nextProjectFor(project.slug);
+  const nextProject = nextMusicProjectFor(project.slug);
 
   return (
     <ProjectShell kicker="PROJECT / THEATRE" title="FANCY A BITE?" project={project}>
@@ -754,7 +754,7 @@ function FancyABitePage({ navigate }: { navigate: (path: string) => void }) {
           </figure>
         ))}
       </section>
-      <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
+      {nextProject && <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />}
     </ProjectShell>
   );
 }
@@ -762,7 +762,7 @@ function FancyABitePage({ navigate }: { navigate: (path: string) => void }) {
 function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
   const project = getProject("no-idea")!;
   const event = latestNoIdeaEvent;
-  const nextProject = nextProjectFor(project.slug);
+  const nextProject = nextLiveProjectFor(project.slug);
   const featuredImages = [event.heroImage, ...event.galleryImages.filter((_, index) => [0, 1, 3, 6].includes(index)).map((image) => image.src)];
   return (
     <ProjectShell kicker="PROJECT / CURATION" title={noIdeaProject.title} project={project}>
@@ -856,7 +856,7 @@ function NoIdeaPage({ navigate }: { navigate: (path: string) => void }) {
         </div>
       </section>
 
-      <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
+      {nextProject && <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />}
     </ProjectShell>
   );
 }
@@ -953,8 +953,10 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
   }
 
   const isPractice = project.slug === "no-idea" || project.slug === "openband-openscore";
-  const [heroSlot, ...gallerySlots] = project.detailMedia ?? [];
+  const realDetailMedia = (project.detailMedia ?? []).filter((slot) => slot.src);
+  const [heroSlot, ...gallerySlots] = realDetailMedia;
   const [heroImage, ...galleryImages] = project.showImagesOnDetail ? (project.images ?? []) : [];
+  const nextProject = nextMusicProjectFor(project.slug);
   return (
     <ProjectShell kicker={`PROJECT / ${project.category.toUpperCase()}`} title={project.title.toUpperCase()} project={project}>
       <div className={`project-layout project-layout-loose ${isPractice ? "practice-detail-layout" : "structured-detail-layout"}`}>
@@ -962,13 +964,9 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
           <img className="project-art album-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />
         ) : heroImage ? (
           <img className="project-detail-image project-detail-hero-image" src={assetUrl(heroImage.src)} alt={heroImage.alt} />
-        ) : (
-          <MediaPlaceholder
-            title={project.title.toUpperCase()}
-            label={heroSlot?.label ?? (project.category === "Music" ? "ALBUM ARTWORK" : "MEDIA PLACEHOLDER")}
-            variant={heroSlot?.variant ?? (project.category === "Music" ? "square" : "landscape")}
-          />
-        )}
+        ) : heroSlot ? (
+          <img className="project-detail-image project-detail-hero-image" src={assetUrl(heroSlot.src!)} alt={heroSlot.alt ?? project.title} />
+        ) : null}
         <div className="project-meta">
           {project.intro ? <p>{project.intro}</p> : project.description && <p>{project.description}</p>}
           <MetaLines lines={[project.year, project.subtype, project.role?.join(" / "), project.label, project.location]} />
@@ -994,6 +992,14 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
           <p>{project.slug === "no-idea" ? "Events, radio, programming, budgeting, technical production and coordination around immersive live experiences." : "Open, non-hierarchical approaches to sound-making with musicians, artists, visual practitioners and local collaborators."}</p>
         </section>
       )}
+      {project.releaseDetails && (
+        <section className="detail-band release-detail-facts">
+          <h2>RELEASE DETAILS</h2>
+          <div className="release-detail-facts-content">
+            {project.releaseDetails.map((line) => <p key={line}>{line}</p>)}
+          </div>
+        </section>
+      )}
       {galleryImages.length > 0 ? (
         <section className={`placeholder-sequence detail-media-grid detail-media-${project.slug}`} aria-label={`${project.title} image gallery`}>
           {galleryImages.map((image) => (
@@ -1003,12 +1009,10 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
       ) : gallerySlots.length > 0 ? (
         <section className={`placeholder-sequence detail-media-grid detail-media-${project.slug}`}>
           {gallerySlots.map((slot, index) => (
-            <MediaPlaceholder key={`${slot.label}-${index}`} title={project.title.toUpperCase()} label={slot.label} variant={slot.variant} />
+            <img className="project-detail-image" src={assetUrl(slot.src!)} alt={slot.alt ?? `${project.title} media ${index + 1}`} key={`${slot.src}-${index}`} />
           ))}
         </section>
-      ) : !project.showImagesOnDetail && (
-        <PlaceholderSequence labels={project.category === "Music" ? ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"] : ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]} />
-      )}
+      ) : null}
       {project.selectedCases && <SelectedCases cases={project.selectedCases} accessNote={project.externalAccessNote} />}
       {project.archiveGallery ? (
         <ArchiveGallery items={project.archiveGallery} />
@@ -1022,8 +1026,8 @@ function ProjectDetailPage({ slug, navigate }: { slug: string; navigate: (path: 
       {project.press && <KnownPress press={project.press} />}
       {project.slug === "cctv-selected-broadcast-work" ? (
         <NextProject title="BACK TO MUSIC" onClick={() => navigate("/music")} label={null} />
-      ) : (
-        <NextProject title={nextProjectFor(project.slug).title} onClick={() => navigate(nextProjectFor(project.slug).path)} />
+      ) : nextProject && (
+        <NextProject title={nextProject.title} onClick={() => navigate(nextProject.path)} />
       )}
     </ProjectShell>
   );
@@ -1212,24 +1216,65 @@ function ExternalLink({ href, children, className = "text-arrow", ariaLabel }: {
   return <a className={className} href={href} target="_blank" rel="noreferrer" aria-label={ariaLabel}>{children}</a>;
 }
 
-function PlaceholderSequence({ labels }: { labels: string[] }) {
-  return <section className="placeholder-sequence">{labels.map((label, index) => <MediaPlaceholder key={label} title="MEDIA" label={label} variant={index === 0 ? "landscape" : "square"} />)}</section>;
-}
-
 function NextProject({ title, onClick, label = "NEXT PROJECT" }: { title: string; onClick: () => void; label?: string | null }) {
   return <button className="next-project" onClick={onClick}>{label && <span>{label}</span>}<strong>{title}</strong></button>;
 }
 
-function nextProjectFor(slug: string) {
-  const visibleProjects = selectedWorks.filter((project) => project.verificationStatus !== "needs-review");
-  const index = visibleProjects.findIndex((project) => project.slug === slug);
-  const requestedNext = getProject(slug)?.nextProjectSlug;
-  const next = (requestedNext && getProject(requestedNext))
-    || visibleProjects[index >= 0 ? (index + 1) % visibleProjects.length : 0];
-  const title = next.slug === "cctv-selected-broadcast-work"
+type NextProjectEntry = {
+  slug: string;
+  title: string;
+  path: string;
+};
+
+function nextMusicProjectFor(slug: string) {
+  return nextProjectFromEntries(slug, musicDetailProjectEntries());
+}
+
+function nextLiveProjectFor(slug: string) {
+  return nextProjectFromEntries(slug, liveDetailProjectEntries());
+}
+
+function musicDetailProjectEntries() {
+  return detailEntriesForProjects([
+    ...featuredMusicReleases,
+    ...otherMusicReleases,
+    ...musicScoringProjects
+  ]);
+}
+
+function liveDetailProjectEntries(): NextProjectEntry[] {
+  return [noIdeaProject, openbandProject]
+    .filter((project) => Boolean(project.slug))
+    .map((project) => ({
+      slug: project.slug,
+      title: project.title.toUpperCase(),
+      path: `/work/${project.slug}`
+    }));
+}
+
+function detailEntriesForProjects(projectsForPage: Project[]) {
+  const entries = projectsForPage
+    .filter((project) => project.slug && project.verificationStatus !== "needs-review")
+    .map((project) => ({
+      slug: project.slug,
+      title: nextProjectTitle(project),
+      path: releaseDetailPath(project)
+    }));
+
+  return entries.filter((entry, index) => entries.findIndex((candidate) => candidate.path === entry.path) === index);
+}
+
+function nextProjectFromEntries(slug: string, entries: NextProjectEntry[]) {
+  const currentProject = getProject(slug);
+  const currentPath = currentProject ? releaseDetailPath(currentProject) : `/work/${slug}`;
+  const index = entries.findIndex((entry) => entry.slug === slug || entry.path === currentPath);
+  return index >= 0 ? entries[index + 1] ?? null : null;
+}
+
+function nextProjectTitle(project: Project) {
+  return project.slug === "cctv-selected-broadcast-work"
     ? "CCTV / SELECTED BROADCAST WORK"
-    : next.slug === "cyberspace" || next.slug === "bug-party"
+    : project.slug === "cyberspace" || project.slug === "bug-party"
     ? "CYBERSPACE / BUG PARTY"
-    : next.title.toUpperCase();
-  return { title, path: releaseDetailPath(next) };
+    : project.title.toUpperCase();
 }

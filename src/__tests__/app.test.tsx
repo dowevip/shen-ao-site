@@ -309,6 +309,89 @@ describe("SHEN AO site IA", () => {
     }
   });
 
+  it("links both HOME album covers to the combined release detail page", () => {
+    render(<App initialPath="/" />);
+
+    const featuredMusic = within(screen.getByTestId("home-featured-music"));
+    expect(featuredMusic.getByRole("link", { name: "View Cyberspace project details" })).toHaveAttribute("href", "/work/cyberspace-bug-party");
+    expect(featuredMusic.getByRole("link", { name: "View Bug Party project details" })).toHaveAttribute("href", "/work/cyberspace-bug-party");
+  });
+
+  it("opens the combined release detail page when a HOME album cover is clicked", () => {
+    window.history.replaceState({}, "", "/");
+    render(<App />);
+
+    fireEvent.click(within(screen.getByTestId("home-featured-music")).getByRole("link", { name: "View Bug Party project details" }));
+
+    expect(window.location.pathname).toBe("/work/cyberspace-bug-party");
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: "CYBERSPACE / BUG PARTY" })).toBeInTheDocument();
+  });
+
+  it("links every MUSIC project image that has a detail page and leaves archive-only images unlinked", () => {
+    render(<App initialPath="/music" />);
+
+    const detailImageRoutes = [
+      ["cyberspace", "/work/cyberspace-bug-party"],
+      ["bug-party", "/work/cyberspace-bug-party"],
+      ["let-me-speak", "/work/let-me-speak"],
+      ["two-dreadful-children-unipre", "/work/two-dreadful-children-unipre"],
+      ["bamboo-blend", "/work/bamboo-blend"],
+      ["role-model", "/work/role-model"],
+      ["fancy-a-bite", "/work/fancy-a-bite"],
+      ["untitled-land", "/work/untitled-land"],
+      ["clouds-from-underground", "/work/clouds-from-underground"],
+      ["cctv-selected-broadcast-work", "/work/cctv-selected-broadcast-work"]
+    ] as const;
+
+    for (const [slug, route] of detailImageRoutes) {
+      expect(
+        within(screen.getByTestId(`music-index-item-${slug}`)).getByRole("link", { name: /project details$/i })
+      ).toHaveAttribute("href", route);
+    }
+
+    expect(
+      within(screen.getByTestId("music-more-commissioned-images")).queryByRole("link", { name: /project details$/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens MUSIC detail pages when linked images are clicked", () => {
+    const imageRoutes = [
+      ["cyberspace", "/work/cyberspace-bug-party"],
+      ["bamboo-blend", "/work/bamboo-blend"],
+      ["role-model", "/work/role-model"]
+    ] as const;
+
+    for (const [slug, route] of imageRoutes) {
+      cleanup();
+      window.history.replaceState({}, "", "/music");
+      render(<App />);
+      fireEvent.click(
+        within(screen.getByTestId(`music-index-item-${slug}`)).getByRole("link", { name: /project details$/i })
+      );
+      expect(window.location.pathname).toBe(route);
+    }
+  });
+
+  it("links LIVE project preview images to their existing detail pages", () => {
+    render(<App initialPath="/live" />);
+
+    const curationSection = within(screen.getByTestId("live-curation-community"));
+    expect(curationSection.getByRole("link", { name: "View NO IDEA project details" })).toHaveAttribute("href", "/work/no-idea");
+    expect(curationSection.getByRole("link", { name: "View OPENBAND project details" })).toHaveAttribute("href", "/work/openband-openscore");
+
+    cleanup();
+    window.history.replaceState({}, "", "/live");
+    render(<App />);
+    fireEvent.click(within(screen.getByTestId("live-curation-community")).getByRole("link", { name: "View NO IDEA project details" }));
+    expect(window.location.pathname).toBe("/work/no-idea");
+
+    cleanup();
+    window.history.replaceState({}, "", "/live");
+    render(<App />);
+    fireEvent.click(within(screen.getByTestId("live-curation-community")).getByRole("link", { name: "View OPENBAND project details" }));
+    expect(window.location.pathname).toBe("/work/openband-openscore");
+  });
+
   it("renders LIVE as four scoped performance practice sections", () => {
     window.history.replaceState({}, "", "/live");
     render(<App />);
@@ -722,6 +805,25 @@ describe("SHEN AO site IA", () => {
     expect(main.getByRole("button", { name: /NEXT PROJECT LET ME SPEAK/ })).toBeInTheDocument();
     for (const removedText of ["MEDIA PLACEHOLDER", "ADDITIONAL MEDIA", "PROJECT IMAGE"]) {
       expect(main.queryByText(removedText)).not.toBeInTheDocument();
+    }
+  });
+
+  it("makes each release PRESS result one complete clickable row", () => {
+    render(<App initialPath="/work/cyberspace-bug-party" />);
+
+    const pressSection = screen.getByRole("heading", { name: "PRESS" }).closest("section");
+    expect(pressSection).not.toBeNull();
+    const press = within(pressSection as HTMLElement);
+    const quietusLink = press.getByRole("link", { name: "READ ↗" });
+    const muitoLink = press.getByRole("link", { name: "VIEW ↗" });
+
+    for (const [link, outlet, title, project] of [
+      [quietusLink, "THE QUIETUS", "Spool's Out: Cassette Reviews for July", "CYBERSPACE + BUG PARTY"],
+      [muitoLink, "MUITO RADIO", "Buy Music Club #27", "CYBERSPACE"]
+    ] as const) {
+      expect(link).toContainElement(press.getByText(outlet));
+      expect(link).toContainElement(press.getByText(title));
+      expect(link).toContainElement(press.getByText(project));
     }
   });
 

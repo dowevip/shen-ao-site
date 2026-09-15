@@ -241,7 +241,9 @@ function HomePage({ navigate }: { navigate: (path: string) => void }) {
           {featuredReleases.map((release, index) => (
             <article className={`featured-release featured-release-${index + 1} plan-b-release plan-b-release-${release.slug}`} key={release.slug}>
               <div className="plan-b-release-art">
-                <img src={assetUrl(release.artwork!)} alt={`${release.title} album artwork`} />
+                <ProjectImageLink path={releaseDetailPath(release)} label={`View ${release.title} project details`} navigate={navigate}>
+                  <img src={assetUrl(release.artwork!)} alt={`${release.title} album artwork`} />
+                </ProjectImageLink>
               </div>
               <div className="plan-b-release-copy">
                 <h2>{release.title.toUpperCase()}</h2>
@@ -351,9 +353,13 @@ function MusicIndexItem({ project, navigate, variant }: { project: Project; navi
     ? undefined
     : project.externalLinks?.find((link) => !isWatchLink(link) && !isListenLink(link) && !isProjectLink(link) && !isNetEaseLink(link));
   const hasMedia = hasProjectMedia(project) || !["archive", "commissioned-archive-image", "commissioned-archive-text"].includes(variant);
+  const candidateDetailPath = releaseDetailPath(project);
+  const detailPath = musicDetailProjectEntries().some((entry) => entry.path === candidateDetailPath)
+    ? candidateDetailPath
+    : undefined;
   return (
     <article className={`music-index-item music-index-item-${variant} music-release-${project.slug} ${hasMedia ? "has-media" : "no-media"}`} data-testid={`music-index-item-${project.slug}`}>
-      {showArtwork && <ReleaseArtwork project={project} showPlaceholder={false} />}
+      {showArtwork && <ReleaseArtwork project={project} showPlaceholder={false} detailPath={detailPath} navigate={navigate} />}
       <div className="music-release-copy">
         <h3>{title}</h3>
         <MetaLines lines={musicIndexMetaLines(project, variant)} />
@@ -403,19 +409,45 @@ function isNetEaseLink(link: ProjectLink) {
   return /netease|music\.163\.com/i.test(`${link.label} ${link.url}`);
 }
 
-function ReleaseArtwork({ project, showPlaceholder = true }: { project: Project; showPlaceholder?: boolean }) {
+function ReleaseArtwork({ project, showPlaceholder = true, detailPath, navigate }: { project: Project; showPlaceholder?: boolean; detailPath?: string; navigate?: (path: string) => void }) {
   const title = project.displayTitle ?? project.title;
+  let artwork: ReactNode = null;
+
   if (project.artwork) {
-    return (
-      <img className="release-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />
-    );
+    artwork = <img className="release-cover" src={assetUrl(project.artwork)} alt={`${project.title} album artwork`} />;
+  } else if (project.images?.[0]) {
+    artwork = <img className="release-cover music-index-still" src={assetUrl(project.images[0].src)} alt={project.images[0].alt} />;
   }
 
-  if (project.images?.[0]) {
-    return <img className="release-cover music-index-still" src={assetUrl(project.images[0].src)} alt={project.images[0].alt} />;
+  if (!artwork) {
+    return showPlaceholder ? <MediaPlaceholder title={title} label="ALBUM ARTWORK" variant="square" /> : null;
   }
 
-  return showPlaceholder ? <MediaPlaceholder title={title} label="ALBUM ARTWORK" variant="square" /> : null;
+  return detailPath && navigate ? (
+    <ProjectImageLink path={detailPath} label={`View ${project.title} project details`} navigate={navigate}>
+      {artwork}
+    </ProjectImageLink>
+  ) : artwork;
+}
+
+function ProjectImageLink({ path, label, navigate, children }: { path: string; label: string; navigate: (path: string) => void; children: ReactNode }) {
+  return (
+    <a
+      className="project-image-link"
+      href={toBrowserPath(path)}
+      aria-label={label}
+      onClick={(event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+          return;
+        }
+
+        event.preventDefault();
+        navigate(path);
+      }}
+    >
+      {children}
+    </a>
+  );
 }
 
 function LivePage({ navigate }: { navigate: (path: string) => void }) {
@@ -516,9 +548,16 @@ function OriginalLiveRow({ event }: { event: LiveEvent }) {
 }
 
 function LivePracticeProjectEntry({ project, navigate }: { project: PracticeProject; navigate: (path: string) => void }) {
+  const detailPath = liveDetailProjectEntries().find((entry) => entry.slug === project.slug)?.path;
+  const previewImage = project.previewImage
+    ? <img src={assetUrl(project.previewImage)} alt={`${project.title} project preview.`} />
+    : null;
+
   return (
     <article className={`live-practice-project live-practice-project-${project.slug}`} data-testid={`live-practice-project-${project.slug}`}>
-      {project.previewImage && <img src={assetUrl(project.previewImage)} alt={`${project.title} project preview.`} />}
+      {previewImage && detailPath
+        ? <ProjectImageLink path={detailPath} label={`View ${project.title} project details`} navigate={navigate}>{previewImage}</ProjectImageLink>
+        : previewImage}
       <div>
         <h3>{project.title}</h3>
         <MetaLines lines={[project.year, project.heading, project.location]} uppercase={false} />
@@ -661,12 +700,12 @@ function ReleasePressLine({ item }: { item: PressItem }) {
   const cta = item.id === "muito-buy-music-club-27" ? "VIEW" : "READ";
 
   return (
-    <div className="home-press-line release-press-line">
+    <ExternalLink className="home-press-line release-press-line" href={item.url} ariaLabel={`${cta} ↗`}>
       <strong>{source}</strong>
       <span>{item.title}</span>
       <em>{displayRelatedProject(item.relatedProject)?.toUpperCase()}</em>
-      <ExternalLink href={item.url}>{cta} ↗</ExternalLink>
-    </div>
+      <span className="release-press-cta">{cta} ↗</span>
+    </ExternalLink>
   );
 }
 
